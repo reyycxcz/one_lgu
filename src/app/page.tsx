@@ -19,7 +19,6 @@ export default function Home() {
               className="h-8 w-auto object-contain" 
               alt="OneLGU Logo" 
             />
-            <span className="font-sans font-bold text-lg tracking-tight text-[#143D2A]">ONELGU</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -57,22 +56,7 @@ export default function Home() {
               Citizen Signup Desk
             </Link>
           </div>
-          
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-3 gap-6 max-w-xl w-full mt-16 pt-8 border-t border-border/80 font-mono text-xs text-foreground/60">
-            <div>
-              <span className="block font-pixel text-lg text-foreground">5 ACTIVE</span>
-              <span>Barangay Nodes</span>
-            </div>
-            <div>
-              <span className="block font-pixel text-lg text-foreground">100% SECURE</span>
-              <span>L7 Encrypted Logs</span>
-            </div>
-            <div>
-              <span className="block font-pixel text-lg text-foreground">REALTIME</span>
-              <span>Supabase Backend</span>
-            </div>
-          </div>
+
         </section>
 
         {/* Features / Modules Section */}
@@ -310,11 +294,6 @@ export default function Home() {
               </div>
               <p className="text-xs text-foreground/65 max-w-sm leading-relaxed font-sans">
                 Unified digital governance platform for local government units, barangays, and residents. Connecting communities with secure, paperless, and real-time administrative workflows.
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#7CFF8A] animate-pulse" />
-                <span className="font-mono text-[9px] font-bold text-[#143D2A]/70 uppercase tracking-wider">Laoag City Nodes Online</span>
-              </div>
             </div>
 
             {/* Column 2: Portals */}

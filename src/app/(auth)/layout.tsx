@@ -4,61 +4,59 @@ import { ReactNode } from "react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel — Brand */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary relative flex-col justify-between p-12">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
-        
-        <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/images/logo/one_lgu.png"
-              width={40}
-              height={40}
-              className="h-10 w-auto object-contain"
-              alt="OneLGU Logo"
-            />
-            <span className="font-sans font-bold text-xl tracking-tight text-white">ONELGU</span>
-          </Link>
-        </div>
-
-        <div className="relative z-10 space-y-6">
-          <h1 className="font-sans text-4xl font-bold text-white leading-tight max-w-md">
-            Digitalizing Local Government Services
-          </h1>
-          <p className="text-white/70 font-sans text-sm leading-relaxed max-w-md">
-            Secure, paperless, and real-time administrative workflows connecting municipal admins, barangay officers, and residents.
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-white/80 animate-pulse" />
-            <span className="font-sans text-xs font-medium text-white/60 tracking-wider">LAOAG CITY NODES ONLINE</span>
-          </div>
-        </div>
-
-        <div className="relative z-10 text-white/40 font-sans text-xs">
-          © 2026 OneLGU Project
-        </div>
-      </div>
-
-      {/* Right Panel — Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-20 bg-white min-h-screen">
-        {/* Mobile logo (only visible on small screens) */}
-        <div className="lg:hidden flex items-center gap-3 mb-10">
-          <Image
-            src="/images/logo/one_lgu.png"
-            width={32}
-            height={32}
-            className="h-8 w-auto object-contain"
-            alt="OneLGU Logo"
-          />
-          <span className="font-sans font-bold text-lg tracking-tight text-foreground">ONELGU</span>
-        </div>
-
-        <div className="w-full max-w-sm">
+    <>
+      {/* ===== MOBILE: Full-screen form only ===== */}
+      <div className="md:hidden min-h-screen bg-white flex flex-col justify-center px-6 py-10">
+        <div className="w-full max-w-sm mx-auto">
           {children}
         </div>
       </div>
-    </div>
+
+      {/* ===== DESKTOP: Centered split card ===== */}
+      <div className="hidden md:flex min-h-screen bg-background flex-col justify-center items-center px-4 py-8 relative">
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(0,177,94,0.02)_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+
+        {/* Split Card */}
+        <div className="w-full max-w-4xl bg-white rounded-none shadow-[0_4px_24px_rgba(20,61,42,0.02),0_1px_2px_rgba(20,61,42,0.02)] overflow-hidden flex flex-row border border-[#E9ECE9] z-10">
+          
+          {/* Left Side: Brand Panel */}
+          <div className="w-1/2 bg-primary relative flex flex-col justify-between p-10 min-h-[460px] text-white">
+            {/* Subtle overlay pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+            
+            <div className="relative z-10">
+              <Link href="/" className="flex items-center gap-3">
+                <Image
+                  src="/images/logo/one_lgu.png"
+                  width={36}
+                  height={36}
+                  className="h-9 w-auto object-contain"
+                  alt="OneLGU Logo"
+                />
+                <span className="font-sans font-bold text-lg tracking-tight text-white">ONELGU</span>
+              </Link>
+            </div>
+
+            <div className="relative z-10 space-y-4">
+              <h1 className="font-sans text-3xl font-bold text-white leading-tight">
+                Digitalizing Local Government
+              </h1>
+              <p className="text-white/75 font-sans text-xs leading-relaxed max-w-sm">
+                Connecting municipal administrative systems, barangay official panels, and citizens in one secure, paperless workspace.
+              </p>
+            </div>
+
+            <div />
+          </div>
+
+          {/* Right Side: Form Panel */}
+          <div className="w-1/2 p-10 flex flex-col justify-center bg-white">
+            {children}
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 }
