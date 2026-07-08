@@ -294,6 +294,7 @@ export default function Home() {
               </div>
               <p className="text-xs text-foreground/65 max-w-sm leading-relaxed font-sans">
                 Unified digital governance platform for local government units, barangays, and residents. Connecting communities with secure, paperless, and real-time administrative workflows.
+              </p>
             </div>
 
             {/* Column 2: Portals */}
