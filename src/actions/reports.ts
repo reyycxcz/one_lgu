@@ -26,7 +26,7 @@ export async function submitReport(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("reports")
@@ -68,7 +68,7 @@ export async function reviewReport(
     return { error: "Only LGU admins can review reports" };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("reports")

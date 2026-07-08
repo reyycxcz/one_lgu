@@ -19,7 +19,7 @@ export async function submitCertificationRequest(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("certification_requests")
@@ -58,7 +58,7 @@ export async function updateCertificationStatus(
     return { error: "Insufficient permissions" };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const updatePayload: Record<string, unknown> = { status };
   

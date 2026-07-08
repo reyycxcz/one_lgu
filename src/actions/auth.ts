@@ -14,7 +14,7 @@ export async function login(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
@@ -48,7 +48,7 @@ export async function register(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -80,7 +80,7 @@ export async function register(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
 }

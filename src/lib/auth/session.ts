@@ -3,7 +3,7 @@ import { UserRole } from "./rbac";
 import { redirect } from "next/navigation";
 
 export async function getSession() {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: { session } } = await supabase.auth.getSession();
     return session;
@@ -22,7 +22,7 @@ export async function requireSession() {
 
 export async function requireProfile() {
   const session = await requireSession();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: profile, error } = await supabase
     .from("profiles")

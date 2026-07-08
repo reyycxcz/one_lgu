@@ -20,7 +20,7 @@ export async function submitComplaint(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("complaints")
@@ -60,7 +60,7 @@ export async function updateComplaintStatus(
     return { error: "Insufficient permissions" };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const updatePayload: Record<string, unknown> = { status };
 
