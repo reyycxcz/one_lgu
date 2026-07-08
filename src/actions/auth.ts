@@ -27,9 +27,9 @@ export async function login(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role || user?.user_metadata?.role || "resident";
 
-  if (role === "super_admin") {
+  if (role === "super_admin" || role === "lgu_reviewer") {
     redirect("/lgu/dashboard");
-  } else if (role === "barangay_official" || role === "sk_official") {
+  } else if (role === "barangay_official") {
     redirect("/barangay/dashboard");
   } else {
     redirect("/resident/dashboard");

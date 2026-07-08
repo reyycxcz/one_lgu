@@ -41,8 +41,10 @@ export async function middleware(request: NextRequest) {
     
     if (userRole === "super_admin") {
       return NextResponse.redirect(new URL("/lgu/dashboard", request.url));
-    } else if (userRole === "barangay_official" || userRole === "sk_official") {
+    } else if (userRole === "barangay_official") {
       return NextResponse.redirect(new URL("/barangay/dashboard", request.url));
+    } else if (userRole === "lgu_reviewer") {
+      return NextResponse.redirect(new URL("/lgu/dashboard", request.url));
     } else {
       return NextResponse.redirect(new URL("/resident/dashboard", request.url));
     }

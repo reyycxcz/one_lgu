@@ -24,7 +24,7 @@ export interface Database {
         Row: {
           id: string;
           barangay_id: string | null;
-          role: "super_admin" | "barangay_official" | "sk_official" | "resident";
+          role: "super_admin" | "barangay_official" | "lgu_reviewer" | "resident";
           full_name: string;
           email: string;
           phone: string | null;
@@ -137,7 +137,7 @@ export interface Database {
       };
     };
     Enums: {
-      user_role: "super_admin" | "barangay_official" | "sk_official" | "resident";
+      user_role: "super_admin" | "barangay_official" | "lgu_reviewer" | "resident";
       certification_type: "barangay_clearance" | "certificate_of_residency" | "certificate_of_indigency" | "business_clearance" | "first_time_job_seeker";
       certification_status: "submitted" | "verified" | "approved" | "rejected" | "generated" | "ready_for_pickup" | "released";
       complaint_status: "submitted" | "under_review" | "scheduled" | "mediation" | "resolved" | "closed";

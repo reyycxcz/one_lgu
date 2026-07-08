@@ -67,7 +67,7 @@
 
   /* Micro-label convention */
   .micro-label {
-    @apply font-sans text-[10px] font-bold tracking-wider uppercase text-foreground/50;
+    @apply font-sans text-[10px] font-bold tracking-wider uppercase text-foreground/50 rounded-full px-3 py-1;
   }
 
   /* High-emphasis Inversion Chip */

@@ -1,9 +1,9 @@
-export type UserRole = "super_admin" | "barangay_official" | "sk_official" | "resident";
+export type UserRole = "super_admin" | "barangay_official" | "lgu_reviewer" | "resident";
 
 export const ROLES: Record<string, UserRole> = {
   SUPER_ADMIN: "super_admin",
   BARANGAY_OFFICIAL: "barangay_official",
-  SK_OFFICIAL: "sk_official",
+  LGU_REVIEWER: "lgu_reviewer",
   RESIDENT: "resident",
 };
 
@@ -11,7 +11,7 @@ export const ROLES: Record<string, UserRole> = {
 export const ROLE_ROUTE_MAPS: Record<UserRole, string[]> = {
   super_admin: ["/lgu"],
   barangay_official: ["/barangay"],
-  sk_official: ["/barangay"], // SK shares barangay layouts with restricted sub-scopes
+  lgu_reviewer: ["/lgu"],
   resident: ["/resident"],
 };
 

@@ -19,29 +19,32 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-white overflow-hidden flex flex-col justify-between">
+    <div className="relative min-h-screen bg-white flex flex-col justify-between">
       
       {/* Header */}
-      <header className="border-b border-[#E3F2E7] sticky top-0 bg-white/90 backdrop-blur-md z-50 transition-all duration-200">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-4 mx-auto max-w-7xl z-50 transition-all duration-200">
+        <div className="bg-white/90 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_2px_12px_rgba(20,61,42,0.04)] px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image 
               src="/images/logo/one_lgu.png" 
-              width={32}
-              height={32}
-              className="h-8 w-auto object-contain" 
+              width={48}
+              height={48}
+              className="h-10 w-auto object-contain" 
               alt="OneLGU Logo" 
             />
           </div>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Features</a>
-            <a href="#portals" className="text-sm font-sans font-medium text-[#143D2A] hover:text-[#143D2A] transition-colors duration-200">Portals</a>
-            <a href="#security" className="text-sm font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Benefits</a>
+          <nav className="hidden md:flex items-center gap-12 ml-16">
+            <a href="#features" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Modules</a>
+            <a href="#civic" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Civic</a>
+            <a href="#portals" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Portals</a>
+            <a href="#security" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Benefits</a>
+            <a href="#how-it-works" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">How It Works</a>
+            <a href="#faq" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">FAQ</a>
           </nav>
 
-          <Link href="/login" className="px-6 py-2 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
-            Log In Portal <ArrowRight className="h-3.5 w-3.5 inline ml-1" />
+          <Link href="/login" className="group ml-16 px-5 py-1.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)]">
+            Log In <ArrowRight className="h-3.5 w-3.5 inline ml-1 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
       </header>
@@ -49,7 +52,7 @@ export default function Home() {
       {/* Hero Section */}
       <main className="flex-grow">
         <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center">
-          <div className="micro-label mb-4 animate-fade-in text-[#143D2A] bg-[#E7FFEA] border-[#C7FFCF]">
+          <div className="micro-label mb-4 animate-fade-in bg-primary text-white">
             01 — PROVINCE OF ILOCOS NORTE DIGITAL PORTAL
           </div>
           
@@ -63,10 +66,10 @@ export default function Home() {
 
           <div className="flex flex-wrap gap-4 justify-center animate-fade-in">
             <Link href="/login" className="px-6 py-3 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
-              Enter Platform Portal
+              Get Started
             </Link>
             <Link href="/register" className="px-6 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
-              Citizen Signup Desk
+              Create Account
             </Link>
           </div>
 
@@ -147,7 +150,7 @@ export default function Home() {
         </section>
 
         {/* Civic Bulletin & Guides Section */}
-        <section className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-20">
+        <section id="civic" className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-20">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
@@ -315,26 +318,6 @@ export default function Home() {
                     Skip the queues at your local Barangay Hall. Request clearances and certificates online securely across Ilocos Norte.
                   </p>
                 </div>
-
-                {/* Integrated Stats Grid */}
-                <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[#E3F2E7]">
-                  <div className="space-y-1">
-                    <span className="block font-sans text-3xl font-bold text-primary">5</span>
-                    <span className="block font-sans text-[10px] font-bold text-foreground/50 uppercase tracking-wider leading-tight">Barangays Connected</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="block font-sans text-3xl font-bold text-primary">12+</span>
-                    <span className="block font-sans text-[10px] font-bold text-foreground/50 uppercase tracking-wider leading-tight">Services Available</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="block font-sans text-3xl font-bold text-primary">24/7</span>
-                    <span className="block font-sans text-[10px] font-bold text-foreground/50 uppercase tracking-wider leading-tight">Online Access</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="block font-sans text-3xl font-bold text-primary">&lt;15m</span>
-                    <span className="block font-sans text-[10px] font-bold text-foreground/50 uppercase tracking-wider leading-tight">Processing Time</span>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -404,7 +387,7 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-white border-t border-b border-[#E3F2E7] py-20">
+        <section id="how-it-works" className="bg-white border-t border-b border-[#E3F2E7] py-20">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
@@ -443,7 +426,7 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
-        <section className="max-w-6xl mx-auto px-6 py-20">
+        <section id="faq" className="max-w-6xl mx-auto px-6 py-20">
           <div className="flex flex-col md:flex-row gap-12 md:gap-20">
             <div className="md:w-1/3 shrink-0">
               <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">08 — FAQ</span>
@@ -486,10 +469,10 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/register" className="px-8 py-3 bg-primary text-white rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
-                Create Your Account <ArrowRight className="h-3.5 w-3.5 inline ml-1" />
+                Get Started <ArrowRight className="h-3.5 w-3.5 inline ml-1" />
               </Link>
               <Link href="/login" className="px-8 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
-                Log In to Portal
+                Log In
               </Link>
             </div>
           </div>
@@ -510,7 +493,7 @@ export default function Home() {
                   className="h-7 w-auto object-contain" 
                   alt="OneLGU Logo"
                 />
-                <span className="font-sans font-bold text-base tracking-tight text-[#143D2A]">ONELGU</span>
+                <span className="font-sans font-bold text-base tracking-tight"><span className="text-primary">ONE</span><span className="text-white" style={{textShadow: "0 0 1px #000, 0 0 1px #000, 0 0 1px #000, 0 0 1px #000"}}>LGU</span></span>
               </div>
               <p className="text-xs text-foreground/65 max-w-sm leading-relaxed font-sans">
                 Unified digital governance platform for local government units, barangays, and residents. Connecting communities with secure, paperless, and real-time administrative workflows.
@@ -552,16 +535,7 @@ export default function Home() {
           </div>
 
           <div className="border-t border-[#E3F2E7] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-sans text-foreground/45">
-            <div>© 2026 ONELGU PROJECT. LAOAG CITY, ILOCOS NORTE.</div>
-            <div className="flex gap-4 flex-wrap justify-center">
-              <a href="#" className="hover:text-[#143D2A] transition-colors">PRIVACY PROTOCOL</a>
-              <span>•</span>
-              <a href="#" className="hover:text-[#143D2A] transition-colors">TERMS OF USE</a>
-              <span>•</span>
-              <a href="#" className="hover:text-[#143D2A] transition-colors">DEVELOPER DOCS</a>
-              <span>•</span>
-              <a href="#" className="hover:text-[#143D2A] transition-colors">RLS SPECIFICATION</a>
-            </div>
+            <div>© 2026 ONELGU PROJECT. ILOCOS NORTE.</div>
           </div>
         </div>
       </footer>

@@ -9,7 +9,7 @@ import { hasRole } from "@/lib/auth/rbac";
 export async function submitReport(formData: FormData) {
   const profile = await requireProfile();
 
-  if (!hasRole(profile.role, ["barangay_official", "sk_official"])) {
+  if (!hasRole(profile.role, ["barangay_official"])) {
     return { error: "Only barangay officials can submit reports" };
   }
 
