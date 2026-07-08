@@ -2,26 +2,110 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 150 12% 96.5%; /* Soft Warm Gray-White #F4F6F5 */
+    --foreground: 260 8% 18%; /* #2D2A32 (dark charcoal) */
+
+    --card: 0 0% 100%; /* Pure White */
+    --card-foreground: 260 8% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 260 8% 18%;
+
+    --primary: 152 100% 34.7%; /* Premium Rich Green #00B15E */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+
+    --secondary: 150 35% 93%; /* Softer Light Green fill #E5F6ED */
+    --secondary-foreground: 152 80% 25%; /* Deep Green text */
+
+    --muted: 150 10% 95%; /* Clean Muted Gray-Green */
+    --muted-foreground: 260 8% 45%;
+
+    --accent: 150 35% 93%;
+    --accent-foreground: 152 80% 25%;
+    
+    --accent-soft: 150 35% 93%;
+    --accent-faint: 150 15% 97%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 150 8% 90%; /* Extremely light gray-green separator border */
+    --input: 150 8% 90%;
+    --ring: 152 100% 34.7%;
+
+    --radius: 20px; /* Softer card corners matching Maya mockup */
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom design system components and utilities */
+@layer components {
+  /* Bryl-minimal Card Recipe */
+  .bryl-card {
+    @apply bg-white border border-[#E9ECE9] rounded-2xl shadow-[0_2px_8px_rgba(20,61,42,0.02)] transition-all duration-300;
+  }
+
+  .bryl-card:hover {
+    @apply shadow-[0_8px_24px_rgba(20,61,42,0.05)] translate-y-[-2px];
+    /* Removed primary outline highlight entirely to keep it clean and soft */
+  }
+
+  .bryl-card-faint {
+    @apply bg-white border border-[#E9ECE9] rounded-2xl transition-all duration-300;
+  }
+
+  /* Micro-label convention */
+  .micro-label {
+    @apply font-sans text-[10px] font-bold tracking-wider uppercase text-foreground/50;
+  }
+
+  /* High-emphasis Inversion Chip */
+  .green-chip {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-[11px] font-sans font-bold tracking-wider uppercase rounded-full transition-all duration-200;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .border-hairline {
+    border-width: 1px;
   }
+  
+  /* Stagger animation utilities */
+  .stagger-delay-1 { animation-delay: 70ms; }
+  .stagger-delay-2 { animation-delay: 140ms; }
+  .stagger-delay-3 { animation-delay: 210ms; }
+  .stagger-delay-4 { animation-delay: 280ms; }
+  .stagger-delay-5 { animation-delay: 350ms; }
+}
+
+/* Lenis smooth scrolling configuration */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
