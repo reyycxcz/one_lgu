@@ -20,7 +20,7 @@ export default function Error({
       
       <div className="max-w-md space-y-6 z-10">
         <span className="micro-label">SYSTEM FAILURE</span>
-        <h1 className="font-pixel text-5xl leading-none uppercase text-destructive">AN ERROR OCCURRED</h1>
+        <h1 className="font-sans font-black text-5xl leading-none uppercase text-destructive">AN ERROR OCCURRED</h1>
         <p className="text-sm text-foreground/60 font-sans">
           A processing error occurred during layout compilation or API dispatch. This incident has been logged.
         </p>
@@ -36,3 +36,4 @@ export default function Error({
     </div>
   );
 }
+

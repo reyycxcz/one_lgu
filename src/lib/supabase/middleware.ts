@@ -27,8 +27,9 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh user session by calling getUser
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use getSession() for fast middleware routing (reads JWT from cookie, no network call).
+  // Reserve getUser() for server actions/components that need verified auth for data access.
+  const { data: { session } } = await supabase.auth.getSession();
 
-  return { supabaseResponse, user };
+  return { supabaseResponse, user: session?.user ?? null };
 }

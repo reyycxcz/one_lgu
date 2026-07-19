@@ -1,27 +1,7 @@
+import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth/session";
 import Link from "next/link";
-import { Plus, ClipboardList, Calendar, ChevronRight, FileText } from "lucide-react";
-import { StatusBadge } from "@/components/shared/status-badge";
-
-const MOCK_REPORTS = [
-  {
-    id: "REP-4011",
-    title: "Q2 Accomplishment Report",
-    type: "accomplishment",
-    period: "Apr 1, 2026 - Jun 30, 2026",
-    status: "approved",
-    file: "Accomplishment_Report_Q2_BGY-001.pdf",
-    reviewedBy: "Engr. Clara Mendez (LGU Admin)",
-  },
-  {
-    id: "REP-3908",
-    title: "June Financial Expense Ledger",
-    type: "financial",
-    period: "Jun 1, 2026 - Jun 30, 2026",
-    status: "submitted",
-    file: "Financial_Report_June_BGY-001.xlsx",
-    reviewedBy: null,
-  },
-];
+import { Plus, FileText } from "lucide-react";
 
 const REPORT_TYPE_COLORS: Record<string, string> = {
   accomplishment: "bg-[#C7FFCF] text-[#2D2A32]",
@@ -30,66 +10,78 @@ const REPORT_TYPE_COLORS: Record<string, string> = {
   compliance: "bg-orange-100 text-orange-800",
 };
 
-export default function BarangayReportsPage() {
+export default async function BarangayReportsPage() {
+  const session = await requireSession();
+  const supabase = await createClient();
+
+  const { data: reports } = await supabase
+    .from("reports")
+    .select("*")
+    .eq("submitted_by", session.user.id)
+    .order("created_at", { ascending: false });
+
   return (
     <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="micro-label">02 — OFFICIAL REPORTING</span>
-          <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">Accomplishment Reports</h1>
+          <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">Submit Reports</h1>
           <p className="text-sm text-foreground/60 mt-1">Submit reports and track review decisions from the municipal office.</p>
         </div>
-        <Link href="/barangay/reports/new" className="green-chip text-xs py-2.5 px-4 inline-flex items-center gap-1.5 self-start">
+        <Link
+          href="/barangay/reports/new"
+          className="px-4 py-2 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-xs font-bold flex items-center gap-1.5 transition-all"
+        >
           <Plus className="h-4 w-4" /> Submit New Report
         </Link>
       </div>
 
-      {/* Reports Table List */}
       <div className="space-y-4">
-        {MOCK_REPORTS.map((report) => (
-          <div key={report.id} className="bryl-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-10 w-10 rounded-xl bg-muted/20 border border-border flex items-center justify-center shrink-0">
-                <ClipboardList className="h-5 w-5 text-foreground/75" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase ${REPORT_TYPE_COLORS[report.type]}`}>
-                    {report.type}
-                  </span>
-                  <span className="font-mono text-[10px] text-foreground/45 font-semibold">{report.id}</span>
-                </div>
-                <h3 className="font-sans font-semibold text-base text-foreground">{report.title}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-foreground/50">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>Period: {report.period}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-foreground/40 font-mono pt-1">
-                  <FileText className="h-3 w-3" /> {report.file}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border/40 pt-4 sm:pt-0">
-              <div className="text-right hidden md:block">
-                <StatusBadge status={report.status} />
-                {report.reviewedBy && (
-                  <p className="text-[9px] text-foreground/40 font-mono mt-1">Reviewer: {report.reviewedBy}</p>
-                )}
-              </div>
-              <div className="md:hidden">
-                <StatusBadge status={report.status} />
-              </div>
-              <Link
-                href={`/barangay/reports/${report.id}`}
-                className="p-1 hover:text-primary transition-colors shrink-0"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Link>
-            </div>
+        {!reports || reports.length === 0 ? (
+          <div className="text-center py-16 text-foreground/40">
+            <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm font-sans">No reports submitted yet.</p>
           </div>
-        ))}
+        ) : (
+          reports.map((report) => (
+            <Link
+              key={report.id}
+              href={`/barangay/reports/${report.id}`}
+              className="block bg-white border border-border p-6 rounded-xl hover:bg-muted/20 transition-colors"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-muted/20 border border-border flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-foreground/75" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${REPORT_TYPE_COLORS[report.type] || "bg-slate-100 text-slate-700"}`}>
+                        {report.type}
+                      </span>
+                    </div>
+                    <h3 className="font-sans font-semibold text-base text-foreground">{report.title}</h3>
+                    {report.period_start && report.period_end && (
+                      <p className="text-xs text-foreground/50">Period: {report.period_start} to {report.period_end}</p>
+                    )}
+                    {report.file_name && (
+                      <p className="text-[11px] text-foreground/40 font-mono pt-1">{report.file_name}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className={`text-[9px] font-bold uppercase px-2.5 py-0.5 rounded-full ${
+                    report.status === "approved" ? "bg-green-50 text-green-700" :
+                    report.status === "rejected" ? "bg-red-50 text-red-700" :
+                    "bg-amber-50 text-amber-700"
+                  }`}>
+                    {report.status.replace(/_/g, " ")}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );

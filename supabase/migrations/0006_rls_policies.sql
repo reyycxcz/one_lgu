@@ -66,7 +66,7 @@ create policy "Allow profile read access based on role scope"
     auth.uid() = id or 
     get_user_role() = 'super_admin' or 
     (get_user_role() = 'barangay_official' and barangay_id = get_user_barangay_id()) or
-    (get_user_role() = 'sk_official' and barangay_id = get_user_barangay_id())
+    (get_user_role() = 'lgu_reviewer' and barangay_id = get_user_barangay_id())
   );
 
 create policy "Allow profile update access for own profile or super admin"
@@ -89,7 +89,7 @@ create policy "Allow certification read access based on scope"
     requester_id = auth.uid() or
     get_user_role() = 'super_admin' or
     (get_user_role() = 'barangay_official' and barangay_id = get_user_barangay_id()) or
-    (get_user_role() = 'sk_official' and barangay_id = get_user_barangay_id())
+    (get_user_role() = 'lgu_reviewer' and barangay_id = get_user_barangay_id())
   );
 
 create policy "Allow certification update based on role and status"
@@ -134,7 +134,7 @@ create policy "Allow report submission for barangay officials"
   to authenticated
   with check (
     (get_user_role() = 'barangay_official' and barangay_id = get_user_barangay_id()) or
-    (get_user_role() = 'sk_official' and barangay_id = get_user_barangay_id())
+    (get_user_role() = 'lgu_reviewer' and barangay_id = get_user_barangay_id())
   );
 
 create policy "Allow reports read access for officials and super admins"
@@ -143,7 +143,7 @@ create policy "Allow reports read access for officials and super admins"
   using (
     get_user_role() = 'super_admin' or
     (get_user_role() = 'barangay_official' and barangay_id = get_user_barangay_id()) or
-    (get_user_role() = 'sk_official' and barangay_id = get_user_barangay_id())
+    (get_user_role() = 'lgu_reviewer' and barangay_id = get_user_barangay_id())
   );
 
 create policy "Allow reports updates for super admin reviews"

@@ -8,7 +8,7 @@ export default function NotFound() {
       
       <div className="max-w-md space-y-6 z-10">
         <span className="micro-label">ERROR 404</span>
-        <h1 className="font-pixel text-6xl md:text-7xl leading-none uppercase">PAGE NOT FOUND</h1>
+        <h1 className="font-sans font-black text-6xl md:text-7xl leading-none uppercase">PAGE NOT FOUND</h1>
         <p className="text-sm text-foreground/60 font-sans">
           The requested system route does not exist or has been restricted under 7-layer validation protocols.
         </p>
@@ -21,3 +21,4 @@ export default function NotFound() {
     </div>
   );
 }
+

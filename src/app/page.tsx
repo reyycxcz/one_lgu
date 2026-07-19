@@ -3,11 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, FileText, Landmark, Users, Smartphone, MapPin, Lock, Scale, Bell, Zap, CheckCircle2, Clock, Check, BookOpen, ShieldAlert, Sparkles, Award, Plus, Minus } from "lucide-react";
+import { ArrowRight, FileText, Landmark, Users, Smartphone, MapPin, Lock, Scale, Bell, Zap, CheckCircle2, Clock, Check, BookOpen, ShieldAlert, Sparkles, Award, Plus, Minus, Upload, ClipboardCheck, FileSignature, Menu, X } from "lucide-react";
 
+const NAV_LINKS = [
+  { href: "#features", label: "Modules" },
+  { href: "#civic", label: "Civic" },
+  { href: "#portals", label: "Portals" },
+  { href: "#security", label: "Benefits" },
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "#faq", label: "FAQ" },
+];
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const faqs = [
     { q: "How do I request a Barangay Clearance?", a: "Log in to the Resident Citizen Portal, navigate to Certifications, and click 'New Request.' Select your document type, fill in the required details, and submit. You can track the status in real-time from your dashboard." },
@@ -22,64 +31,125 @@ export default function Home() {
     <div className="relative min-h-screen bg-white flex flex-col justify-between">
       
       {/* Header */}
-      <header className="sticky top-4 mx-auto max-w-7xl z-50 transition-all duration-200">
-        <div className="bg-white/90 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_2px_12px_rgba(20,61,42,0.04)] px-8 h-14 flex items-center justify-between">
+      <header className="sticky top-2 sm:top-4 mx-auto w-full max-w-7xl px-3 sm:px-0 z-50 transition-all duration-200">
+        <div className="bg-white/90 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_2px_12px_rgba(20,61,42,0.04)] px-4 sm:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image 
-              src="/images/logo/one_lgu.png" 
+            <Image
+              src="/images/logo/one_lgu.png"
               width={48}
               height={48}
-              className="h-10 w-auto object-contain" 
-              alt="OneLGU Logo" 
+              className="h-9 sm:h-10 w-auto object-contain"
+              alt="OneLGU Logo"
             />
           </div>
 
           <nav className="hidden md:flex items-center gap-12 ml-16">
-            <a href="#features" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Modules</a>
-            <a href="#civic" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Civic</a>
-            <a href="#portals" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Portals</a>
-            <a href="#security" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">Benefits</a>
-            <a href="#how-it-works" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">How It Works</a>
-            <a href="#faq" className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">FAQ</a>
+            {NAV_LINKS.map((link) => (
+              <a key={link.href} href={link.href} className="text-xs font-sans font-medium text-foreground/60 hover:text-[#143D2A] transition-colors duration-200">{link.label}</a>
+            ))}
           </nav>
 
-          <Link href="/login" className="group ml-16 px-5 py-1.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)]">
+          <Link href="/login" className="hidden md:inline-flex group ml-16 px-5 py-1.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)]">
             Log In <ArrowRight className="h-3.5 w-3.5 inline ml-1 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((v) => !v)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileNavOpen}
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full text-foreground/70 hover:bg-secondary transition-colors"
+          >
+            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {mobileNavOpen && (
+          <div className="md:hidden mt-2 bg-white border border-[#E3F2E7] rounded-2xl shadow-[0_8px_24px_rgba(20,61,42,0.08)] px-4 py-4 flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileNavOpen(false)}
+                className="text-sm font-sans font-medium text-foreground/70 hover:text-[#143D2A] py-2.5 px-2 rounded-lg hover:bg-secondary/60 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Link
+              href="/login"
+              onClick={() => setMobileNavOpen(false)}
+              className="mt-2 flex items-center justify-center gap-1.5 px-5 py-2.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide"
+            >
+              Log In <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
       <main className="flex-grow">
-        <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center">
-          <div className="micro-label mb-4 animate-fade-in bg-primary text-white">
-            01 — PROVINCE OF ILOCOS NORTE DIGITAL PORTAL
-          </div>
-          
-          <h1 className="font-sans font-bold text-5xl md:text-7xl tracking-wide uppercase leading-none max-w-4xl text-foreground mb-8 animate-fade-in">
-            DIGITALIZING LOCAL GOVERNMENT
-          </h1>
-          
-          <p className="text-foreground/80 font-sans text-lg max-w-2xl leading-relaxed mb-12 animate-fade-in">
-            A secure G2C and G2G digital governance network linking municipal offices, barangay halls, and citizens across the Province of Ilocos Norte through paperless workflows.
-          </p>
-
-          <div className="flex flex-wrap gap-4 justify-center animate-fade-in">
-            <Link href="/login" className="px-6 py-3 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
-              Get Started
-            </Link>
-            <Link href="/register" className="px-6 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
-              Create Account
-            </Link>
+        <section className="relative overflow-hidden">
+          {/* Decorative backdrop */}
+          <div className="absolute inset-0 -z-10">
+            <div
+              className="absolute inset-0 opacity-[0.35]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, #E3F2E7 1px, transparent 1px), linear-gradient(to bottom, #E3F2E7 1px, transparent 1px)",
+                backgroundSize: "56px 56px",
+                maskImage: "radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%)",
+                WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%)",
+              }}
+            />
+            <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[480px] w-[780px] rounded-full bg-primary/10 blur-[110px]" />
           </div>
 
+          <div className="max-w-6xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-20 flex flex-col items-center text-center">
+            <div className="micro-label mb-6 animate-fade-in bg-primary text-white">
+              01 — DINGRAS, ILOCOS NORTE DIGITAL PORTAL
+            </div>
+
+            <h1 className="font-sans font-black text-4xl sm:text-6xl md:text-8xl tracking-wide uppercase leading-[1.05] md:leading-none max-w-4xl text-foreground mb-8 animate-fade-in px-2">
+              DIGITALIZING LOCAL GOVERNMENT
+            </h1>
+
+            <p className="text-foreground/80 font-sans text-base md:text-lg max-w-2xl leading-relaxed mb-12 animate-fade-in px-2">
+              A secure G2C and G2G digital governance network linking municipal offices, barangay halls, and citizens across the Municipality of Dingras, Ilocos Norte through paperless workflows.
+            </p>
+
+            <div className="flex flex-wrap gap-4 justify-center animate-fade-in mb-16">
+              <Link href="/login" className="px-6 py-3 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
+                Get Started
+              </Link>
+              <Link href="/register" className="px-6 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
+                Create Account
+              </Link>
+            </div>
+
+            {/* Stat strip */}
+            <div className="w-full max-w-3xl grid grid-cols-3 divide-x divide-[#E3F2E7] border-t border-[#E3F2E7] pt-8 animate-fade-in">
+              <div className="px-2 md:px-4">
+                <div className="font-sans font-black text-xl sm:text-3xl md:text-4xl text-[#143D2A]">31</div>
+                <div className="micro-label mt-1 px-0 text-foreground/50 text-[8px] sm:text-[10px]">Barangays Connected</div>
+              </div>
+              <div className="px-2 md:px-4">
+                <div className="font-sans font-black text-xl sm:text-3xl md:text-4xl text-[#143D2A]">15–30<span className="text-xs sm:text-lg align-top">min</span></div>
+                <div className="micro-label mt-1 px-0 text-foreground/50 text-[8px] sm:text-[10px]">Avg. Certificate Turnaround</div>
+              </div>
+              <div className="px-2 md:px-4">
+                <div className="font-sans font-black text-xl sm:text-3xl md:text-4xl text-[#143D2A]">24/7</div>
+                <div className="micro-label mt-1 px-0 text-foreground/50 text-[8px] sm:text-[10px]">Online Availability</div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="features" className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
-              <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">02 — SYSTEM MODULES</span>
-              <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 text-foreground">Core Functionalities</h2>
+              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">02 — SYSTEM MODULES</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Core Functionalities</h2>
             </div>
             <p className="text-foreground/60 font-sans text-sm max-w-md">
               Streamlining local administrative procedures with automated state tracking, document generators, and verification logs.
@@ -88,61 +158,73 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Module 1 */}
-            <div className="bryl-card p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-lg">01</span>
-                <span className="micro-label">MANAGEMENT & STORAGE</span>
+            <div className="bryl-card relative p-6 space-y-4 overflow-hidden">
+              <span className="absolute -top-3 -right-1 font-sans text-6xl sm:text-8xl font-black text-primary/[0.06] select-none leading-none">01</span>
+              <div className="relative flex items-center gap-3">
+                <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <Upload className="h-5 w-5" />
+                </div>
+                <span className="micro-label px-0 text-foreground/50">MANAGEMENT & STORAGE</span>
               </div>
-              <h3 className="font-sans font-bold text-xl uppercase tracking-wide">Reports Submission & Auditing</h3>
-              <p className="text-sm text-foreground/75 leading-relaxed font-sans">
+              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Reports Submission & Auditing</h3>
+              <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Allows barangay officials to upload monthly accomplishment reports and financial expense statements directly to Supabase Storage. LGU admins can review, leave feedback notes, and approve or reject submissions to build compliance scores.
               </p>
-              <div className="border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
+              <div className="relative border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
                 FEATURES: Multi-format Upload • Review History Ledger • Automated PDF Archival
               </div>
             </div>
 
             {/* Module 2 */}
-            <div className="bryl-card p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-lg">02</span>
-                <span className="micro-label">COMPLIANCE HUB</span>
+            <div className="bryl-card relative p-6 space-y-4 overflow-hidden">
+              <span className="absolute -top-3 -right-1 font-sans text-6xl sm:text-8xl font-black text-primary/[0.06] select-none leading-none">02</span>
+              <div className="relative flex items-center gap-3">
+                <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <ClipboardCheck className="h-5 w-5" />
+                </div>
+                <span className="micro-label px-0 text-foreground/50">COMPLIANCE HUB</span>
               </div>
-              <h3 className="font-sans font-bold text-xl uppercase tracking-wide">LGU Required Documents Checklist</h3>
-              <p className="text-sm text-foreground/75 leading-relaxed font-sans">
+              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">LGU Required Documents Checklist</h3>
+              <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Consolidated planning trackers enforcing developmental submissions (such as Annual Investment Programs and Development Plans). LGU dashboards flag delinquent barangays to maintain accountability.
               </p>
-              <div className="border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
+              <div className="relative border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
                 FEATURES: Compliance Calendar • Automated Reminders • Barangay Performance Scorecards
               </div>
             </div>
 
             {/* Module 3 */}
-            <div className="bryl-card p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-lg">03</span>
-                <span className="micro-label">G2C SERVICE PLATFORM</span>
+            <div className="bryl-card relative p-6 space-y-4 overflow-hidden">
+              <span className="absolute -top-3 -right-1 font-sans text-6xl sm:text-8xl font-black text-primary/[0.06] select-none leading-none">03</span>
+              <div className="relative flex items-center gap-3">
+                <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <FileSignature className="h-5 w-5" />
+                </div>
+                <span className="micro-label px-0 text-foreground/50">G2C SERVICE PLATFORM</span>
               </div>
-              <h3 className="font-sans font-bold text-xl uppercase tracking-wide">Barangay Certification Requests</h3>
-              <p className="text-sm text-foreground/75 leading-relaxed font-sans">
+              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Barangay Certification Requests</h3>
+              <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Residents request clearances, residency certificates, indigency proofs, and first-time job seeker waivers online. Barangay staff verify inputs, generate official files with pre-loaded signatures, and track status until released.
               </p>
-              <div className="border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
+              <div className="relative border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
                 FEATURES: Fee waiver validation (RA 11261) • PDF Generation • Multi-Stage Progress Stepper
               </div>
             </div>
 
             {/* Module 4 */}
-            <div className="bryl-card p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-lg">04</span>
-                <span className="micro-label">MEDIATION & ARBITRATION</span>
+            <div className="bryl-card relative p-6 space-y-4 overflow-hidden">
+              <span className="absolute -top-3 -right-1 font-sans text-6xl sm:text-8xl font-black text-primary/[0.06] select-none leading-none">04</span>
+              <div className="relative flex items-center gap-3">
+                <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <Scale className="h-5 w-5" />
+                </div>
+                <span className="micro-label px-0 text-foreground/50">MEDIATION & ARBITRATION</span>
               </div>
-              <h3 className="font-sans font-bold text-xl uppercase tracking-wide">Incident Grievance & Complaints</h3>
-              <p className="text-sm text-foreground/75 leading-relaxed font-sans">
+              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Incident Grievance & Complaints</h3>
+              <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 A digital channel for residents to file complaints and upload supporting media. Officials assign investigator mediators (Kagawads), schedule face-to-face summons hearings, and log community arbitration resolutions.
               </p>
-              <div className="border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
+              <div className="relative border-t border-border/40 pt-3 font-mono text-[10px] text-foreground/50">
                 FEATURES: Image/Video Evidence attachments • Hearing Scheduler • Mediation Case Log history
               </div>
             </div>
@@ -154,8 +236,8 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
-                <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">03 — CIVIC BULLETIN & GUIDES</span>
-                <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 text-[#143D2A]">Civic Bulletin & Updates</h2>
+                <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">03 — CIVIC BULLETIN & GUIDES</span>
+                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-[#143D2A]">Civic Bulletin & Updates</h2>
               </div>
               <p className="text-foreground/60 font-sans text-sm max-w-md">
                 Stay updated with the latest announcements, local programs, and official guidelines from your local government unit.
@@ -243,8 +325,8 @@ export default function Home() {
         <section id="portals" className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
-              <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">04 — PLATFORM ROLES</span>
-              <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 text-foreground">Three Role-Based Portals</h2>
+              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">04 — PLATFORM ROLES</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Three Role-Based Portals</h2>
             </div>
             <p className="text-foreground/60 font-sans text-sm max-w-md">
               Secure routes and layouts ensuring users only see tools and data scoped to their specific administrative clearance level.
@@ -253,53 +335,60 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* LGU Admin Portal */}
-            <div className="bryl-card p-6 flex flex-col justify-between h-80">
+            <div className="bryl-card p-6 flex flex-col justify-between h-80 group">
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <Landmark className="h-6 w-6 text-foreground" />
-                  <span className="font-mono text-xs uppercase text-foreground/40 font-semibold">LEVEL 03 — SUPER ADMIN</span>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="h-12 w-12 rounded-xl bg-[#143D2A] flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105">
+                    <Landmark className="h-5.5 w-5.5" />
+                  </div>
+                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 03 — SUPER ADMIN</span>
                 </div>
-                <h3 className="font-sans font-bold text-xl uppercase tracking-wide mb-2">LGU Console Portal</h3>
+                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">LGU Console Portal</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
-                  Consolidated municipal oversight. Admins audit compliance targets for all 5 barangays, evaluate uploaded financial statements, monitor immutable audit logs (L7), and configure system-wide RBAC.
+                  Consolidated municipal oversight. Admins audit compliance targets for all 31 barangays, evaluate uploaded financial statements, monitor immutable audit logs (L7), and configure system-wide RBAC.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground hover:underline">
-                Enter LGU Portal Console <ArrowRight className="h-3.5 w-3.5" />
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+                Enter LGU Portal Console <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
 
             {/* Barangay Portal */}
-            <div className="bryl-card p-6 flex flex-col justify-between h-80">
+            <div className="bryl-card p-6 flex flex-col justify-between h-80 group relative border-2 border-primary/15">
+              <span className="absolute -top-3 left-6 px-2.5 py-0.5 rounded-full bg-primary text-white text-[9px] font-sans font-bold tracking-wider uppercase">Most Used</span>
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <Users className="h-6 w-6 text-foreground" />
-                  <span className="font-mono text-xs uppercase text-foreground/40 font-semibold">LEVEL 02 — LOCAL OFFICIAL</span>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105">
+                    <Users className="h-5.5 w-5.5" />
+                  </div>
+                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 02 — LOCAL OFFICIAL</span>
                 </div>
-                <h3 className="font-sans font-bold text-xl uppercase tracking-wide mb-2">Barangay Hall Portal</h3>
+                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">Barangay Hall Portal</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
                   Operations dashboard for Captains, SK, and Clerks. Process resident certification queues, dispatch planning documents, schedule Lupon mediation calendars, and manage local staff accounts.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground hover:underline">
-                Enter Barangay Portal <ArrowRight className="h-3.5 w-3.5" />
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+                Enter Barangay Portal <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
 
             {/* Resident Portal */}
-            <div className="bryl-card p-6 flex flex-col justify-between h-80">
+            <div className="bryl-card p-6 flex flex-col justify-between h-80 group">
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <FileText className="h-6 w-6 text-foreground" />
-                  <span className="font-mono text-xs uppercase text-foreground/40 font-semibold">LEVEL 01 — CITIZEN PORTAL</span>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105">
+                    <FileText className="h-5.5 w-5.5" />
+                  </div>
+                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 01 — CITIZEN PORTAL</span>
                 </div>
-                <h3 className="font-sans font-bold text-xl uppercase tracking-wide mb-2">Resident Citizen Desk</h3>
+                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">Resident Citizen Desk</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
                   Direct resident desk. File document certification requests, monitor application status in real-time via steppers, file community grievances, and receive instant in-app alerts.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground hover:underline">
-                Enter Resident Desk <ArrowRight className="h-3.5 w-3.5" />
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+                Enter Resident Desk <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
           </div>
@@ -312,10 +401,10 @@ export default function Home() {
             <div className="lg:w-1/3 shrink-0 flex flex-col justify-between">
               <div className="space-y-6">
                 <div>
-                  <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">05 — WHY ONELGU?</span>
-                  <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 mb-4 text-[#143D2A]">Faster Services, Simpler Access</h2>
+                  <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">05 — WHY ONELGU?</span>
+                  <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 mb-4 text-[#143D2A]">Faster Services, Simpler Access</h2>
                   <p className="text-foreground/60 text-sm font-sans leading-relaxed">
-                    Skip the queues at your local Barangay Hall. Request clearances and certificates online securely across Ilocos Norte.
+                    Skip the queues at your local Barangay Hall. Request clearances and certificates online securely across Dingras, Ilocos Norte.
                   </p>
                 </div>
               </div>
@@ -391,31 +480,49 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
-                <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">07 — HOW IT WORKS</span>
-                <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 text-[#143D2A]">Three Simple Steps</h2>
+                <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">07 — HOW IT WORKS</span>
+                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-[#143D2A]">Three Simple Steps</h2>
               </div>
               <p className="text-foreground/60 font-sans text-sm max-w-md">
                 From registration to document release — the entire process is fully digital.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
-                <span className="font-sans text-5xl font-bold text-primary/10">01</span>
+            <div className="relative grid md:grid-cols-3 gap-8">
+              {/* Connector line (desktop only) */}
+              <div className="hidden md:block absolute top-[52px] left-[16.5%] right-[16.5%] h-px bg-[repeating-linear-gradient(90deg,#C7FFCF_0,#C7FFCF_6px,transparent_6px,transparent_12px)]" />
+
+              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] hover:bg-white transition-colors duration-200">
+                <div className="flex items-center gap-4">
+                  <span className="font-sans text-5xl font-black text-primary/10">01</span>
+                  <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <Users className="h-4.5 w-4.5" />
+                  </div>
+                </div>
                 <h3 className="font-sans text-base font-bold text-[#143D2A]">Register & Verify</h3>
                 <p className="text-xs text-foreground/65 font-sans leading-relaxed">
-                  Create your Resident Citizen account, select your Barangay within Ilocos Norte, and verify your identity through the portal. One-time setup, lifetime access.
+                  Create your Resident Citizen account, select your Barangay within Dingras, Ilocos Norte, and verify your identity through the portal. One-time setup, lifetime access.
                 </p>
               </div>
-              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
-                <span className="font-sans text-5xl font-bold text-primary/10">02</span>
+              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] hover:bg-white transition-colors duration-200">
+                <div className="flex items-center gap-4">
+                  <span className="font-sans text-5xl font-black text-primary/10">02</span>
+                  <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <FileSignature className="h-4.5 w-4.5" />
+                  </div>
+                </div>
                 <h3 className="font-sans text-base font-bold text-[#143D2A]">Submit Your Request</h3>
                 <p className="text-xs text-foreground/65 font-sans leading-relaxed">
                   Choose a service — clearance, certificate, or complaint — fill in the required fields, upload any attachments, and submit instantly.
                 </p>
               </div>
-              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
-                <span className="font-sans text-5xl font-bold text-primary/10">03</span>
+              <div className="relative p-6 border border-[#E3F2E7] bg-[#FAFDFB] space-y-4 rounded-none hover:border-[#C7FFCF] hover:bg-white transition-colors duration-200">
+                <div className="flex items-center gap-4">
+                  <span className="font-sans text-5xl font-black text-primary/10">03</span>
+                  <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <CheckCircle2 className="h-4.5 w-4.5" />
+                  </div>
+                </div>
                 <h3 className="font-sans text-base font-bold text-[#143D2A]">Track & Receive</h3>
                 <p className="text-xs text-foreground/65 font-sans leading-relaxed">
                   Monitor your application status in real-time. Once signed and approved by your Barangay Captain, download or pick up your document.
@@ -429,8 +536,8 @@ export default function Home() {
         <section id="faq" className="max-w-6xl mx-auto px-6 py-20">
           <div className="flex flex-col md:flex-row gap-12 md:gap-20">
             <div className="md:w-1/3 shrink-0">
-              <span className="inline-block font-sans text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">08 — FAQ</span>
-              <h2 className="font-sans font-bold text-4xl uppercase tracking-wider mt-2 text-foreground">Frequently Asked Questions</h2>
+              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">08 — FAQ</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Frequently Asked Questions</h2>
               <p className="text-foreground/55 text-sm font-sans mt-3 leading-relaxed">
                 Everything you need to know about OneLGU services, document requests, and your account.
               </p>
@@ -463,7 +570,7 @@ export default function Home() {
         {/* Final CTA Banner */}
         <section className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-16">
           <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
-            <h2 className="font-sans text-2xl md:text-3xl font-bold text-[#143D2A]">Ready to go paperless?</h2>
+            <h2 className="font-sans font-black text-4xl md:text-5xl uppercase tracking-wider text-[#143D2A]">Ready to go paperless?</h2>
             <p className="text-foreground/55 text-sm font-sans max-w-lg mx-auto">
               Join thousands of residents who are already using OneLGU to request certificates, file complaints, and access barangay services online.
             </p>

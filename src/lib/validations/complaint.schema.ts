@@ -9,7 +9,17 @@ export const complaintStatusEnum = z.enum([
   "closed",
 ]);
 
+export const complaintTypeEnum = z.enum([
+  "noise_complaint",
+  "garbage_illegal_dumping",
+  "road_infrastructure",
+  "streetlight_problem",
+  "stray_aggressive_animals",
+  "other",
+]);
+
 export const complaintSchema = z.object({
+  type: complaintTypeEnum,
   respondent_name: z.string().optional(),
   subject: z.string().min(5, "Subject must be at least 5 characters long").max(100),
   description: z.string().min(10, "Please describe the incident in at least 10 characters").max(1000),

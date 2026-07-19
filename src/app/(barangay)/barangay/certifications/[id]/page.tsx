@@ -2,8 +2,7 @@ export default function BarangayCertificationDetailPage({ params }: { params: { 
   return (
     <div className="space-y-6">
       <div>
-        <span className="micro-label">04 — VERIFICATION</span>
-        <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">Verification Request #{params.id.slice(0, 8)}</h1>
+        <h1 className="font-sans font-black text-5xl uppercase tracking-wider mt-1">Verification Request #{params.id.slice(0, 8)}</h1>
         <p className="text-sm text-foreground/60 mt-1">Verify attachments, issue certificates, and handle releases.</p>
       </div>
       <div className="bryl-card p-8">

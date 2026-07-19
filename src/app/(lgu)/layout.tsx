@@ -1,120 +1,150 @@
-import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { ReactNode } from "react";
-import { Landmark, LayoutDashboard, LogOut, ClipboardList, ShieldAlert, Users, BarChart3, Database } from "lucide-react";
+import { redirect } from "next/navigation";
+import LGUClientLayout from "./client-layout";
 
-export default function LGULayout({ children }: { children: ReactNode }) {
+const LGU_NAV_GROUPS = [
+  {
+    label: "Dashboard",
+    items: [
+      { path: "/lgu/dashboard", label: "Overview", icon: "LayoutDashboard" },
+      { path: "/lgu/dashboard/submission-summary", label: "Submission Summary", icon: "FileText" },
+      { path: "/lgu/dashboard/pending-approvals", label: "Pending Approvals", icon: "ClipboardCheck" },
+      { path: "/lgu/dashboard/compliance-overview", label: "Compliance Overview", icon: "TrendingUp" },
+      { path: "/lgu/dashboard/recent-activities", label: "Recent Activities", icon: "Activity" },
+    ],
+  },
+  {
+    label: "Barangays",
+    items: [
+      { path: "/lgu/barangays", label: "Barangay List", icon: "Building2" },
+      { path: "/lgu/barangays/profiles", label: "Barangay Profiles", icon: "FileText" },
+      { path: "/lgu/barangays/officials", label: "Assigned Officials", icon: "Users" },
+      { path: "/lgu/barangays/performance", label: "Performance Monitoring", icon: "BarChart3" },
+    ],
+  },
+  {
+    label: "Barangay Reports",
+    items: [
+      { path: "/lgu/reports/pending", label: "Pending Reports", icon: "Clock" },
+      { path: "/lgu/reports/approved", label: "Approved Reports", icon: "CheckCircle" },
+      { path: "/lgu/reports/returned", label: "Returned Reports", icon: "XCircle" },
+      { path: "/lgu/reports/archived", label: "Archived Reports", icon: "Archive" },
+      { path: "/lgu/reports/categories", label: "Report Categories", icon: "FolderOpen" },
+    ],
+  },
+  {
+    label: "Document Submissions",
+    items: [
+      { path: "/lgu/documents/pending", label: "Pending Documents", icon: "Upload" },
+      { path: "/lgu/documents/approved", label: "Approved Documents", icon: "CheckCircle" },
+      { path: "/lgu/documents/returned", label: "Returned Documents", icon: "XCircle" },
+      { path: "/lgu/documents/archived", label: "Archived Documents", icon: "Archive" },
+    ],
+  },
+  {
+    label: "Certification Requests",
+    items: [
+      { path: "/lgu/certifications/all", label: "All Requests", icon: "ListChecks" },
+      { path: "/lgu/certifications/pending", label: "Pending", icon: "Clock" },
+      { path: "/lgu/certifications/approved", label: "Approved", icon: "CheckCircle" },
+      { path: "/lgu/certifications/rejected", label: "Rejected", icon: "XCircle" },
+      { path: "/lgu/certifications/issued", label: "Issued Certificates", icon: "Award" },
+    ],
+  },
+  {
+    label: "Complaint Reports",
+    items: [
+      { path: "/lgu/complaints/all", label: "All Complaints", icon: "AlertTriangle" },
+      { path: "/lgu/complaints/pending", label: "Pending Cases", icon: "Clock" },
+      { path: "/lgu/complaints/investigation", label: "Under Investigation", icon: "Search" },
+      { path: "/lgu/complaints/resolved", label: "Resolved Cases", icon: "CheckCircle" },
+      { path: "/lgu/complaints/closed", label: "Closed Cases", icon: "Archive" },
+    ],
+  },
+  {
+    label: "Compliance Monitoring",
+    items: [
+      { path: "/lgu/compliance/status", label: "Submission Status", icon: "ClipboardList" },
+      { path: "/lgu/compliance/late", label: "Late Submissions", icon: "AlertCircle" },
+      { path: "/lgu/compliance/missing", label: "Missing Requirements", icon: "AlertTriangle" },
+      { path: "/lgu/compliance/rankings", label: "Barangay Rankings", icon: "Award" },
+      { path: "/lgu/compliance/history", label: "Compliance History", icon: "History" },
+    ],
+  },
+  {
+    label: "Analytics",
+    items: [
+      { path: "/lgu/analytics/submissions", label: "Submission Analytics", icon: "BarChart3" },
+      { path: "/lgu/analytics/complaints", label: "Complaint Analytics", icon: "PieChart" },
+      { path: "/lgu/analytics/certifications", label: "Certification Analytics", icon: "FileBarChart" },
+      { path: "/lgu/analytics/compliance", label: "Compliance Analytics", icon: "TrendingUp" },
+      { path: "/lgu/analytics/annual", label: "Annual Reports", icon: "FileSpreadsheet" },
+    ],
+  },
+  {
+    label: "Announcements",
+    items: [
+      { path: "/lgu/announcements/create", label: "Create Announcement", icon: "Plus" },
+      { path: "/lgu/announcements/sent", label: "Sent Announcements", icon: "Megaphone" },
+      { path: "/lgu/announcements/history", label: "Notification History", icon: "Bell" },
+    ],
+  },
+  {
+    label: "User Management",
+    items: [
+      { path: "/lgu/users/residents", label: "Residents", icon: "Users" },
+      { path: "/lgu/users/officials", label: "Barangay Officials", icon: "UserCheck" },
+      { path: "/lgu/users/sk-officials", label: "SK Officials", icon: "UserPlus" },
+      { path: "/lgu/users/requests", label: "Account Requests", icon: "UserCog" },
+    ],
+  },
+  {
+    label: "System Management",
+    items: [
+      { path: "/lgu/settings/document-types", label: "Document Types", icon: "FileText" },
+      { path: "/lgu/settings/report-categories", label: "Report Categories", icon: "FolderOpen" },
+      { path: "/lgu/settings/certification-types", label: "Certification Types", icon: "Award" },
+      { path: "/lgu/settings/complaint-categories", label: "Complaint Categories", icon: "AlertTriangle" },
+      { path: "/lgu/settings/barangays", label: "Barangay Management", icon: "Building2" },
+      { path: "/lgu/settings/system", label: "System Settings", icon: "Settings" },
+    ],
+  },
+  {
+    label: "Audit Logs",
+    items: [
+      { path: "/lgu/audit-logs/activities", label: "User Activities", icon: "Activity" },
+      { path: "/lgu/audit-logs/login-history", label: "Login History", icon: "History" },
+      { path: "/lgu/audit-logs/system", label: "System Logs", icon: "Database" },
+    ],
+  },
+  {
+    label: "Profile",
+    items: [
+      { path: "/lgu/profile", label: "My Profile", icon: "UserCircle" },
+      { path: "/lgu/profile/password", label: "Change Password", icon: "Lock" },
+      { path: "/login", label: "Logout", icon: "LogOut" },
+    ],
+  },
+];
+
+export default async function LGULayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const userProfile = {
+    name: user?.user_metadata?.full_name || user?.email || "Super Admin",
+    email: user?.email || "",
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50/50 flex">
-      {/* Desktop Sidebar */}
-      <aside className="w-64 border-r border-border bg-white flex flex-col justify-between hidden md:flex sticky top-0 h-screen">
-        <div>
-          {/* Header */}
-          <div className="h-16 px-6 border-b border-border flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary border border-border flex items-center justify-center font-pixel text-xl font-bold text-foreground">
-              Ω
-            </div>
-            <span className="font-pixel text-xl tracking-wider text-foreground">ONELGU</span>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="p-4 space-y-1">
-            <div className="px-3 py-2 text-[10px] font-mono font-bold tracking-wider text-foreground/40 uppercase">
-              LGU Console
-            </div>
-            <Link 
-              href="/lgu/dashboard" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Link>
-            <Link 
-              href="/lgu/barangays" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <Landmark className="h-4 w-4" />
-              <span>Barangays</span>
-            </Link>
-            <Link 
-              href="/lgu/reports" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <ClipboardList className="h-4 w-4" />
-              <span>Review Reports</span>
-            </Link>
-            <Link 
-              href="/lgu/compliance" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <ShieldAlert className="h-4 w-4" />
-              <span>Compliance Tracker</span>
-            </Link>
-            <Link 
-              href="/lgu/analytics" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>LGU Analytics</span>
-            </Link>
-            <Link 
-              href="/lgu/audit-logs" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <Database className="h-4 w-4" />
-              <span>Audit Trails</span>
-            </Link>
-            <Link 
-              href="/lgu/users" 
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors"
-            >
-              <Users className="h-4 w-4" />
-              <span>RBAC Management</span>
-            </Link>
-          </nav>
-        </div>
-
-        {/* Footer info & Logout */}
-        <div className="p-4 border-t border-border space-y-3">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center font-bold text-sm text-foreground">
-              SA
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">LGU Administrator</p>
-              <p className="text-[10px] font-mono uppercase text-foreground/50">Super Admin</p>
-            </div>
-          </div>
-
-          <Link 
-            href="/login" 
-            className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out</span>
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Panel */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
-        <header className="h-16 border-b border-border bg-white px-6 flex items-center justify-between md:hidden sticky top-0 z-40">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-primary border border-border flex items-center justify-center font-pixel text-lg font-bold text-foreground">
-              Ω
-            </div>
-            <span className="font-pixel text-lg tracking-wider text-foreground">ONELGU</span>
-          </div>
-          <Link href="/login" className="p-1 text-destructive">
-            <LogOut className="h-5 w-5" />
-          </Link>
-        </header>
-
-        {/* Content Container */}
-        <main className="flex-1 p-6 md:p-10 max-w-6xl w-full mx-auto">
-          {children}
-        </main>
-      </div>
-    </div>
+    <LGUClientLayout userProfile={userProfile} navGroups={LGU_NAV_GROUPS}>
+      {children}
+    </LGUClientLayout>
   );
 }

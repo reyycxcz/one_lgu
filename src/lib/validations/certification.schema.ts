@@ -2,9 +2,11 @@ import { z } from "zod";
 
 export const certificationTypeEnum = z.enum([
   "barangay_clearance",
+  "barangay_certificate",
   "certificate_of_residency",
   "certificate_of_indigency",
   "business_clearance",
+  "scholarship_certificate",
   "first_time_job_seeker",
 ]);
 

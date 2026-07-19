@@ -1,46 +1,83 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, Info } from "lucide-react";
+import { ArrowLeft, Upload, Info, Loader2 } from "lucide-react";
+import { submitCertificationRequest } from "@/actions/certifications";
 
 export default function NewCertificationPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    formData.set("requirements", "[]");
+
+    const result = await submitCertificationRequest(formData);
+
+    if (result?.error) {
+      setError(typeof result.error === "string" ? result.error : "Failed to submit request. Please check the form and try again.");
+      setLoading(false);
+      return;
+    }
+
+    router.push("/resident/certifications");
+  }
+
   return (
     <div className="space-y-8 animate-stagger-in">
       {/* Header */}
       <div>
-        <Link href="/resident/certifications" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground/60 hover:text-foreground mb-4">
+        <Link href="/resident/certifications" className="inline-flex items-center gap-1.5 font-sans text-xs font-medium text-foreground/60 hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" /> Back to History
         </Link>
-        <span className="micro-label">02 — NEW REQUEST</span>
-        <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">Request Certificate</h1>
+        <h1 className="font-display font-bold text-3xl text-foreground">Request Certificate</h1>
         <p className="text-sm text-foreground/60 mt-1">Fill out the required information and upload attachments.</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Request Form */}
         <div className="bryl-card p-6 lg:col-span-2 space-y-6">
-          <form className="space-y-6">
+          {error && (
+            <div className="p-3 rounded-xl text-sm font-sans bg-red-50 border border-red-200 text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-foreground/75 mb-2">
+              <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
                 Certificate Type
               </label>
               <select
+                name="type"
                 className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                 required
                 defaultValue=""
               >
                 <option value="" disabled>Select certificate type...</option>
                 <option value="barangay_clearance">Barangay Clearance</option>
+                <option value="barangay_certificate">Barangay Certificate</option>
                 <option value="certificate_of_residency">Certificate of Residency</option>
                 <option value="certificate_of_indigency">Certificate of Indigency</option>
                 <option value="business_clearance">Business Clearance</option>
+                <option value="scholarship_certificate">Certificate for Scholarship Purposes</option>
                 <option value="first_time_job_seeker">First-Time Job Seeker (RA 11261)</option>
               </select>
             </div>
 
             <div>
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-foreground/75 mb-2">
+              <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
                 Purpose
               </label>
               <textarea
+                name="purpose"
                 placeholder="Describe why you are requesting this certificate (e.g. Local employment requirements, Scholarship application, bank requirements, business permit application)..."
                 rows={4}
                 className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
@@ -49,7 +86,7 @@ export default function NewCertificationPage() {
             </div>
 
             <div>
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-foreground/75 mb-2">
+              <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
                 Requirements Upload
               </label>
               <div className="border border-dashed border-border rounded-xl p-8 bg-muted/10 flex flex-col items-center justify-center text-center space-y-3 hover:bg-muted/20 transition-all cursor-pointer">
@@ -65,9 +102,16 @@ export default function NewCertificationPage() {
 
             <button
               type="submit"
-              className="w-full green-chip py-3 justify-center text-xs tracking-widest font-bold font-mono"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 gradient-primary text-white rounded-lg py-3 text-sm font-sans font-bold shadow-[0_4px_14px_-4px_rgba(0,177,94,0.55)] hover:brightness-105 active:brightness-95 transition-all disabled:opacity-60"
             >
-              SUBMIT CERTIFICATE REQUEST
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> Submitting...
+                </>
+              ) : (
+                "Submit Certificate Request"
+              )}
             </button>
           </form>
         </div>
@@ -75,7 +119,7 @@ export default function NewCertificationPage() {
         {/* Informational sidebar */}
         <div className="space-y-6">
           <div className="bryl-card-faint p-6 space-y-4">
-            <h3 className="font-pixel text-lg uppercase tracking-wider flex items-center gap-2">
+            <h3 className="font-display text-base font-semibold flex items-center gap-2">
               <Info className="h-4.5 w-4.5" /> Attachment Rules
             </h3>
             <ul className="space-y-3 text-xs text-foreground/75 font-sans leading-relaxed">

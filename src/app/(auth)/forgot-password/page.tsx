@@ -1,42 +1,48 @@
+"use client";
+
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LoginPageLayout } from "@/components/login-form";
+
+function ForgotPasswordForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"form">) {
+  return (
+    <form className={cn("flex flex-col gap-6 font-sans", className)} {...props}>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-bold">Reset password</h1>
+        <p className="text-balance text-sm text-muted-foreground">
+          Enter your email address to receive a recovery link
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" placeholder="your email" required />
+        </div>
+        <Button type="submit" className="w-full">
+          Send Reset Link
+        </Button>
+      </div>
+      <div className="text-center text-sm">
+        Remember password?{" "}
+        <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Log in here
+        </Link>
+      </div>
+    </form>
+  );
+}
 
 export default function ForgotPasswordPage() {
   return (
-    <div>
-      <div className="text-center mb-6">
-        <h2 className="font-pixel text-2xl uppercase tracking-wider text-foreground">Reset Password</h2>
-        <p className="text-xs text-foreground/60 font-sans mt-1">Enter your email address to receive a recovery link</p>
-      </div>
-
-      <form className="space-y-4">
-        <div>
-          <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-foreground/75 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            placeholder="juan.delacruz@gmail.com"
-            className="w-full px-4 py-2 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full green-chip py-2.5 justify-center text-xs tracking-widest font-bold font-mono"
-        >
-          SEND RESET LINK
-        </button>
-      </form>
-
-      <div className="mt-6 text-center border-t border-border pt-4">
-        <p className="text-xs text-foreground/60">
-          Remember password?{" "}
-          <Link href="/login" className="font-mono text-[11px] font-bold uppercase text-foreground hover:underline">
-            Login here
-          </Link>
-        </p>
-      </div>
-    </div>
+    <LoginPageLayout formTitle="Digitalizing Local Government">
+      <ForgotPasswordForm />
+    </LoginPageLayout>
   );
 }

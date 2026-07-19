@@ -1,140 +1,166 @@
+import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth/session";
 import Link from "next/link";
-import { FileText, AlertOctagon, ClipboardList, CheckCircle2, ChevronRight } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-export default function BarangayDashboard() {
+const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  approved: "default",
+  rejected: "destructive",
+  submitted: "secondary",
+  verified: "secondary",
+  resolved: "default",
+  closed: "default",
+  mediation: "secondary",
+};
+
+export default async function BarangayDashboard() {
+  const session = await requireSession();
+  const supabase = await createClient();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, barangays(name)")
+    .eq("id", session.user.id)
+    .single();
+
+  const barangayData = profile?.barangays as unknown as { name: string } | null;
+  const barangayId = barangayData?.name || "";
+
+  const [certResult, complaintResult, reportResult] = await Promise.all([
+    supabase
+      .from("certification_requests")
+      .select("id, status, type, purpose, created_at, requester:profiles(full_name)")
+      .eq("barangay_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("complaints")
+      .select("id, status, subject, created_at")
+      .eq("barangay_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("reports")
+      .select("id, status, title, type, created_at")
+      .eq("barangay_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
+
+  const pendingCerts = certResult.data?.filter(c => c.status === "submitted" || c.status === "verified").length || 0;
+  const activeComplaints = complaintResult.data?.filter(c => c.status !== "resolved" && c.status !== "closed").length || 0;
+  const totalReports = reportResult.data?.length || 0;
+
   return (
     <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
-      <div>
-        <span className="micro-label">01 — OFFICIAL OVERVIEW</span>
-        <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">Barangay Admin Dashboard</h1>
-        <p className="text-sm text-foreground/60 mt-1">Barangay San Jose, Laoag City — Operations Center.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">Barangay Dashboard</h1>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">
+            {barangayId ? `${barangayId} — Operations Center` : "Operations Center"}
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/barangay/certifications">
+            <Plus /> Process Requests
+          </Link>
+        </Button>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bryl-card p-6 flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <span className="micro-label">PENDING CERTS</span>
-            <FileText className="h-4 w-4 text-foreground/40" />
-          </div>
-          <div>
-            <div className="font-pixel text-3xl">4 REQUESTS</div>
-            <p className="text-[10px] text-foreground/50 mt-1">Needs verification/approval</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-primary text-primary-foreground border-0 shadow-sm">
+          <CardHeader className="p-5 pb-2">
+            <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-inherit opacity-90">
+              Pending Requests
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
+            <p className="text-2xl font-bold font-sans tracking-tight">{pendingCerts} Requests</p>
+          </CardContent>
+        </Card>
 
-        <div className="bryl-card p-6 flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <span className="micro-label">ACTIVE COMPLAINTS</span>
-            <AlertOctagon className="h-4 w-4 text-foreground/40" />
-          </div>
-          <div>
-            <div className="font-pixel text-3xl">2 CASES</div>
-            <p className="text-[10px] text-foreground/50 mt-1">Scheduled for mediation</p>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="p-5 pb-2">
+            <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+              Active Complaints
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
+            <p className="text-2xl font-bold font-sans tracking-tight">{activeComplaints} Cases</p>
+          </CardContent>
+        </Card>
 
-        <div className="bryl-card p-6 flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <span className="micro-label">REPORTS STATUS</span>
-            <ClipboardList className="h-4 w-4 text-foreground/40" />
-          </div>
-          <div>
-            <div className="font-pixel text-3xl">SUBMITTED</div>
-            <p className="text-[10px] text-foreground/50 mt-1">June Accomplishment Report</p>
-          </div>
-        </div>
-
-        <div className="bryl-card p-6 flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <span className="micro-label">COMPLIANCE SCORE</span>
-            <CheckCircle2 className="h-4 w-4 text-foreground/40" />
-          </div>
-          <div>
-            <div className="font-pixel text-3xl">92% TARGET</div>
-            <p className="text-[10px] text-foreground/50 mt-1">Excellent standing with LGU</p>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="p-5 pb-2">
+            <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+              Reports Submitted
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
+            <p className="text-2xl font-bold font-sans tracking-tight">{totalReports}</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Certificate Requests Queue */}
-        <div className="bryl-card p-6 space-y-6 lg:col-span-2">
-          <div className="flex justify-between items-end border-b border-border/80 pb-4">
-            <div>
-              <span className="micro-label">INCOMING QUEUE</span>
-              <h3 className="font-pixel text-xl uppercase mt-1">Certification Requests</h3>
-            </div>
-            <Link href="/barangay/certifications" className="font-mono text-[10px] uppercase text-foreground/60 hover:text-foreground flex items-center">
-              View Queue <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-3">
+            <CardTitle className="font-bold text-sm">Recent Certifications</CardTitle>
+            <Button variant="link" size="sm" asChild className="text-xs font-bold">
+              <Link href="/barangay/certifications">View All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            {!certResult.data || certResult.data.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-6">No certification requests yet.</p>
+            ) : (
+              <div className="divide-y divide-border/50">
+                {certResult.data.map((cert) => (
+                  <div key={cert.id} className="flex items-center justify-between px-6 py-3 text-xs">
+                    <div>
+                      <p className="font-bold text-foreground">{cert.type.replace(/_/g, " ")}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{cert.purpose}</p>
+                    </div>
+                    <Badge variant={statusVariant[cert.status] || "secondary"} className="uppercase text-[10px]">
+                      {cert.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center p-3 bg-muted/20 border border-border/60 rounded-xl hover:border-primary transition-all gap-3">
-              <div className="space-y-1">
-                <span className="font-mono text-[10px] font-bold text-foreground bg-primary px-2 py-0.5 rounded uppercase">
-                  CLEARANCE
-                </span>
-                <p className="text-sm font-semibold mt-1">Juan Dela Cruz</p>
-                <p className="text-xs text-foreground/60">Purpose: Employment Requirement</p>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-3">
+            <CardTitle className="font-bold text-sm">Recent Complaints</CardTitle>
+            <Button variant="link" size="sm" asChild className="text-xs font-bold">
+              <Link href="/barangay/complaints">View All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            {!complaintResult.data || complaintResult.data.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-6">No complaints yet.</p>
+            ) : (
+              <div className="divide-y divide-border/50">
+                {complaintResult.data.map((complaint) => (
+                  <div key={complaint.id} className="flex items-center justify-between px-6 py-3 text-xs">
+                    <div>
+                      <p className="font-bold text-foreground">{complaint.subject}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(complaint.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <Badge variant={statusVariant[complaint.status] || "secondary"} className="uppercase text-[10px]">
+                      {complaint.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-foreground/50">Requested 2 hrs ago</span>
-                <Link href="/barangay/certifications/123" className="green-chip text-[9px] py-1">
-                  Process
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center p-3 bg-muted/20 border border-border/60 rounded-xl hover:border-primary transition-all gap-3">
-              <div className="space-y-1">
-                <span className="font-mono text-[10px] font-bold text-foreground bg-secondary px-2 py-0.5 rounded uppercase">
-                  BUSINESS
-                </span>
-                <p className="text-sm font-semibold mt-1">Sari-Sari Store Permit</p>
-                <p className="text-xs text-foreground/60">Applicant: Maria Santos</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-foreground/50">Requested 5 hrs ago</span>
-                <Link href="/barangay/certifications/456" className="green-chip text-[9px] py-1">
-                  Process
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Complaints Case Queue */}
-        <div className="bryl-card p-6 space-y-6">
-          <div className="flex justify-between items-end border-b border-border/80 pb-4">
-            <div>
-              <span className="micro-label">INCIDENTS</span>
-              <h3 className="font-pixel text-xl uppercase mt-1">Mediation Cases</h3>
-            </div>
-            <Link href="/barangay/complaints" className="font-mono text-[10px] uppercase text-foreground/60 hover:text-foreground flex items-center">
-              View Cases <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            <div className="p-3 bg-muted/20 border border-border/60 rounded-xl space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="font-mono text-[9px] font-bold text-foreground bg-red-100 text-red-800 px-2 py-0.5 rounded uppercase">
-                  SCHEDULED
-                </span>
-                <span className="font-mono text-[9px] text-foreground/50">Jul 12, 10:00 AM</span>
-              </div>
-              <p className="text-sm font-semibold">Boundary Dispute</p>
-              <p className="text-xs text-foreground/60">Complainant: Pedro Penduko vs. Neighbor</p>
-              <Link href="/barangay/complaints/789" className="block text-center font-mono text-[10px] uppercase font-bold text-foreground hover:underline border-t border-border/40 pt-2 mt-2">
-                Manage Schedule
-              </Link>
-            </div>
-          </div>
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

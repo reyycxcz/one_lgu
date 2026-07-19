@@ -1,123 +1,104 @@
 import Link from "next/link";
-import { ArrowLeft, Calendar, FileText, Download, MessageCircle } from "lucide-react";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { ArrowLeft, FileText } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth/session";
 
-export default function ReportDetailPage({ params }: { params: { id: string } }) {
-  const reportDetails = {
-    id: params.id,
-    title: "Q2 Accomplishment Report",
-    type: "accomplishment",
-    period: "Apr 1, 2026 - Jun 30, 2026",
-    status: "approved",
-    fileName: "Accomplishment_Report_Q2_BGY-001.pdf",
-    submittedAt: "Jul 1, 2026, 04:30 PM",
-    submittedBy: "Santiago O. (Barangay Captain)",
-    reviewedBy: "Engr. Clara Mendez (LGU Admin)",
-    reviewedAt: "Jul 3, 2026, 09:15 AM",
-    reviewNotes: "The accomplishment report satisfies all LGU monitoring parameters. Expenditure mappings match targets.",
-  };
+export default async function ReportDetailPage({ params }: { params: { id: string } }) {
+  const session = await requireSession();
+  const supabase = await createClient();
+
+  const { data: report } = await supabase
+    .from("reports")
+    .select("*")
+    .eq("id", params.id)
+    .single();
+
+  if (!report) {
+    return (
+      <div className="space-y-8 animate-stagger-in">
+        <div>
+          <Link href="/barangay/reports" className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-foreground/45 hover:text-foreground/70 transition-colors mb-4">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Reports
+          </Link>
+          <h1 className="font-sans text-2xl font-bold text-foreground">Report Not Found</h1>
+          <p className="text-sm text-foreground/55 mt-1">This report does not exist or you do not have access.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
       <div>
-        <Link href="/barangay/reports" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground/60 hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to History
+        <Link href="/barangay/reports" className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-foreground/45 hover:text-foreground/70 transition-colors mb-4">
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Reports
         </Link>
-        <span className="micro-label">02 — OFFICIAL REVIEW</span>
-        <div className="flex flex-wrap items-center gap-3 mt-1">
-          <h1 className="font-pixel text-4xl uppercase tracking-wider">Report Metadata</h1>
-          <span className="font-mono text-sm text-foreground/40">#{reportDetails.id}</span>
-        </div>
+        <h1 className="font-sans text-2xl font-bold text-foreground">Report Details</h1>
+        <p className="text-sm text-foreground/55 mt-1">Report #{report.id.slice(0, 8)}</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Details */}
-        <div className="bryl-card p-6 lg:col-span-2 space-y-6">
-          <div className="border-b border-border/80 pb-4">
-            <span className="micro-label font-bold">REPORT TITLE</span>
-            <h3 className="text-xl font-semibold mt-1">{reportDetails.title}</h3>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-border p-6 rounded-xl space-y-4">
             <div>
-              <span className="micro-label">REPORT TYPE</span>
-              <p className="text-sm font-semibold uppercase text-foreground/80 mt-1">{reportDetails.type}</p>
+              <p className="text-xs font-medium text-foreground/55 mb-1">Title</p>
+              <h3 className="text-lg font-semibold text-foreground">{report.title}</h3>
             </div>
-            <div>
-              <span className="micro-label">REVIEW DECISION</span>
-              <div className="mt-1">
-                <StatusBadge status={reportDetails.status} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">Type</p>
+                <p className="text-sm text-foreground/75 uppercase">{report.type}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">Status</p>
+                <span className="inline-block text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  {report.status.replace(/_/g, " ")}
+                </span>
               </div>
             </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <span className="micro-label">COVERED PERIOD</span>
-              <p className="text-sm text-foreground/80 mt-1 inline-flex items-center gap-1.5 font-medium">
-                <Calendar className="h-4 w-4" /> {reportDetails.period}
-              </p>
-            </div>
-            <div>
-              <span className="micro-label">DATE DISPATCHED</span>
-              <p className="text-sm text-foreground/80 mt-1">{reportDetails.submittedAt}</p>
-            </div>
-          </div>
-
-          <div>
-            <span className="micro-label">SUBMITTED FILE</span>
-            <div className="flex items-center justify-between p-3 bg-muted/20 border border-border/60 rounded-xl mt-1">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4.5 w-4.5 text-foreground/60" />
-                <span className="text-sm font-semibold">{reportDetails.fileName}</span>
+            {report.period_start && report.period_end && (
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">Period</p>
+                <p className="text-sm text-foreground/75">{report.period_start} to {report.period_end}</p>
               </div>
-              <button className="green-chip text-[9px] py-1 inline-flex items-center gap-1">
-                <Download className="h-3 w-3" /> Download
-              </button>
-            </div>
+            )}
+            {report.file_name && (
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">File</p>
+                <div className="flex items-center gap-2 text-sm text-foreground/75">
+                  <FileText className="h-4 w-4" /> {report.file_name}
+                </div>
+              </div>
+            )}
+            {report.review_notes && (
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">Review Notes</p>
+                <p className="text-sm text-foreground/75 italic">{report.review_notes}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* LGU Review Feedback sidebar */}
         <div className="space-y-6">
-          {reportDetails.status === "approved" || reportDetails.status === "rejected" ? (
-            <div className="bryl-card bg-primary/10 border-primary p-6 space-y-4">
-              <h4 className="font-pixel text-lg uppercase tracking-wider flex items-center gap-2">
-                <MessageCircle className="h-4.5 w-4.5" /> LGU Feedback
-              </h4>
-
-              <div className="space-y-3 text-xs">
+          <div className="bg-white border border-border p-6 rounded-xl space-y-4">
+            <h4 className="font-sans text-sm font-bold text-foreground">Timeline</h4>
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-2">
+                <span className="h-2 w-2 rounded-full bg-primary mt-1 shrink-0" />
                 <div>
-                  <p className="font-bold">Reviewed By</p>
-                  <p className="text-foreground/75">{reportDetails.reviewedBy}</p>
-                </div>
-                <div>
-                  <p className="font-bold">Evaluation Date</p>
-                  <p className="text-foreground/75">{reportDetails.reviewedAt}</p>
-                </div>
-                <div>
-                  <p className="font-bold">Review Notes</p>
-                  <p className="text-foreground/75 italic leading-relaxed">&ldquo;{reportDetails.reviewNotes}&rdquo;</p>
+                  <p className="font-semibold text-foreground">Submitted</p>
+                  <p className="text-foreground/50">{new Date(report.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="bryl-card-faint p-6 space-y-2 text-center text-xs">
-              <p className="font-bold text-foreground/70">Awaiting Evaluation</p>
-              <p className="text-foreground/50">This report has been successfully dispatched to LGU reviewers and is currently pending audit.</p>
-            </div>
-          )}
-
-          <div className="bryl-card-faint p-6 space-y-4">
-            <h4 className="font-pixel text-lg uppercase tracking-wider">SUBMISSION HISTORY</h4>
-            <div className="space-y-3 font-mono text-xs">
-              <div className="relative pl-6 border-l border-border/80">
-                <span className="absolute left-[-4.5px] top-1 h-2 w-2 rounded-full bg-primary" />
-                <p className="font-bold text-foreground">Report Submitted</p>
-                <p className="text-[10px] text-foreground/50">By {reportDetails.submittedBy}</p>
-                <p className="text-[9px] text-foreground/45">{reportDetails.submittedAt}</p>
-              </div>
+              {report.reviewed_at && (
+                <div className="flex items-start gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-foreground">Reviewed</p>
+                    <p className="text-foreground/50">{new Date(report.reviewed_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

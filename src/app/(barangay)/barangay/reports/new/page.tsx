@@ -9,8 +9,7 @@ export default function NewReportPage() {
         <Link href="/barangay/reports" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground/60 hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" /> Back to History
         </Link>
-        <span className="micro-label">02 — NEW SUBMISSION</span>
-        <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">Submit Accomplishments</h1>
+        <h1 className="font-sans font-black text-4xl uppercase tracking-wider mt-1">Submit Accomplishments</h1>
         <p className="text-sm text-foreground/60 mt-1">Submit mandatory operational files to the LGU consol.</p>
       </div>
 
@@ -98,7 +97,7 @@ export default function NewReportPage() {
         {/* Informational Sidebar */}
         <div className="space-y-6">
           <div className="bryl-card-faint p-6 space-y-4">
-            <h3 className="font-pixel text-lg uppercase tracking-wider flex items-center gap-2">
+            <h3 className="font-sans text-lg uppercase tracking-wider flex items-center gap-2">
               <Info className="h-4.5 w-4.5" /> LGU Deadlines
             </h3>
             <ul className="space-y-3 text-xs text-foreground/75 font-sans leading-relaxed">
@@ -118,3 +117,4 @@ export default function NewReportPage() {
     </div>
   );
 }
+

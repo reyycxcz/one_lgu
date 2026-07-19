@@ -17,9 +17,8 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
         <Link href="/barangay/documents" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground/60 hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" /> Back to Checklist
         </Link>
-        <span className="micro-label">03 — COMPLIANCE ASSIGNMENT</span>
         <div className="flex flex-wrap items-center gap-3 mt-1">
-          <h1 className="font-pixel text-4xl uppercase tracking-wider">{docDetails.title}</h1>
+          <h1 className="font-sans font-black text-5xl uppercase tracking-wider">{docDetails.title}</h1>
           <span className="font-mono text-sm text-foreground/40">#{docDetails.id}</span>
         </div>
       </div>
@@ -60,7 +59,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
         {/* Regulatory instruction sidebar */}
         <div className="space-y-6">
           <div className="bryl-card-faint p-6 space-y-4 text-xs font-sans leading-relaxed text-foreground/80">
-            <h4 className="font-pixel text-base uppercase tracking-wider text-foreground">GUIDELINES</h4>
+            <h4 className="font-sans text-base uppercase tracking-wider text-foreground">GUIDELINES</h4>
             <p>
               The <strong>3-Year Barangay Development Plan (BDP)</strong> outlines the programs, projects, and activities designed to meet developmental milestones.
             </p>

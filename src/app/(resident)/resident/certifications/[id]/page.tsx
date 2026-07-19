@@ -1,116 +1,107 @@
 import Link from "next/link";
-import { ArrowLeft, Calendar, ShieldCheck } from "lucide-react";
-import { Stepper } from "@/components/shared/stepper";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { ArrowLeft } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth/session";
 
-const CERTIFICATION_STEPS = [
-  "submitted",
-  "verified",
-  "approved",
-  "generated",
-  "ready_for_pickup",
-  "released",
-];
+export default async function CertificationDetailPage({ params }: { params: { id: string } }) {
+  const session = await requireSession();
+  const supabase = await createClient();
 
-export default function CertificationDetailPage({ params }: { params: { id: string } }) {
-  // Mock details matching tracking number
-  const certDetails = {
-    id: params.id,
-    type: "Barangay Clearance",
-    purpose: "Employment Requirement (Local)",
-    dateRequested: "Jul 8, 2026, 09:12 AM",
-    status: "verified",
-    requirements: [
-      { name: "Government Photo ID (Passport)", size: "1.2 MB", status: "Approved" },
-      { name: "Proof of Residency (Utility Bill)", size: "870 KB", status: "Approved" },
-    ],
-    verifiedBy: "Sgt. Jose Martinez (Barangay Clerk)",
-    verifiedAt: "Jul 8, 2026, 11:30 AM",
-  };
+  const { data: cert } = await supabase
+    .from("certification_requests")
+    .select("*")
+    .eq("id", params.id)
+    .eq("requester_id", session.user.id)
+    .single();
+
+  if (!cert) {
+    return (
+      <div className="space-y-8 animate-stagger-in">
+        <div>
+          <Link href="/resident/certifications" className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-foreground/45 hover:text-foreground/70 transition-colors mb-4">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Certifications
+          </Link>
+          <h1 className="font-sans text-2xl font-bold text-foreground">Certification Not Found</h1>
+          <p className="text-sm text-foreground/55 mt-1">This request does not exist or you do not have access.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
       <div>
-        <Link href="/resident/certifications" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground/60 hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to History
+        <Link href="/resident/certifications" className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-foreground/45 hover:text-foreground/70 transition-colors mb-4">
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Certifications
         </Link>
-        <span className="micro-label">02 — REAL-TIME CASE ROUTER</span>
-        <div className="flex flex-wrap items-center gap-3 mt-1">
-          <h1 className="font-pixel text-4xl uppercase tracking-wider">Request Tracking</h1>
-          <span className="font-mono text-sm text-foreground/40">#{certDetails.id}</span>
-        </div>
-      </div>
-
-      {/* Stepper progress indicator */}
-      <div className="bryl-card p-6 bg-white">
-        <Stepper steps={CERTIFICATION_STEPS} currentStep={certDetails.status} />
+        <h1 className="font-sans text-2xl font-bold text-foreground">Certification Request</h1>
+        <p className="text-sm text-foreground/55 mt-1">Request #{cert.id.slice(0, 8)}</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Detail Specifications */}
-        <div className="bryl-card p-6 lg:col-span-2 space-y-6">
-          <div className="border-b border-border/80 pb-4">
-            <span className="micro-label font-bold">DOCUMENT TYPE</span>
-            <h3 className="text-xl font-semibold mt-1">{certDetails.type}</h3>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-border p-6 rounded-xl space-y-4">
             <div>
-              <span className="micro-label">STATUS CODE</span>
-              <div className="mt-1">
-                <StatusBadge status={certDetails.status} />
-              </div>
+              <p className="text-xs font-medium text-foreground/55 mb-1">Document Type</p>
+              <h3 className="text-lg font-semibold text-foreground">{cert.type.replace(/_/g, " ")}</h3>
             </div>
             <div>
-              <span className="micro-label">DATE REQUESTED</span>
-              <div className="text-sm font-medium mt-1 inline-flex items-center gap-1.5 text-foreground/80">
-                <Calendar className="h-4 w-4" /> {certDetails.dateRequested}
+              <p className="text-xs font-medium text-foreground/55 mb-1">Purpose</p>
+              <p className="text-sm text-foreground/75">{cert.purpose}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-foreground/55 mb-1">Status</p>
+              <span className="inline-block text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                {cert.status.replace(/_/g, " ")}
+              </span>
+            </div>
+            {cert.rejected_reason && (
+              <div>
+                <p className="text-xs font-medium text-foreground/55 mb-1">Rejection Reason</p>
+                <p className="text-sm text-red-600">{cert.rejected_reason}</p>
               </div>
-            </div>
-          </div>
-
-          <div>
-            <span className="micro-label">PURPOSE SPECIFICATION</span>
-            <p className="text-sm text-foreground/80 mt-1 leading-relaxed">{certDetails.purpose}</p>
-          </div>
-
-          {/* Uploaded attachments */}
-          <div className="space-y-3">
-            <span className="micro-label">VERIFIED ATTACHMENTS</span>
-            <div className="space-y-2">
-              {certDetails.requirements.map((file, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-muted/20 border border-border/60 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold">{file.name}</span>
-                  </div>
-                  <span className="font-mono text-[10px] text-foreground/45 uppercase">{file.size}</span>
-                </div>
-              ))}
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Status log timeline */}
         <div className="space-y-6">
-          <div className="bryl-card-faint p-6 space-y-4">
-            <h4 className="font-pixel text-lg uppercase tracking-wider">VERIFICATION LOGS</h4>
-            
-            <div className="space-y-4 font-mono text-xs">
-              <div className="relative pl-6 border-l border-border/80 pb-2">
-                <span className="absolute left-[-4.5px] top-1 h-2 w-2 rounded-full bg-primary" />
-                <p className="font-bold text-foreground">Verified by Barangay staff</p>
-                <p className="text-[10px] text-foreground/50">{certDetails.verifiedBy}</p>
-                <p className="text-[9px] text-foreground/40 mt-0.5">{certDetails.verifiedAt}</p>
+          <div className="bg-white border border-border p-6 rounded-xl space-y-4">
+            <h4 className="font-sans text-sm font-bold text-foreground">Timeline</h4>
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-2">
+                <span className="h-2 w-2 rounded-full bg-primary mt-1 shrink-0" />
+                <div>
+                  <p className="font-semibold text-foreground">Submitted</p>
+                  <p className="text-foreground/50">{new Date(cert.created_at).toLocaleDateString()}</p>
+                </div>
               </div>
-
-              <div className="relative pl-6 border-l border-border/80 pb-2">
-                <span className="absolute left-[-4.5px] top-1 h-2 w-2 rounded-full bg-primary" />
-                <p className="font-bold text-foreground">Submitted by Resident</p>
-                <p className="text-[10px] text-foreground/50">Via Online Citizen Portal</p>
-                <p className="text-[9px] text-foreground/40 mt-0.5">{certDetails.dateRequested}</p>
-              </div>
+              {cert.verified_at && (
+                <div className="flex items-start gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-foreground">Verified</p>
+                    <p className="text-foreground/50">{new Date(cert.verified_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              )}
+              {cert.approved_at && (
+                <div className="flex items-start gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-500 mt-1 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-foreground">Approved</p>
+                    <p className="text-foreground/50">{new Date(cert.approved_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              )}
+              {cert.released_at && (
+                <div className="flex items-start gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-600 mt-1 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-foreground">Released</p>
+                    <p className="text-foreground/50">{new Date(cert.released_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

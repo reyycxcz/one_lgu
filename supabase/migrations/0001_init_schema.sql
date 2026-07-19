@@ -1,7 +1,7 @@
 -- ============================================
 -- ENUMS
 -- ============================================
-create type user_role as enum ('super_admin', 'barangay_official', 'sk_official', 'resident');
+create type user_role as enum ('super_admin', 'barangay_official', 'lgu_reviewer', 'resident');
 
 create type certification_type as enum (
   'barangay_clearance',

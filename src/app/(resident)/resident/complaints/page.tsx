@@ -1,88 +1,72 @@
 import Link from "next/link";
-import { Plus, Search, AlertOctagon, Calendar, ArrowRight } from "lucide-react";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { createClient } from "@/lib/supabase/server";
+import { requireSession } from "@/lib/auth/session";
+import { Plus, AlertOctagon, Clock, ChevronRight } from "lucide-react";
 
-// Mock complaints data
-const MOCK_COMPLAINTS = [
-  {
-    id: "CASE-4402",
-    subject: "Noise Complaint (Late Night Karaoke)",
-    respondent: "Residential Property Block B",
-    dateFiled: "Jul 1, 2026",
-    status: "mediation",
-  },
-  {
-    id: "CASE-3911",
-    subject: "Boundary Fence Dispute",
-    respondent: "F. Perez (Neighbor)",
-    dateFiled: "May 10, 2026",
-    status: "resolved",
-  },
-];
+export default async function ResidentComplaintsPage() {
+  const session = await requireSession();
+  const supabase = await createClient();
 
-export default function ResidentComplaintsPage() {
+  const { data: complaints } = await supabase
+    .from("complaints")
+    .select("id, subject, respondent_name, status, created_at")
+    .eq("complainant_id", session.user.id)
+    .order("created_at", { ascending: false });
+
   return (
-    <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
+    <div className="space-y-6 animate-stagger-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="micro-label">03 — COMPLAINT REGISTRY</span>
-          <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">My Filed Complaints</h1>
-          <p className="text-sm text-foreground/60 mt-1">Submit local grievances and track scheduling for barangay mediation.</p>
+          <h1 className="font-display font-bold text-3xl text-foreground">Complaints</h1>
+          <p className="text-sm text-foreground/55 mt-1">File grievances and track mediation status.</p>
         </div>
-        <Link href="/resident/complaints/new" className="green-chip text-xs py-2.5 px-4 inline-flex items-center gap-1.5 self-start">
-          <Plus className="h-4 w-4" /> File New Complaint
+        <Link href="/resident/complaints/new" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg font-sans text-xs font-bold hover:bg-primary/90 transition-colors self-start">
+          <Plus className="h-3.5 w-3.5" /> File Complaint
         </Link>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-foreground/40" />
-          <input
-            type="text"
-            placeholder="Search incident subject or case number..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-          />
-        </div>
-        <select className="px-4 py-2 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all">
-          <option value="all">All Cases</option>
-          <option value="active">Active Mediation</option>
-          <option value="resolved">Resolved</option>
-        </select>
-      </div>
-
-      {/* Complaints List */}
-      <div className="space-y-4">
-        {MOCK_COMPLAINTS.map((complaint) => (
-          <div key={complaint.id} className="bryl-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-10 w-10 rounded-xl bg-[#E7FFEA] border border-border flex items-center justify-center shrink-0">
-                <AlertOctagon className="h-5 w-5 text-foreground/70" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-[10px] text-foreground/40 font-semibold">{complaint.id}</span>
+      <div className="border border-border rounded-2xl bg-white divide-y divide-border">
+        {complaints && complaints.length > 0 ? (
+          complaints.map((complaint) => (
+            <Link
+              key={complaint.id}
+              href={`/resident/complaints/${complaint.id}`}
+              className="flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                  <AlertOctagon className="h-4 w-4 text-orange-500" />
                 </div>
-                <h3 className="font-sans font-semibold text-base text-foreground">{complaint.subject}</h3>
-                <p className="text-xs text-foreground/60">Respondent: {complaint.respondent}</p>
-                <div className="flex items-center gap-1 text-[11px] text-foreground/40 font-mono">
-                  <Calendar className="h-3 w-3" /> Filed on {complaint.dateFiled}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{complaint.subject}</p>
+                  {complaint.respondent_name && (
+                    <p className="text-xs text-foreground/45 mt-0.5 truncate">Respondent: {complaint.respondent_name}</p>
+                  )}
+                  <div className="flex items-center gap-1 text-[11px] text-foreground/40 mt-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{new Date(complaint.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border/40 pt-4 sm:pt-0">
-              <StatusBadge status={complaint.status} />
-              <Link
-                href={`/resident/complaints/${complaint.id}`}
-                className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-foreground hover:underline"
-              >
-                View Case Logs <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className={`text-[11px] font-medium capitalize px-2.5 py-1 rounded-full whitespace-nowrap ${
+                  complaint.status === "submitted" ? "bg-yellow-50 text-yellow-700" :
+                  complaint.status === "under_review" ? "bg-blue-50 text-blue-700" :
+                  complaint.status === "resolved" ? "bg-green-50 text-green-700" :
+                  "bg-muted text-foreground/60"
+                }`}>
+                  {complaint.status.replace(/_/g, " ")}
+                </span>
+                <ChevronRight className="h-4 w-4 text-foreground/30" />
+              </div>
+            </Link>
+          ))
+        ) : (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm text-foreground/50">No complaints filed.</p>
+            <Link href="/resident/complaints/new" className="text-xs text-primary font-medium hover:underline mt-2 inline-block">File your first complaint</Link>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

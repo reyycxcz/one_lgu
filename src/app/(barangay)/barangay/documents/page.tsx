@@ -30,8 +30,7 @@ export default function BarangayDocumentsPage() {
     <div className="space-y-8 animate-stagger-in">
       {/* Header */}
       <div>
-        <span className="micro-label">03 — COMPLIANCE FILES</span>
-        <h1 className="font-pixel text-4xl uppercase tracking-wider mt-1">LGU Required Documents</h1>
+        <h1 className="font-sans font-black text-4xl uppercase tracking-wider mt-1">LGU Required Documents</h1>
         <p className="text-sm text-foreground/60 mt-1">Checklist of annual planning and developmental frameworks mandated by municipal code.</p>
       </div>
 
@@ -78,3 +77,4 @@ export default function BarangayDocumentsPage() {
     </div>
   );
 }
+

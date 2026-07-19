@@ -10,6 +10,7 @@ export async function submitComplaint(formData: FormData) {
   const profile = await requireProfile();
 
   const parsed = complaintSchema.safeParse({
+    type: formData.get("type"),
     respondent_name: formData.get("respondent_name") || undefined,
     subject: formData.get("subject"),
     description: formData.get("description"),
@@ -27,6 +28,7 @@ export async function submitComplaint(formData: FormData) {
     .insert({
       complainant_id: profile.id,
       barangay_id: profile.barangay_id,
+      type: parsed.data.type,
       respondent_name: parsed.data.respondent_name,
       subject: parsed.data.subject,
       description: parsed.data.description,
