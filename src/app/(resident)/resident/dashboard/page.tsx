@@ -11,25 +11,25 @@ export default async function ResidentDashboard() {
   const session = await requireSession();
   const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, barangays(name)")
-    .eq("id", session.user.id)
-    .single();
-
-  const { data: certifications } = await supabase
-    .from("certification_requests")
-    .select("id, type, status, created_at")
-    .eq("requester_id", session.user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const { data: complaints } = await supabase
-    .from("complaints")
-    .select("id, subject, status, created_at")
-    .eq("complainant_id", session.user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const [{ data: profile }, { data: certifications }, { data: complaints }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, barangays(name)")
+      .eq("id", session.user.id)
+      .single(),
+    supabase
+      .from("certification_requests")
+      .select("id, type, status, created_at")
+      .eq("requester_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("complaints")
+      .select("id, subject, status, created_at")
+      .eq("complainant_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   const firstName = profile?.full_name?.split(" ")[0] || "Resident";
   const barangayName = (profile?.barangays as any)?.name || session.user.user_metadata?.barangay_code || "your barangay";

@@ -7,16 +7,10 @@ export default async function NotificationsPage() {
   const session = await requireSession();
   const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", session.user.id)
-    .single();
-
   const { data: notifications } = await supabase
     .from("notifications")
     .select("*")
-    .eq("recipient_id", profile?.id || session.user.id)
+    .eq("recipient_id", session.user.id)
     .order("created_at", { ascending: false });
 
   return (

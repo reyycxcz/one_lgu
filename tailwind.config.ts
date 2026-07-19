@@ -99,7 +99,7 @@ const config: Config = {
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			'fade-in': 'fade-in 200ms ease-out forwards',
   			'card-hover': 'card-hover 350ms cubic-bezier(0.16, 1, 0.3, 1)',
-  			'stagger-in': 'stagger-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+  			'stagger-in': 'stagger-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards'
   		},
   		keyframes: {
   			'accordion-down': {
