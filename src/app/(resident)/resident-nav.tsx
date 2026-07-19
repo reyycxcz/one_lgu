@@ -93,7 +93,7 @@ export default function ResidentNav() {
       </aside>
 
       {/* Mobile Floating Bottom Nav — eGovPH style with elevated center action */}
-      <nav className="md:hidden fixed bottom-4 left-3 right-3 z-50">
+      <nav className="md:hidden fixed bottom-7 left-3 right-3 z-50">
         <div className="relative grid grid-cols-5 items-end bg-white/95 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_4px_24px_rgba(20,61,42,0.12)] px-1 py-1">
           {[
             { label: "Home", href: "/resident/dashboard", icon: Home },
@@ -123,7 +123,7 @@ export default function ResidentNav() {
             >
               <FilePlus2 className="h-6 w-6 text-white" />
             </Link>
-            <span className={`mt-7 pb-1.5 text-[10px] font-sans font-semibold ${
+            <span className={`mt-6 pb-1 text-[10px] font-sans font-semibold ${
               pathname.startsWith("/resident/certifications/new") ? "text-primary" : "text-foreground/60"
             }`}>
               Request
