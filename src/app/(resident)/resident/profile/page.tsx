@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
+import { MfaStatusCard } from "@/components/mfa-status-card";
 import ProfileForm from "./profile-form";
 
 export default async function ResidentProfilePage() {
@@ -36,6 +37,10 @@ export default async function ResidentProfilePage() {
         barangayCode={barangayCode}
         municipality={municipality}
       />
+
+      <div className="max-w-2xl">
+        <MfaStatusCard />
+      </div>
     </div>
   );
 }

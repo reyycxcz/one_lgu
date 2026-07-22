@@ -1,21 +1,29 @@
-import { ChartPieLabel } from "@/components/chart-pie-label"
+import { createClient } from "@/lib/supabase/server";
+import { LguPageHeader } from "@/components/lgu/page-header";
+import { CategoryPieChart } from "@/components/lgu/charts/category-pie-chart";
 
-export default function CertificationAnalyticsPage() {
+export default async function CertificationAnalyticsPage() {
+  const supabase = await createClient();
+  const { data: requests } = await supabase.from("certification_requests").select("type");
+
+  const counts = new Map<string, number>();
+  (requests || []).forEach((r) => counts.set(r.type, (counts.get(r.type) || 0) + 1));
+
+  const data = Array.from(counts.entries())
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count);
+
   return (
-    <>
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <div className="px-4 lg:px-6">
-              <h2 className="text-2xl font-bold tracking-tight">Certification Analytics</h2>
-              <p className="text-muted-foreground">View certification request distribution and status</p>
-            </div>
-            <div className="px-4 lg:px-6">
-              <ChartPieLabel />
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  )
+    <div className="space-y-6">
+      <LguPageHeader
+        title="Certification Analytics"
+        description="View certification request distribution by type."
+      />
+      <CategoryPieChart
+        title="Requests by Type"
+        description="Share of each certification type among all requests"
+        data={data}
+      />
+    </div>
+  );
 }

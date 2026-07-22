@@ -1,16 +1,16 @@
 "use client";
 
 import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
-  Search,
-  LayoutDashboard,
+  SquaresFour,
   FileText,
-  ClipboardCheck,
-  TrendingUp,
-  Activity,
-  Building2,
+  ClipboardText,
+  TrendUp,
+  Pulse,
+  Buildings,
   Users,
-  BarChart3,
+  ChartBar,
   Clock,
   CheckCircle,
   XCircle,
@@ -18,39 +18,40 @@ import {
   FolderOpen,
   Upload,
   ListChecks,
-  Award,
-  AlertTriangle,
-  Search as SearchIcon,
-  ClipboardList,
-  AlertCircle,
-  History,
-  PieChart,
-  FileBarChart,
-  FileSpreadsheet,
-  Plus,
+  Medal,
+  Warning,
+  MagnifyingGlass,
+  WarningCircle,
+  ClockCounterClockwise,
+  ChartPie,
+  ChartBarHorizontal,
+  FileXls,
+  Plus as PlusIcon,
   Megaphone,
   Bell,
   UserCheck,
   UserPlus,
-  UserCog,
-  Settings,
+  UserGear,
+  Gear,
   Database,
   UserCircle,
   Lock,
-  LogOut,
-} from "lucide-react";
+  SignOut,
+} from "@phosphor-icons/react/dist/ssr";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
+import { LiveClock } from "@/components/shared/live-clock";
+import { signOut } from "@/actions/auth";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
-  LayoutDashboard,
+  LayoutDashboard: SquaresFour,
   FileText,
-  ClipboardCheck,
-  TrendingUp,
-  Activity,
-  Building2,
+  ClipboardCheck: ClipboardText,
+  TrendingUp: TrendUp,
+  Activity: Pulse,
+  Building2: Buildings,
   Users,
-  BarChart3,
+  BarChart3: ChartBar,
   Clock,
   CheckCircle,
   XCircle,
@@ -58,26 +59,26 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   FolderOpen,
   Upload,
   ListChecks,
-  Award,
-  AlertTriangle,
-  Search: SearchIcon,
-  ClipboardList,
-  AlertCircle,
-  History,
-  PieChart,
-  FileBarChart,
-  FileSpreadsheet,
-  Plus,
+  Award: Medal,
+  AlertTriangle: Warning,
+  Search: MagnifyingGlass,
+  ClipboardList: ClipboardText,
+  AlertCircle: WarningCircle,
+  History: ClockCounterClockwise,
+  PieChart: ChartPie,
+  FileBarChart: ChartBarHorizontal,
+  FileSpreadsheet: FileXls,
+  Plus: PlusIcon,
   Megaphone,
   Bell,
   UserCheck,
   UserPlus,
-  UserCog,
-  Settings,
+  UserCog: UserGear,
+  Settings: Gear,
   Database,
   UserCircle,
   Lock,
-  LogOut,
+  LogOut: SignOut,
 };
 
 interface LGUClientLayoutProps {
@@ -88,6 +89,7 @@ interface LGUClientLayoutProps {
 
 export default function LGUClientLayout({ children, userProfile, navGroups }: LGUClientLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
 
   const resolvedNavGroups = navGroups.map((group) => ({
     ...group,
@@ -107,23 +109,17 @@ export default function LGUClientLayout({ children, userProfile, navGroups }: LG
           appTitle="ONELGU"
           appSubtitle="Ilocos Norte"
           navGroups={resolvedNavGroups}
+          onLogout={() => signOut()}
         />
       </div>
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="hidden md:flex h-16 border-b border-border bg-white px-6 items-center justify-between sticky top-0 z-40 gap-4">
-          <div className="flex items-center gap-3 flex-1 max-w-md">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
-              <input
-                type="text"
-                placeholder="Search barangays, requests, reports..."
-                className="w-full h-9 rounded-lg border border-border bg-muted/60 pl-9 pr-3 text-xs font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-white transition-colors"
-              />
-            </div>
+          <div className="flex items-center gap-3">
+            <LiveClock />
           </div>
           <div className="flex items-center gap-4">
-            <NotificationBell userId="" />
+            <NotificationBell />
             <div className="flex items-center gap-3 pl-3 border-l border-border">
               <div className="text-right leading-none">
                 <p className="text-xs font-bold text-foreground">{userProfile.name}</p>
@@ -138,7 +134,7 @@ export default function LGUClientLayout({ children, userProfile, navGroups }: LG
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 w-full max-w-none">
+        <main key={pathname} className="flex-1 p-6 md:p-8 w-full max-w-none animate-page-fade-in">
           {children}
         </main>
       </div>

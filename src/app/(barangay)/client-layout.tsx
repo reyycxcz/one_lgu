@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { useState, ReactNode } from "react";
-import { Grid, FileUp, FolderOpen, FileSignature, Scale, Activity, Contact, LogOut, Mail } from "lucide-react";
+import { LogOut, Mail } from "lucide-react";
+import { SquaresFour, FileArrowUp, FolderOpen, Signature, Scales, Pulse, AddressBook } from "@phosphor-icons/react/dist/ssr";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
+import { signOut } from "@/actions/auth";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
-  Grid, FileUp, FolderOpen, FileSignature, Scale, Activity, Contact,
+  Grid: SquaresFour,
+  FileUp: FileArrowUp,
+  FolderOpen,
+  FileSignature: Signature,
+  Scale: Scales,
+  Activity: Pulse,
+  Contact: AddressBook,
 };
 
 interface BarangayClientLayoutProps {
@@ -37,6 +45,7 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
           appTitle="ONELGU"
           appSubtitle={userProfile.barangayName}
           navGroups={resolvedNavGroups}
+          onLogout={() => signOut()}
         />
       </div>
 
@@ -46,7 +55,7 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
             <button className="w-8 h-8 rounded-full border border-[#e3ede9] flex items-center justify-center text-foreground/60 hover:bg-slate-50 transition-colors">
               <Mail className="h-4 w-4" />
             </button>
-            <NotificationBell userId="" />
+            <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="text-right leading-none">
                 <p className="text-xs font-bold text-foreground">{userProfile.name}</p>

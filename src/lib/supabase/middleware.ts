@@ -27,9 +27,10 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Use getSession() for fast middleware routing (reads JWT from cookie, no network call).
-  // Reserve getUser() for server actions/components that need verified auth for data access.
-  const { data: { session } } = await supabase.auth.getSession();
+  // getUser() re-verifies the JWT against the Supabase Auth server instead of
+  // just decoding the cookie locally, so a forged/tampered session cookie
+  // can't fool the proxy's RBAC redirect logic (see SECURITY-AUDIT-CHECKLIST.md).
+  const { data: { user } } = await supabase.auth.getUser();
 
-  return { supabaseResponse, user: session?.user ?? null };
+  return { supabaseResponse, user };
 }

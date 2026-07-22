@@ -9,42 +9,44 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const normalized = status.toLowerCase().replace(/_/g, " ");
 
-  // Green Chip (highest emphasis)
+  // Positive / completed (highest emphasis)
   const isHighEmphasis = [
     "verified",
     "approved",
     "resolved",
     "released",
     "ready for pickup",
+    "published",
   ].includes(normalized);
 
-  // Soft Accent (mid emphasis)
+  // In progress (mid emphasis)
   const isMidEmphasis = [
     "submitted",
     "under review",
     "scheduled",
     "mediation",
+    "draft",
   ].includes(normalized);
 
-  // Faint Accent (low emphasis / completed state)
+  // Completed / neutral (low emphasis)
   const isLowEmphasis = ["generated", "closed", "archived"].includes(normalized);
 
-  // Negative Accent
+  // Negative
   const isNegative = ["rejected", "cancelled"].includes(normalized);
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] font-bold tracking-wider uppercase rounded-full border",
-        isHighEmphasis && "bg-primary text-primary-foreground border-primary shadow-[0_2px_10px_-3px_rgba(124,255,138,0.4)]",
-        isMidEmphasis && "bg-[#C7FFCF] text-[#2D2A32] border-[#C7FFCF]/40",
-        isLowEmphasis && "bg-[#E7FFEA] text-[#2D2A32]/70 border-[#E7FFEA]/30",
-        isNegative && "bg-red-50 text-red-800 border-red-100",
+        "inline-flex items-center gap-1.5 px-3 py-1 font-sans text-[11px] font-bold capitalize rounded-full",
+        isHighEmphasis && "bg-primary text-white",
+        isMidEmphasis && "bg-amber-500 text-white",
+        isLowEmphasis && "bg-slate-500 text-white",
+        isNegative && "bg-red-600 text-white",
         className
       )}
     >
       {isHighEmphasis && (
-        <span className="h-1.5 w-1.5 rounded-full bg-[#2D2A32] animate-pulse" />
+        <span className="h-1.5 w-1.5 rounded-full bg-white/80 animate-pulse" />
       )}
       {normalized}
     </span>

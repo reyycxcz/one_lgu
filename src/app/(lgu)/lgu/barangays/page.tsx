@@ -1,8 +1,18 @@
-export default function BarangayListPage() {
+import { createClient } from "@/lib/supabase/server";
+import BarangayDirectory from "./barangay-directory";
+
+export default async function BarangayListPage() {
+  const supabase = await createClient();
+
+  const { data: barangays } = await supabase
+    .from("barangays")
+    .select("id, name, code, municipality, province, is_active")
+    .order("name", { ascending: true });
+
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Barangay List</h2>
-      <p>Content for Barangay List goes here.</p>
-    </div>
+    <BarangayDirectory
+      barangays={barangays || []}
+      totalBarangays={barangays?.length || 0}
+    />
   );
 }

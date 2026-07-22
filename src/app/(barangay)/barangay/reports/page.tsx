@@ -64,7 +64,7 @@ export default async function BarangayReportsPage() {
                       <p className="text-xs text-foreground/50">Period: {report.period_start} to {report.period_end}</p>
                     )}
                     {report.file_name && (
-                      <p className="text-[11px] text-foreground/40 font-mono pt-1">{report.file_name}</p>
+                      <p className="text-[11px] text-foreground/40 font-sans pt-1">{report.file_name}</p>
                     )}
                   </div>
                 </div>

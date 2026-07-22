@@ -1,29 +1,18 @@
-import { createClient } from "@/lib/supabase/server";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { requireRole } from "@/lib/auth/session";
 import ResidentNav from "./resident-nav";
 import NotificationBell from "@/components/shared/notification-bell";
 
 export default async function ResidentLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const profile = await requireRole(["resident"]);
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("barangay_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.barangay_id) {
+  if (!profile.barangay_id) {
     redirect("/onboarding");
   }
 
-  const userName = user?.user_metadata?.full_name || user?.email || "Resident";
+  const userName = profile.full_name || profile.email || "Resident";
 
   return (
     <div className="min-h-screen bg-[#F8FDF9] flex flex-col">
@@ -42,12 +31,7 @@ export default async function ResidentLayout({ children }: { children: ReactNode
           </div>
 
           <div className="flex items-center gap-2.5">
-            <img
-              src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${userName}`}
-              alt="Avatar"
-              className="hidden md:block h-8 w-8 rounded-full border border-border bg-white"
-            />
-            <NotificationBell userId={user?.id || ""} />
+            <NotificationBell />
           </div>
         </div>
       </header>

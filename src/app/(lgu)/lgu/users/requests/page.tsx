@@ -1,8 +1,11 @@
+import { UserList } from "@/components/lgu/user-list";
+
 export default function AccountRequestsPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Account Requests</h2>
-      <p>Content for Account Requests goes here.</p>
-    </div>
+    <UserList
+      title="Account Requests"
+      description="Accounts marked inactive, pending activation or review."
+      onlyInactive
+    />
   );
 }

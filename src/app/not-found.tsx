@@ -10,7 +10,7 @@ export default function NotFound() {
         <span className="micro-label">ERROR 404</span>
         <h1 className="font-sans font-black text-6xl md:text-7xl leading-none uppercase">PAGE NOT FOUND</h1>
         <p className="text-sm text-foreground/60 font-sans">
-          The requested system route does not exist or has been restricted under 7-layer validation protocols.
+          The requested system route does not exist, or your account role does not have access to it.
         </p>
         <div>
           <Link href="/" className="green-chip text-xs py-2.5 px-6 inline-flex items-center gap-1.5">

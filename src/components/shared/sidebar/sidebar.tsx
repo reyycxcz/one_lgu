@@ -106,7 +106,7 @@ export function Sidebar({
           <p className="text-base font-bold text-foreground tracking-wider whitespace-nowrap font-sans uppercase">
             {appTitle}
           </p>
-          <p className="text-[10px] text-primary/70 font-semibold truncate uppercase mt-0.5 whitespace-nowrap tracking-widest font-mono">
+          <p className="text-[10px] text-primary/70 font-semibold truncate uppercase mt-0.5 whitespace-nowrap tracking-widest font-sans">
             {appSubtitle}
           </p>
         </div>
@@ -181,26 +181,50 @@ export function Sidebar({
               >
                 {group.items.map(({ path, label, icon: Icon, badge }) => {
                   const active = isActive(path)
+                  const isLogout = label === 'Logout'
                   return (
                     <Link
                       key={path}
                       href={path}
                       title={collapsed ? label : undefined}
+                      onClick={
+                        isLogout
+                          ? (e) => {
+                              e.preventDefault()
+                              handleLogout()
+                            }
+                          : undefined
+                      }
                       className={cn(
-                        'relative flex items-center w-full rounded-md text-sm font-semibold transition-all duration-150',
+                        'group relative flex items-center w-full rounded-md text-sm font-semibold transition-all duration-150',
                         collapsed
                           ? 'px-2.5 py-2.5 justify-center'
                           : 'px-3 py-2.5 gap-3',
                         active
-                          ? 'bg-primary text-white shadow-sm'
+                          ? 'text-white border-t border-white/40 border-b-2 border-b-black/20 bg-gradient-to-br from-[#20AD66] to-[#0B5A30]'
                           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                       )}
+                      style={
+                        active
+                          ? {
+                              boxShadow:
+                                'inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.2), 0 2px 6px rgba(11,90,48,0.35)',
+                            }
+                          : undefined
+                      }
                     >
-                      <Icon
-                        size={16}
-                        className="flex-shrink-0"
-                        strokeWidth={active ? 2.5 : 2}
-                      />
+                      <span
+                        className={cn(
+                          'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors',
+                          active ? 'bg-white/15' : 'bg-sidebar-accent/50 group-hover:bg-sidebar-accent'
+                        )}
+                      >
+                        <Icon
+                          size={17}
+                          weight={active ? 'fill' : 'duotone'}
+                          className={active ? 'text-white' : 'text-sidebar-foreground/65'}
+                        />
+                      </span>
                       <span
                         className={cn(
                           'text-left truncate transition-all duration-200 ease-in-out whitespace-nowrap font-sans text-xs tracking-wide',
@@ -244,29 +268,40 @@ export function Sidebar({
             />
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-[#107A43] to-[#0B5A30] text-white p-4 rounded-2xl space-y-4 shadow-md flex flex-col justify-between">
-            <div className="space-y-1">
-              <span className="text-[8px] font-bold text-emerald-200 uppercase tracking-widest block font-mono">
-                {appSubtitle === 'Dingras' ? 'MUNICIPAL HALL' : 'BARANGAY HALL'}
+          <div
+            className="relative overflow-hidden text-white p-4 rounded-2xl space-y-4 flex flex-col justify-between border-t border-white/40 border-x border-x-black/10 border-b-2 border-b-black/25 backdrop-blur-xl bg-gradient-to-br from-[#22B36B] via-[#0F8A4E] to-[#0A5C32]"
+            style={{
+              boxShadow:
+                "0 10px 28px rgba(9,60,34,0.45), inset 0 1.5px 0 rgba(255,255,255,0.55), inset 0 -3px 6px rgba(0,0,0,0.25), inset 0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {/* glossy top highlight */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/35 to-transparent" />
+            {/* soft light bloom */}
+            <div className="pointer-events-none absolute -top-8 -left-8 h-24 w-24 rounded-full bg-white/25 blur-2xl" />
+
+            <div className="relative space-y-1">
+              <span className="text-[8px] font-bold text-emerald-100 uppercase tracking-widest block font-sans">
+                {appSubtitle === 'Ilocos Norte' ? 'MUNICIPAL HALL' : 'BARANGAY HALL'}
               </span>
               <h5 className="font-sans font-bold text-sm leading-tight text-white truncate">
                 {user?.name || 'LGU Administrator'}
               </h5>
-              <p className="text-[10px] text-emerald-200/80 font-medium truncate">
+              <p className="text-[10px] text-emerald-100/80 font-medium truncate">
                 {user?.role || 'Super Admin'}
               </p>
             </div>
-            
-            <div className="flex items-center justify-between pt-2 border-t border-emerald-700/40">
-              <Link 
+
+            <div className="relative flex items-center justify-between pt-2 border-t border-white/20">
+              <Link
                 href={appSubtitle === 'Ilocos Norte' ? '/lgu/profile' : '/barangay/profile'}
-                className="text-[9px] font-bold tracking-wider uppercase text-emerald-200 hover:text-white flex items-center gap-1 transition-colors"
+                className="text-[9px] font-bold tracking-wider uppercase text-emerald-100 hover:text-white flex items-center gap-1 transition-colors"
               >
                 View Profile <ArrowRight size={10} />
               </Link>
-              <button 
+              <button
                 onClick={handleLogout}
-                className="text-[9px] font-bold tracking-wider uppercase text-red-300 hover:text-red-200 transition-colors"
+                className="text-[9px] font-bold tracking-wider uppercase text-red-200 hover:text-red-100 transition-colors"
               >
                 Sign Out
               </button>

@@ -30,14 +30,19 @@ export function LoginForm({
       const result = await login(formData);
 
       if (result?.error) {
-        let errorMsg: string;
+        const fallback = "Something went wrong signing you in. Please try again in a moment.";
+        let errorMsg: string = fallback;
         if (typeof result.error === "string" && result.error.trim() !== "") {
           errorMsg = result.error;
-        } else if (typeof result.error === "object") {
-          const vals = Object.values(result.error as Record<string, unknown>).flat();
-          errorMsg = vals.length > 0 ? vals.join(", ") : "Invalid email or password. Please try again.";
-        } else {
-          errorMsg = "Invalid email or password. Please try again.";
+        } else if (result.error && typeof result.error === "object") {
+          const vals = Object.values(result.error as Record<string, unknown>)
+            .flat()
+            .filter((v): v is string => typeof v === "string" && v.trim() !== "");
+          errorMsg = vals.length > 0 ? vals.join(", ") : fallback;
+        }
+        // Never surface a raw/empty-looking value like "{}" or "[]" to the user.
+        if (!errorMsg || errorMsg.trim() === "" || errorMsg.trim() === "{}" || errorMsg.trim() === "[]") {
+          errorMsg = fallback;
         }
         setError(errorMsg);
       } else if (result?.redirectTo) {

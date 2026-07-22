@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
 import { Card, CardContent } from "@/components/ui/card";
+import { MfaStatusCard } from "@/components/mfa-status-card";
 
 export default async function BarangayProfilePage() {
   const session = await requireSession();
@@ -65,6 +66,10 @@ export default async function BarangayProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="max-w-2xl">
+        <MfaStatusCard />
+      </div>
     </div>
   );
 }

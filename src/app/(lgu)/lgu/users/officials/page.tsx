@@ -1,8 +1,11 @@
+import { UserList } from "@/components/lgu/user-list";
+
 export default function BarangayOfficialsPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Barangay Officials</h2>
-      <p>Content for Barangay Officials goes here.</p>
-    </div>
+    <UserList
+      title="Barangay Officials"
+      description="Barangay official accounts registered across the municipality."
+      roles={["barangay_official"]}
+    />
   );
 }

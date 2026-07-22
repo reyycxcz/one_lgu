@@ -1,6 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { requireRole } from "@/lib/auth/session";
 import LGUClientLayout from "./client-layout";
 
 const LGU_NAV_GROUPS = [
@@ -129,17 +128,11 @@ const LGU_NAV_GROUPS = [
 ];
 
 export default async function LGULayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  const profile = await requireRole(["lgu_reviewer"]);
 
   const userProfile = {
-    name: user?.user_metadata?.full_name || user?.email || "Super Admin",
-    email: user?.email || "",
+    name: profile.full_name || profile.email || "Super Admin",
+    email: profile.email || "",
   };
 
   return (

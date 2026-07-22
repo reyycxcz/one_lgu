@@ -1,8 +1,15 @@
+import { TypeCategoryList } from "@/components/lgu/type-category-list";
+
+const REPORT_TYPES = ["monthly", "financial", "accomplishment", "compliance"];
+
 export default function ReportCategoriesPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Report Categories</h2>
-      <p>Content for Report Categories goes here.</p>
-    </div>
+    <TypeCategoryList
+      title="Report Categories"
+      description="Categories barangay officials use when submitting reports."
+      table="reports"
+      column="type"
+      values={REPORT_TYPES}
+    />
   );
 }

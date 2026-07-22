@@ -2,11 +2,17 @@ import { createClient } from "../supabase/server";
 import { UserRole } from "./rbac";
 import { redirect } from "next/navigation";
 
+// Returns a session-shaped object (`{ user }`) built from getUser(), which
+// re-verifies the JWT against the Supabase Auth server instead of trusting
+// a locally-decoded cookie (getSession() is unsafe for this — see
+// SECURITY-AUDIT-CHECKLIST.md). No caller in this codebase reads
+// session-level fields (access_token, etc.) — only session.user.*.
 export async function getSession() {
   const supabase = await createClient();
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session;
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+    return { user };
   } catch {
     return null;
   }
@@ -41,11 +47,23 @@ export async function requireProfile() {
 
 export async function requireRole(allowedRoles: UserRole[]) {
   const profile = await requireProfile();
-  
+
+  // MFA is opt-in — we don't force anyone to set it up. But if a user HAS
+  // enrolled a verified TOTP factor, they must complete the challenge on a
+  // fresh session (aal1 -> aal2), otherwise enabling it would be meaningless.
+  const supabase = await createClient();
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  // nextLevel === "aal2" while currentLevel is lower means a verified factor
+  // exists but this session hasn't satisfied it yet.
+  if (aal && aal.currentLevel !== "aal2" && aal.nextLevel === "aal2") {
+    redirect("/mfa-challenge");
+  }
+
   if (profile.role === "super_admin") {
     return profile;
   }
-  
+
   if (!allowedRoles.includes(profile.role as UserRole)) {
     redirect("/not-found"); // Silent rejection for security
   }

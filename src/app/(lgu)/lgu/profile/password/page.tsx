@@ -1,8 +1,21 @@
-export default function ChangePasswordPage() {
+import { requireSession } from "@/lib/auth/session";
+import { LguPageHeader } from "@/components/lgu/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { MfaStatusCard } from "@/components/mfa-status-card";
+import PasswordForm from "./password-form";
+
+export default async function ChangePasswordPage() {
+  await requireSession();
+
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Change Password</h2>
-      <p>Content for Change Password goes here.</p>
+    <div className="space-y-6 max-w-xl">
+      <LguPageHeader title="Change Password" description="Update the password and security settings for your LGU admin account." />
+      <Card>
+        <CardContent className="pt-6">
+          <PasswordForm />
+        </CardContent>
+      </Card>
+      <MfaStatusCard />
     </div>
   );
 }

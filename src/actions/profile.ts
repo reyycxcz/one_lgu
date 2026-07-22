@@ -1,21 +1,28 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { requireSession } from "@/lib/auth/session";
+import { requireSession, requireProfile } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/rbac";
+import { logAction } from "@/lib/audit/logger";
+import { profileUpdateSchema, passwordUpdateSchema } from "@/lib/validations/profile.schema";
 
 export async function updateProfile(formData: FormData) {
   const session = await requireSession();
   const supabase = await createClient();
 
-  const fullName = formData.get("fullName") as string;
-  const email = formData.get("email") as string;
-  const phone = formData.get("phone") as string;
-  const address = formData.get("address") as string;
-  const barangayCode = formData.get("barangayCode") as string;
+  const parsed = profileUpdateSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    address: formData.get("address"),
+    barangayCode: formData.get("barangayCode"),
+  });
 
-  if (!fullName || !email) {
-    return { error: "Full name and email are required" };
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
   }
+
+  const { fullName, email, phone, address, barangayCode } = parsed.data;
 
   // If barangayCode is provided, look up the barangay_id
   let barangayId: string | null = null;
@@ -47,6 +54,70 @@ export async function updateProfile(formData: FormData) {
   if (error) {
     return { error: error.message };
   }
+
+  await logAction({
+    actorId: session.user.id,
+    action: "profile.updated",
+    entityType: "profile",
+    entityId: session.user.id,
+  });
+
+  return { success: true };
+}
+
+export async function updatePassword(formData: FormData) {
+  const session = await requireSession();
+  const supabase = await createClient();
+
+  const parsed = passwordUpdateSchema.safeParse({
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await logAction({
+    actorId: session.user.id,
+    action: "profile.password_changed",
+    entityType: "profile",
+    entityId: session.user.id,
+  });
+
+  return { success: true };
+}
+
+export async function toggleUserActive(userId: string, isActive: boolean) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin"])) {
+    return { error: "Only LGU admins can activate or deactivate accounts" };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_active: isActive })
+    .eq("id", userId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await logAction({
+    actorId: profile.id,
+    action: isActive ? "user.activated" : "user.deactivated",
+    entityType: "profile",
+    entityId: userId,
+  });
 
   return { success: true };
 }

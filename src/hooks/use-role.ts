@@ -11,13 +11,13 @@ export function useRole() {
   useEffect(() => {
     async function fetchRole() {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", session.user.id)
+          .eq("id", user.id)
           .single();
         
         setRole((profile?.role as UserRole) || "resident");

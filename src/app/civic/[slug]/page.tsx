@@ -1,14 +1,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BookOpen, ShieldAlert, Sparkles, Award } from "lucide-react";
-import { civicPosts, getCivicPost } from "@/lib/civic-bulletin";
+import { ArrowLeft, BookOpen, ShieldAlert, Sparkles, Award, Megaphone } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { toCivicPost } from "@/lib/civic-bulletin";
 import type { Metadata } from "next";
 
-const ICONS = { BookOpen, ShieldAlert, Sparkles, Award };
+const ICONS = { BookOpen, ShieldAlert, Sparkles, Award, Megaphone };
 
-export function generateStaticParams() {
-  return civicPosts.map((post) => ({ slug: post.slug }));
+async function getPost(slug: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("announcements")
+    .select("slug, category, title, excerpt, tag, body")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+
+  if (!data) return null;
+  return toCivicPost(data);
 }
 
 export async function generateMetadata({
@@ -17,7 +27,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getCivicPost(slug);
+  const post = await getPost(slug);
   if (!post) return {};
   return {
     title: post.title,
@@ -31,7 +41,7 @@ export default async function CivicPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getCivicPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const Icon = ICONS[post.icon];

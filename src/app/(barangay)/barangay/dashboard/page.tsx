@@ -22,30 +22,31 @@ export default async function BarangayDashboard() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, barangays(name)")
+    .select("full_name, barangay_id, barangays(name)")
     .eq("id", session.user.id)
     .single();
 
   const barangayData = profile?.barangays as unknown as { name: string } | null;
   const barangayId = barangayData?.name || "";
+  const barangayUuid = profile?.barangay_id;
 
   const [certResult, complaintResult, reportResult] = await Promise.all([
     supabase
       .from("certification_requests")
       .select("id, status, type, purpose, created_at, requester:profiles(full_name)")
-      .eq("barangay_id", session.user.id)
+      .eq("barangay_id", barangayUuid || "")
       .order("created_at", { ascending: false })
       .limit(10),
     supabase
       .from("complaints")
       .select("id, status, subject, created_at")
-      .eq("barangay_id", session.user.id)
+      .eq("barangay_id", barangayUuid || "")
       .order("created_at", { ascending: false })
       .limit(10),
     supabase
       .from("reports")
       .select("id, status, title, type, created_at")
-      .eq("barangay_id", session.user.id)
+      .eq("barangay_id", barangayUuid || "")
       .order("created_at", { ascending: false })
       .limit(10),
   ]);

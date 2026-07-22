@@ -80,8 +80,8 @@ export default async function ResidentDashboard() {
       {/* Service search */}
       <ServiceSearch />
 
-      {/* Icon shortcuts */}
-      <div className="flex gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Icon shortcuts — mobile only; desktop already has the sidebar nav */}
+      <div className="md:hidden flex gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link href="/resident/certifications/new" className="flex w-16 shrink-0 flex-col items-center gap-1.5">
           <div className="flex h-14 w-14 items-center justify-center rounded-full gradient-primary shadow-[0_4px_14px_-4px_rgba(0,177,94,0.55)]">
             <FilePlus2 className="h-5.5 w-5.5 text-white" />

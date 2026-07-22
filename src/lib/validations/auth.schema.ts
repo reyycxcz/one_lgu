@@ -16,6 +16,10 @@ export const onboardingSchema = z.object({
   barangayCode: z.string().min(1, "Please select your Barangay"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please provide a valid email address"),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;

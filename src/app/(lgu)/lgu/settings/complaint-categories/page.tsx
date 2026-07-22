@@ -1,8 +1,22 @@
+import { TypeCategoryList } from "@/components/lgu/type-category-list";
+
+const COMPLAINT_TYPES = [
+  "noise_complaint",
+  "garbage_illegal_dumping",
+  "road_infrastructure",
+  "streetlight_problem",
+  "stray_aggressive_animals",
+  "other",
+];
+
 export default function ComplaintCategoriesPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Complaint Categories</h2>
-      <p>Content for Complaint Categories goes here.</p>
-    </div>
+    <TypeCategoryList
+      title="Complaint Categories"
+      description="Categories residents choose from when filing a complaint."
+      table="complaints"
+      column="type"
+      values={COMPLAINT_TYPES}
+    />
   );
 }

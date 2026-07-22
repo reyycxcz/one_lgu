@@ -92,9 +92,9 @@ export default function ResidentNav() {
         </nav>
       </aside>
 
-      {/* Mobile Floating Bottom Nav — eGovPH style with elevated center action */}
-      <nav className="md:hidden fixed bottom-7 left-3 right-3 z-50">
-        <div className="relative grid grid-cols-5 items-end bg-white/95 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_4px_24px_rgba(20,61,42,0.12)] px-1 py-1">
+      {/* Mobile Bottom Nav — fixed, flush to the edge (eGovPH style), elevated center action */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#E3F2E7]">
+        <div className="relative grid grid-cols-5 items-end px-1 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           {[
             { label: "Home", href: "/resident/dashboard", icon: Home },
             { label: "Certs", href: "/resident/certifications", icon: FileText },
@@ -104,9 +104,11 @@ export default function ResidentNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-0.5 py-1"
+                className="flex flex-col items-center gap-1 py-1"
               >
-                <item.icon className={`h-5.5 w-5.5 ${active ? "text-primary" : "text-foreground/60"}`} />
+                <span className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${active ? "bg-primary/10" : ""}`}>
+                  <item.icon className={`h-5 w-5 ${active ? "text-primary" : "text-foreground/55"}`} strokeWidth={active ? 2.25 : 1.75} />
+                </span>
                 <span className={`text-[10px] font-sans font-medium ${active ? "text-primary" : "text-foreground/50"}`}>
                   {item.label}
                 </span>
@@ -139,9 +141,11 @@ export default function ResidentNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-0.5 py-1"
+                className="flex flex-col items-center gap-1 py-1"
               >
-                <item.icon className={`h-5.5 w-5.5 ${active ? "text-primary" : "text-foreground/60"}`} />
+                <span className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${active ? "bg-primary/10" : ""}`}>
+                  <item.icon className={`h-5 w-5 ${active ? "text-primary" : "text-foreground/55"}`} strokeWidth={active ? 2.25 : 1.75} />
+                </span>
                 <span className={`text-[10px] font-sans font-medium ${active ? "text-primary" : "text-foreground/50"}`}>
                   {item.label}
                 </span>

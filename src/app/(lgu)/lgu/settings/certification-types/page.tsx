@@ -1,8 +1,23 @@
+import { TypeCategoryList } from "@/components/lgu/type-category-list";
+
+const CERTIFICATION_TYPES = [
+  "barangay_clearance",
+  "certificate_of_residency",
+  "certificate_of_indigency",
+  "business_clearance",
+  "first_time_job_seeker",
+  "barangay_certificate",
+  "scholarship_certificate",
+];
+
 export default function CertificationTypesPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Certification Types</h2>
-      <p>Content for Certification Types goes here.</p>
-    </div>
+    <TypeCategoryList
+      title="Certification Types"
+      description="Document types residents can request through the platform."
+      table="certification_requests"
+      column="type"
+      values={CERTIFICATION_TYPES}
+    />
   );
 }

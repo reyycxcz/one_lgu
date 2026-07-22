@@ -1,9 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { loginSchema, registerSchema, onboardingSchema } from "@/lib/validations/auth.schema";
+import { loginSchema, registerSchema, onboardingSchema, forgotPasswordSchema } from "@/lib/validations/auth.schema";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { requireSession } from "@/lib/auth/session";
+import { logAction } from "@/lib/audit/logger";
 
 export async function login(formData: FormData) {
   const parsed = loginSchema.safeParse({
@@ -33,11 +35,25 @@ export async function login(formData: FormData) {
 
   const role = user.app_metadata?.role || user.user_metadata?.role || "resident";
 
+  await logAction({
+    actorId: user.id,
+    action: "auth.login",
+    entityType: "auth",
+    entityId: user.id,
+  });
+
   let redirectTo = "/resident/dashboard";
   if (role === "super_admin" || role === "lgu_reviewer") {
     redirectTo = "/lgu/dashboard";
   } else if (role === "barangay_official") {
     redirectTo = "/barangay/dashboard";
+  }
+
+  // MFA is opt-in. Only users who already enrolled a verified factor are
+  // challenged here (aal1 -> aal2) — we never force setup at login.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && aal.currentLevel !== "aal2" && aal.nextLevel === "aal2") {
+    redirectTo = "/mfa-challenge";
   }
 
   return { success: true, redirectTo };
@@ -69,16 +85,17 @@ export async function register(formData: FormData) {
 
   if (authError) return { error: authError.message };
 
+  // The `profiles` row is auto-created by the on_auth_user_created DB
+  // trigger (always role: "resident") — the app never inserts into
+  // profiles directly, since a client-writable insert policy would be a
+  // privilege-escalation vector.
   if (authData.user) {
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: authData.user.id,
-      barangay_id: null,
-      role: "resident",
-      full_name: parsed.data.fullName,
-      email: parsed.data.email,
+    await logAction({
+      actorId: authData.user.id,
+      action: "auth.registered",
+      entityType: "profile",
+      entityId: authData.user.id,
     });
-
-    if (profileError) return { error: profileError.message };
   }
 
   // If email confirmation is disabled, signUp() also returns an active session.
@@ -120,11 +137,54 @@ export async function completeOnboarding(formData: FormData) {
 
   if (profileError) return { error: profileError.message };
 
+  await logAction({
+    actorId: session.user.id,
+    action: "auth.onboarding_completed",
+    entityType: "profile",
+    entityId: session.user.id,
+    barangayId: barangay.id,
+  });
+
+  return { success: true };
+}
+
+export async function forgotPassword(formData: FormData) {
+  const parsed = forgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  const origin = `${protocol}://${host}`;
+
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/reset-password`,
+  });
+
+  // Always report success, whether or not the email exists, to avoid leaking
+  // which addresses are registered (user enumeration).
   return { success: true };
 }
 
 export async function signOut() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    await logAction({
+      actorId: user.id,
+      action: "auth.logout",
+      entityType: "auth",
+      entityId: user.id,
+    });
+  }
+
   await supabase.auth.signOut();
   redirect("/login");
 }

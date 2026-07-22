@@ -1,8 +1,11 @@
+import { ReportList } from "@/components/lgu/report-list";
+
 export default function ArchivedReportsPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Archived Reports</h2>
-      <p>Content for Archived Reports goes here.</p>
-    </div>
+    <ReportList
+      title="Archived Reports"
+      description="Older reports moved to the archive."
+      statuses={["archived"]}
+    />
   );
 }
