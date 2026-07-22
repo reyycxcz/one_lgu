@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { requireRole } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import LGUClientLayout from "./client-layout";
 
 const LGU_NAV_GROUPS = [
@@ -135,8 +136,22 @@ export default async function LGULayout({ children }: { children: ReactNode }) {
     email: profile.email || "",
   };
 
+  // Pending items awaiting LGU action, for the header approvals indicator.
+  const supabase = await createClient();
+  const [certs, reports, complaints] = await Promise.all([
+    supabase.from("certification_requests").select("id", { count: "exact", head: true }).in("status", ["submitted", "verified"]),
+    supabase.from("reports").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
+    supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+  ]);
+
+  const pending = {
+    certifications: certs.count || 0,
+    reports: reports.count || 0,
+    complaints: complaints.count || 0,
+  };
+
   return (
-    <LGUClientLayout userProfile={userProfile} navGroups={LGU_NAV_GROUPS}>
+    <LGUClientLayout userProfile={userProfile} navGroups={LGU_NAV_GROUPS} pending={pending}>
       {children}
     </LGUClientLayout>
   );

@@ -41,6 +41,10 @@ import {
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
 import { LiveClock } from "@/components/shared/live-clock";
+import { HeaderGreeting } from "@/components/lgu/header-greeting";
+import { HeaderPending, type PendingCounts } from "@/components/lgu/header-pending";
+import { HeaderQuickCreate } from "@/components/lgu/header-quick-create";
+import { HeaderProfileMenu } from "@/components/lgu/header-profile-menu";
 import { signOut } from "@/actions/auth";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -85,9 +89,10 @@ interface LGUClientLayoutProps {
   children: ReactNode;
   userProfile: { name: string; email: string };
   navGroups: { label: string; items: { path: string; label: string; icon: string }[] }[];
+  pending: PendingCounts;
 }
 
-export default function LGUClientLayout({ children, userProfile, navGroups }: LGUClientLayoutProps) {
+export default function LGUClientLayout({ children, userProfile, navGroups, pending }: LGUClientLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
@@ -116,21 +121,14 @@ export default function LGUClientLayout({ children, userProfile, navGroups }: LG
       <div className="flex-1 flex flex-col min-w-0">
         <header className="hidden md:flex h-16 border-b border-border bg-white px-6 items-center justify-between sticky top-0 z-40 gap-4">
           <div className="flex items-center gap-3">
+            <HeaderGreeting name={userProfile.name} />
             <LiveClock />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <HeaderQuickCreate />
+            <HeaderPending pending={pending} />
             <NotificationBell />
-            <div className="flex items-center gap-3 pl-3 border-l border-border">
-              <div className="text-right leading-none">
-                <p className="text-xs font-bold text-foreground">{userProfile.name}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{userProfile.email}</p>
-              </div>
-              <img
-                src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${userProfile.name}`}
-                alt="Avatar"
-                className="w-9 h-9 rounded-full border border-border bg-secondary"
-              />
-            </div>
+            <HeaderProfileMenu name={userProfile.name} email={userProfile.email} />
           </div>
         </header>
 
