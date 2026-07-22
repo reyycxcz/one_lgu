@@ -12,10 +12,6 @@ const navItems = [
   { label: "Notifications", href: "/resident/notifications", icon: Bell },
 ];
 
-const portalItems = [
-  { label: "Home", href: "/", icon: Home },
-];
-
 const accountItems = [
   { label: "My Profile", href: "/resident/profile", icon: User },
 ];
@@ -32,15 +28,6 @@ export default function ResidentNav() {
       {/* Desktop Sidebar */}
       <aside className="w-60 border-r border-border bg-white flex flex-col justify-between hidden md:flex sticky top-14 h-[calc(100vh-3.5rem)]">
         <nav className="p-4 space-y-1">
-          {/* Back to Home */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-sans font-medium text-foreground/70 hover:bg-muted/40 rounded-lg transition-colors mb-2"
-          >
-            <Home className="h-4 w-4 text-foreground/50" />
-            <span>Back to Home</span>
-          </Link>
-
           <div className="px-3 py-2 text-[10px] font-sans font-bold tracking-wider text-foreground/40 uppercase">
             Navigation
           </div>

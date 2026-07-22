@@ -4,13 +4,15 @@ const isDev = process.env.NODE_ENV === "development";
 // React/Next's dev-mode Fast Refresh needs eval() for debugging (stack
 // reconstruction across the dev server boundary); it's never used in
 // production builds, so 'unsafe-eval' is scoped to dev only.
+// Vercel Analytics serves its script same-origin (/_vercel/insights/script.js)
+// in production, but falls back to va.vercel-scripts.com in debug/dev.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://api.dicebear.com https://*.supabase.co",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
