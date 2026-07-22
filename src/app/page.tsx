@@ -49,7 +49,7 @@ export default function Home() {
             ))}
           </nav>
 
-          <Link href="/login" className="hidden md:inline-flex group ml-16 px-5 py-1.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)]">
+          <Link href="/login" className="hidden md:inline-flex group ml-16 px-5 py-1.5 bg-primary text-white rounded-full font-sans text-xs font-bold transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)]">
             Log In <ArrowRight className="h-3.5 w-3.5 inline ml-1 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
 
@@ -79,7 +79,7 @@ export default function Home() {
             <Link
               href="/login"
               onClick={() => setMobileNavOpen(false)}
-              className="mt-2 flex items-center justify-center gap-1.5 px-5 py-2.5 bg-primary text-white rounded-full font-sans text-xs font-bold tracking-wide"
+              className="mt-2 flex items-center justify-center gap-1.5 px-5 py-2.5 bg-primary text-white rounded-full font-sans text-xs font-bold"
             >
               Log In <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -107,11 +107,11 @@ export default function Home() {
 
           <div className="max-w-6xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-20 flex flex-col items-center text-center">
             <div className="micro-label mb-6 animate-fade-in bg-primary text-white">
-              01 — DINGRAS, ILOCOS NORTE DIGITAL PORTAL
+              01 — Dingras, Ilocos Norte Digital Portal
             </div>
 
-            <h1 className="font-sans font-black text-4xl sm:text-6xl md:text-8xl tracking-wide uppercase leading-[1.05] md:leading-none max-w-4xl text-foreground mb-8 animate-fade-in px-2">
-              DIGITALIZING LOCAL GOVERNMENT
+            <h1 className="font-sans font-black text-4xl sm:text-6xl md:text-8xl leading-[1.05] md:leading-none max-w-4xl text-foreground mb-8 animate-fade-in px-2">
+              Digitalizing Local Government
             </h1>
 
             <p className="text-foreground/80 font-sans text-base md:text-lg max-w-2xl leading-relaxed mb-12 animate-fade-in px-2">
@@ -119,10 +119,10 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center animate-fade-in mb-16">
-              <Link href="/login" className="px-6 py-3 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
+              <Link href="/login" className="px-6 py-3 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-sm font-bold transition-all duration-200 shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
                 Get Started
               </Link>
-              <Link href="/register" className="px-6 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
+              <Link href="/register" className="px-6 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold transition-all duration-200 hover:translate-y-[-1px]">
                 Create Account
               </Link>
             </div>
@@ -148,8 +148,8 @@ export default function Home() {
         <section id="features" className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
-              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">02 — SYSTEM MODULES</span>
-              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Core Functionalities</h2>
+              <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full">02 — System Modules</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 text-foreground">Core Functionalities</h2>
             </div>
             <p className="text-foreground/60 font-sans text-sm max-w-md">
               Streamlining local administrative procedures with automated state tracking, document generators, and verification logs.
@@ -164,9 +164,9 @@ export default function Home() {
                 <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
                   <Upload className="h-5 w-5" />
                 </div>
-                <span className="micro-label px-0 text-foreground/50">MANAGEMENT & STORAGE</span>
+                <span className="micro-label px-0 text-foreground/50">Management & Storage</span>
               </div>
-              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Reports Submission & Auditing</h3>
+              <h3 className="relative font-sans font-black text-2xl">Reports Submission & Auditing</h3>
               <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Allows barangay officials to upload monthly accomplishment reports and financial expense statements directly to Supabase Storage. LGU admins can review, leave feedback notes, and approve or reject submissions to build compliance scores.
               </p>
@@ -182,9 +182,9 @@ export default function Home() {
                 <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
                   <ClipboardCheck className="h-5 w-5" />
                 </div>
-                <span className="micro-label px-0 text-foreground/50">COMPLIANCE HUB</span>
+                <span className="micro-label px-0 text-foreground/50">Compliance Hub</span>
               </div>
-              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">LGU Required Documents Checklist</h3>
+              <h3 className="relative font-sans font-black text-2xl">LGU Required Documents Checklist</h3>
               <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Consolidated planning trackers enforcing developmental submissions (such as Annual Investment Programs and Development Plans). LGU dashboards flag delinquent barangays to maintain accountability.
               </p>
@@ -200,9 +200,9 @@ export default function Home() {
                 <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
                   <FileSignature className="h-5 w-5" />
                 </div>
-                <span className="micro-label px-0 text-foreground/50">G2C SERVICE PLATFORM</span>
+                <span className="micro-label px-0 text-foreground/50">G2C Service Platform</span>
               </div>
-              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Barangay Certification Requests</h3>
+              <h3 className="relative font-sans font-black text-2xl">Barangay Certification Requests</h3>
               <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 Residents request clearances, residency certificates, indigency proofs, and first-time job seeker waivers online. Barangay staff verify inputs, generate official files with pre-loaded signatures, and track status until released.
               </p>
@@ -218,9 +218,9 @@ export default function Home() {
                 <div className="h-11 w-11 shrink-0 rounded-xl bg-secondary flex items-center justify-center text-primary">
                   <Scale className="h-5 w-5" />
                 </div>
-                <span className="micro-label px-0 text-foreground/50">MEDIATION & ARBITRATION</span>
+                <span className="micro-label px-0 text-foreground/50">Mediation & Arbitration</span>
               </div>
-              <h3 className="relative font-sans font-black text-2xl uppercase tracking-wide">Incident Grievance & Complaints</h3>
+              <h3 className="relative font-sans font-black text-2xl">Incident Grievance & Complaints</h3>
               <p className="relative text-sm text-foreground/75 leading-relaxed font-sans">
                 A digital channel for residents to file complaints and upload supporting media. Officials assign investigator mediators (Kagawads), schedule face-to-face summons hearings, and log community arbitration resolutions.
               </p>
@@ -236,8 +236,8 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
-                <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">03 — CIVIC BULLETIN & GUIDES</span>
-                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-[#143D2A]">Civic Bulletin & Updates</h2>
+                <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full">03 — Civic Bulletin & Guides</span>
+                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 text-[#143D2A]">Civic Bulletin & Updates</h2>
               </div>
               <p className="text-foreground/60 font-sans text-sm max-w-md">
                 Stay updated with the latest announcements, local programs, and official guidelines from your local government unit.
@@ -250,7 +250,7 @@ export default function Home() {
               <div className="bryl-card p-6 flex flex-col justify-between bg-white border border-[#E3F2E7] rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary uppercase">Certification Guide</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary">Certification Guide</span>
                     <BookOpen className="h-4 w-4 text-[#143D2A]/60" />
                   </div>
                   <h3 className="font-sans text-sm font-bold text-[#143D2A] leading-snug">How to Request Barangay Clearances Online</h3>
@@ -259,8 +259,8 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-[#E3F2E7] mt-6 flex justify-between items-center text-[10px] text-foreground/45 font-mono">
-                  <span>CIVIC HANDBOOK</span>
-                  <span className="text-primary font-bold">READ MORE →</span>
+                  <span>Civic Handbook</span>
+                  <span className="text-primary font-bold">Read More →</span>
                 </div>
               </div>
 
@@ -268,7 +268,7 @@ export default function Home() {
               <div className="bryl-card p-6 flex flex-col justify-between bg-white border border-[#E3F2E7] rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary uppercase">Dispute Mediation</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary">Dispute Mediation</span>
                     <ShieldAlert className="h-4 w-4 text-[#143D2A]/60" />
                   </div>
                   <h3 className="font-sans text-sm font-bold text-[#143D2A] leading-snug">Katarungang Pambarangay Hearing Rules</h3>
@@ -277,8 +277,8 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-[#E3F2E7] mt-6 flex justify-between items-center text-[10px] text-foreground/45 font-mono">
-                  <span>RESOLUTIONS</span>
-                  <span className="text-primary font-bold">READ MORE →</span>
+                  <span>Resolutions</span>
+                  <span className="text-primary font-bold">Read More →</span>
                 </div>
               </div>
 
@@ -286,7 +286,7 @@ export default function Home() {
               <div className="bryl-card p-6 flex flex-col justify-between bg-white border border-[#E3F2E7] rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary uppercase">Livelihood Programs</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-[#E7FFEA] border border-[#C7FFCF] text-primary">Livelihood Programs</span>
                     <Sparkles className="h-4 w-4 text-[#143D2A]/60" />
                   </div>
                   <h3 className="font-sans text-sm font-bold text-[#143D2A] leading-snug">Free Livelihood Seminars & Skills Training</h3>
@@ -295,8 +295,8 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-[#E3F2E7] mt-6 flex justify-between items-center text-[10px] text-foreground/45 font-mono">
-                  <span>UPCOMING EVENTS</span>
-                  <span className="text-primary font-bold">READ MORE →</span>
+                  <span>Upcoming Events</span>
+                  <span className="text-primary font-bold">Read More →</span>
                 </div>
               </div>
 
@@ -304,7 +304,7 @@ export default function Home() {
               <div className="bryl-card p-6 flex flex-col justify-between bg-white border border-[#E3F2E7] rounded-none hover:border-[#C7FFCF] transition-colors duration-200">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#E7FFEA] border-[#C7FFCF] border text-primary uppercase">Clean & Green</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-[#E7FFEA] border-[#C7FFCF] border text-primary">Clean & Green</span>
                     <Award className="h-4 w-4 text-[#143D2A]/60" />
                   </div>
                   <h3 className="font-sans text-sm font-bold text-[#143D2A] leading-snug">Barangay Waste Management & Clean Schedules</h3>
@@ -313,8 +313,8 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-[#E3F2E7] mt-6 flex justify-between items-center text-[10px] text-foreground/45 font-mono">
-                  <span>ANNOUNCEMENTS</span>
-                  <span className="text-primary font-bold">READ MORE →</span>
+                  <span>Announcements</span>
+                  <span className="text-primary font-bold">Read More →</span>
                 </div>
               </div>
             </div>
@@ -325,8 +325,8 @@ export default function Home() {
         <section id="portals" className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
-              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">04 — PLATFORM ROLES</span>
-              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Three Role-Based Portals</h2>
+              <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full">04 — Platform Roles</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 text-foreground">Three Role-Based Portals</h2>
             </div>
             <p className="text-foreground/60 font-sans text-sm max-w-md">
               Secure routes and layouts ensuring users only see tools and data scoped to their specific administrative clearance level.
@@ -341,34 +341,34 @@ export default function Home() {
                   <div className="h-12 w-12 rounded-xl bg-[#143D2A] flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105">
                     <Landmark className="h-5.5 w-5.5" />
                   </div>
-                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 03 — SUPER ADMIN</span>
+                  <span className="font-mono text-[10px] text-foreground/40 font-semibold">LVL 03 — Super Admin</span>
                 </div>
-                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">LGU Console Portal</h3>
+                <h3 className="font-sans font-black text-2xl mb-2">LGU Console Portal</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
                   Consolidated municipal oversight. Admins audit compliance targets for all 31 barangays, evaluate uploaded financial statements, monitor immutable audit logs (L7), and configure system-wide RBAC.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground group-hover:text-primary transition-colors">
                 Enter LGU Portal Console <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
 
             {/* Barangay Portal */}
             <div className="bryl-card p-6 flex flex-col justify-between h-80 group relative border-2 border-primary/15">
-              <span className="absolute -top-3 left-6 px-2.5 py-0.5 rounded-full bg-primary text-white text-[9px] font-sans font-bold tracking-wider uppercase">Most Used</span>
+              <span className="absolute -top-3 left-6 px-2.5 py-0.5 rounded-full bg-primary text-white text-[9px] font-sans font-bold">Most Used</span>
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105">
                     <Users className="h-5.5 w-5.5" />
                   </div>
-                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 02 — LOCAL OFFICIAL</span>
+                  <span className="font-mono text-[10px] text-foreground/40 font-semibold">LVL 02 — Local Official</span>
                 </div>
-                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">Barangay Hall Portal</h3>
+                <h3 className="font-sans font-black text-2xl mb-2">Barangay Hall Portal</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
                   Operations dashboard for Captains, SK, and Clerks. Process resident certification queues, dispatch planning documents, schedule Lupon mediation calendars, and manage local staff accounts.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground group-hover:text-primary transition-colors">
                 Enter Barangay Portal <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
@@ -380,14 +380,14 @@ export default function Home() {
                   <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105">
                     <FileText className="h-5.5 w-5.5" />
                   </div>
-                  <span className="font-mono text-[10px] uppercase text-foreground/40 font-semibold tracking-wider">LVL 01 — CITIZEN PORTAL</span>
+                  <span className="font-mono text-[10px] text-foreground/40 font-semibold">LVL 01 — Citizen Portal</span>
                 </div>
-                <h3 className="font-sans font-black text-2xl uppercase tracking-wide mb-2">Resident Citizen Desk</h3>
+                <h3 className="font-sans font-black text-2xl mb-2">Resident Citizen Desk</h3>
                 <p className="text-sm text-foreground/75 font-sans leading-relaxed">
                   Direct resident desk. File document certification requests, monitor application status in real-time via steppers, file community grievances, and receive instant in-app alerts.
                 </p>
               </div>
-              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary transition-colors">
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground group-hover:text-primary transition-colors">
                 Enter Resident Desk <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
@@ -401,8 +401,8 @@ export default function Home() {
             <div className="lg:w-1/3 shrink-0 flex flex-col justify-between">
               <div className="space-y-6">
                 <div>
-                  <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">05 — WHY ONELGU?</span>
-                  <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 mb-4 text-[#143D2A]">Faster Services, Simpler Access</h2>
+                  <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full w-fit">05 — Why OneLGU?</span>
+                  <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 mb-4 text-[#143D2A]">Faster Services, Simpler Access</h2>
                   <p className="text-foreground/60 text-sm font-sans leading-relaxed">
                     Skip the queues at your local Barangay Hall. Request clearances and certificates online securely across Dingras, Ilocos Norte.
                   </p>
@@ -480,8 +480,8 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
-                <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full">07 — HOW IT WORKS</span>
-                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-[#143D2A]">Three Simple Steps</h2>
+                <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full">07 — How It Works</span>
+                <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 text-[#143D2A]">Three Simple Steps</h2>
               </div>
               <p className="text-foreground/60 font-sans text-sm max-w-md">
                 From registration to document release — the entire process is fully digital.
@@ -536,8 +536,8 @@ export default function Home() {
         <section id="faq" className="max-w-6xl mx-auto px-6 py-20">
           <div className="flex flex-col md:flex-row gap-12 md:gap-20">
             <div className="md:w-1/3 shrink-0">
-              <span className="inline-block font-mono text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 bg-primary text-white rounded-full w-fit">08 — FAQ</span>
-              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mt-2 text-foreground">Frequently Asked Questions</h2>
+              <span className="inline-block font-mono text-[10px] font-bold px-3.5 py-1 bg-primary text-white rounded-full w-fit">08 — FAQ</span>
+              <h2 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl mt-2 text-foreground">Frequently Asked Questions</h2>
               <p className="text-foreground/55 text-sm font-sans mt-3 leading-relaxed">
                 Everything you need to know about OneLGU services, document requests, and your account.
               </p>
@@ -570,15 +570,15 @@ export default function Home() {
         {/* Final CTA Banner */}
         <section className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-16">
           <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
-            <h2 className="font-sans font-black text-4xl md:text-5xl uppercase tracking-wider text-[#143D2A]">Ready to go paperless?</h2>
+            <h2 className="font-sans font-black text-4xl md:text-5xl text-[#143D2A]">Ready to go paperless?</h2>
             <p className="text-foreground/55 text-sm font-sans max-w-lg mx-auto">
               Join thousands of residents who are already using OneLGU to request certificates, file complaints, and access barangay services online.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link href="/register" className="px-8 py-3 bg-primary text-white rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
+              <Link href="/register" className="px-8 py-3 bg-primary text-white rounded-full font-sans text-sm font-bold transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
                 Get Started <ArrowRight className="h-3.5 w-3.5 inline ml-1" />
               </Link>
-              <Link href="/login" className="px-8 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold tracking-wide transition-all duration-200 hover:translate-y-[-1px]">
+              <Link href="/login" className="px-8 py-3 border border-[#E3E6E4] hover:border-gray-300 text-foreground bg-white hover:bg-gray-50 rounded-full font-sans text-sm font-bold transition-all duration-200 hover:translate-y-[-1px]">
                 Log In
               </Link>
             </div>
@@ -609,7 +609,7 @@ export default function Home() {
 
             {/* Column 2: Portals */}
             <div className="space-y-4">
-              <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-[#143D2A]/85">Portals</h4>
+              <h4 className="font-sans text-xs font-bold text-[#143D2A]/85">Portals</h4>
               <ul className="space-y-2 text-xs font-sans text-foreground/60">
                 <li><Link href="/login" className="hover:text-[#143D2A] transition-colors duration-150">LGU Admin Desk</Link></li>
                 <li><Link href="/login" className="hover:text-[#143D2A] transition-colors duration-150">Barangay Captain Portal</Link></li>
@@ -620,7 +620,7 @@ export default function Home() {
 
             {/* Column 3: Services */}
             <div className="space-y-4">
-              <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-[#143D2A]/85">Services</h4>
+              <h4 className="font-sans text-xs font-bold text-[#143D2A]/85">Services</h4>
               <ul className="space-y-2 text-xs font-sans text-foreground/60">
                 <li><Link href="/login" className="hover:text-[#143D2A] transition-colors duration-150">Clearance Certificates</Link></li>
                 <li><Link href="/login" className="hover:text-[#143D2A] transition-colors duration-150">Certificate of Residency</Link></li>
@@ -631,7 +631,7 @@ export default function Home() {
 
             {/* Column 4: Support */}
             <div className="space-y-4">
-              <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-[#143D2A]/85">Support</h4>
+              <h4 className="font-sans text-xs font-bold text-[#143D2A]/85">Support</h4>
               <ul className="space-y-2 text-xs font-sans text-foreground/60">
                 <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">How to Register</Link></li>
                 <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">Frequently Asked Questions</Link></li>
@@ -642,7 +642,7 @@ export default function Home() {
           </div>
 
           <div className="border-t border-[#E3F2E7] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-sans text-foreground/45">
-            <div>© 2026 ONELGU PROJECT. ILOCOS NORTE.</div>
+            <div>© 2026 OneLGU Project. Ilocos Norte.</div>
           </div>
         </div>
       </footer>

@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { GeistMono } from "geist/font/mono";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import "./globals.css";
 import { NavigationEvents } from "@/components/navigation-events";
+import { PwaRegister } from "@/components/pwa-register";
 
 /* eGovPH design system fonts (extracted): Lexend = primary UI,
    Gilroy = display/headings, Roboto Medium = numbers/IDs */
@@ -38,9 +39,15 @@ const robotoNumbers = localFont({
 export const metadata: Metadata = {
   title: "OneLGU - Local Government Unit Portal",
   description: "Unified modules for Reports Management, Compliance, Barangay Certifications, and Resident Complaints.",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/images/logo/one_lgu.png",
+    apple: "/icons/icon-192.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#00B15E",
 };
 
 export default function RootLayout({
@@ -58,6 +65,7 @@ export default function RootLayout({
           {children}
           <NavigationEvents />
         </LenisProvider>
+        <PwaRegister />
       </body>
     </html>
   );

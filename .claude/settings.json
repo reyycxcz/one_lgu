@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sIL https://e.gov.ph/)",
+      "Bash(curl -s -A \"Mozilla/5.0\" https://e.gov.ph/ -o /tmp/egov.html -w \"HTTP %{http_code}, size %{size_download}\\\\n\")",
+      "Bash(curl -sk -A \"Mozilla/5.0\" https://e.gov.ph/ -o /tmp/egov.html -w \"HTTP %{http_code}, size %{size_download}\\\\n\")",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://e.gov.ph/\" -UserAgent \"Mozilla/5.0\" -UseBasicParsing; $r.Content | Out-File -Encoding utf8 \"$env:TEMP\\\\egov.html\"; \"OK $\\($r.StatusCode\\) $\\($r.Content.Length\\)\" } catch { \"ERR: $_\" })",
+      "Read(//c/Users/Raysoo/AppData/Local/Temp/**)",
+      "Bash(curl -sk -A \"Mozilla/5.0\" \"https://e.gov.ph/assets/index-C4dJKbf1.css\" -o /tmp/egov.css -w \"HTTP %{http_code}, size %{size_download}\\\\n\")",
+      "Bash(grep -oE \"@font-face\\\\{[^}]*\\\\}\" /tmp/egov.css | head -30; echo \"----families----\"; grep -oE \"font-family:[^;]{1,120};\" /tmp/egov.css | sort -u | head -50)",
+      "Read(//tmp/**)",
+      "Bash(grep -oE \"\\\\-\\\\-font-[a-z]+:[^;]{1,150};\" /tmp/egov.css | sort -u; echo \"---gilroy/roboto/other---\"; grep -oiE \"gilroy|roboto|inter|poppins|montserrat|nunito|manrope|dm sans|work sans\" /tmp/egov.css | sort -u)"
+    ]
+  }
+}
