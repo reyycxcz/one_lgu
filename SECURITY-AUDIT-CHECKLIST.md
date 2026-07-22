@@ -310,6 +310,9 @@ Still open (not fixable in code / blocked):
 4. **No error/monitoring service (e.g. Sentry)** — needs an external account + DSN the user would need to create; not something to fabricate. Structural error handling (no leaked stack traces, generic `error.tsx`) remains in place as a baseline.
 5. **In-memory rate limiter is single-instance only** — acceptable for the current deployment shape; flagged for revisit if/when this moves to a multi-region serverless deployment.
 
+Accepted risks (deliberate trade-offs, decided by the project owner):
+1. **Email confirmation disabled** (`mailer_autoconfirm: true`, set 2026-07-22 via Management API). Supabase's built-in email service is capped at **2 emails/hour project-wide** — a testing-only limit that made registration fail with `email rate limit exceeded`. The project's `RESEND_API_KEY` was checked as an alternative but returns `401 Unauthorized` (expired/invalid), so custom SMTP was not an option. With autoconfirm on, signups no longer send or require an email. **Risk accepted:** email addresses are no longer verified, so a user can register with an address they don't own. Acceptable for the current demo/pilot stage; **must be reverted before real public rollout** by configuring custom SMTP (Resend/SendGrid/SES with a verified sending domain) and setting `mailer_autoconfirm: false` again.
+
 Next steps:
 1. Decide whether to upgrade the Supabase plan to enable leaked-password protection.
 2. If/when CAPTCHA is wanted, create an hCaptcha or Cloudflare Turnstile account and share the site/secret keys so it can be wired into the login/register/forgot-password forms.

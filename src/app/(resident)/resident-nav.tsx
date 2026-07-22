@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FileText, AlertOctagon, Bell, User, LayoutDashboard, LogOut, Home, FilePlus2 } from "lucide-react";
+import { signOut } from "@/actions/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/resident/dashboard", icon: LayoutDashboard },
@@ -82,13 +83,14 @@ export default function ResidentNav() {
             );
           })}
 
-          <Link
-            href="/login"
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-sans font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          <button
+            type="button"
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-sans font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
-          </Link>
+          </button>
         </nav>
       </aside>
 

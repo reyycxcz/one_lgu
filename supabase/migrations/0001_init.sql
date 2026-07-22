@@ -336,11 +336,14 @@ create trigger on_auth_user_created
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 -- =====================================================================
--- Block residents/officials from self-escalating privileged profile
--- columns (role, is_active, barangay_id reassignment) through the
+-- Block self-escalation of privileged profile columns through the
 -- "update own profile" policy, which only restricts *which rows* can be
--- updated, not *which columns*. barangay_id may still be set once during
--- onboarding (old value null) by the owning user.
+-- updated, not *which columns*.
+--   * role / is_active         -> super_admin only
+--   * barangay_id for RESIDENT -> allowed (they moved; grants no extra access)
+--   * barangay_id for OFFICIAL/REVIEWER -> super_admin only, since for those
+--     roles barangay_id IS their data-access scope (get_user_barangay_id()
+--     drives their RLS policies).
 -- =====================================================================
 create or replace function public.protect_profile_privileged_fields()
 returns trigger as $$
@@ -349,10 +352,14 @@ begin
     if new.role is distinct from old.role then
       raise exception 'Only a super admin can change a profile role';
     end if;
+
     if new.is_active is distinct from old.is_active then
       raise exception 'Only a super admin can change a profile active status';
     end if;
-    if new.barangay_id is distinct from old.barangay_id and old.barangay_id is not null then
+
+    if new.barangay_id is distinct from old.barangay_id
+       and old.barangay_id is not null
+       and old.role <> 'resident' then
       raise exception 'Only a super admin can reassign an existing barangay';
     end if;
   end if;
