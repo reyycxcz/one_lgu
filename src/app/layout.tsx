@@ -5,6 +5,7 @@ import { LenisProvider } from "@/components/providers/lenis-provider";
 import "./globals.css";
 import { NavigationEvents } from "@/components/navigation-events";
 import { PwaRegister } from "@/components/pwa-register";
+import { Analytics } from "@vercel/analytics/next";
 
 /* eGovPH design system fonts (extracted): Lexend = primary UI,
    Gilroy = display/headings, Roboto Medium = numbers/IDs */
@@ -140,6 +141,7 @@ export default function RootLayout({
           <NavigationEvents />
         </LenisProvider>
         <PwaRegister />
+        <Analytics />
       </body>
     </html>
   );
