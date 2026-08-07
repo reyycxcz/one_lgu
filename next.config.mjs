@@ -1,32 +1,19 @@
 /** @type {import('next').NextConfig} */
-const isDev = process.env.NODE_ENV === "development";
-
-// React/Next's dev-mode Fast Refresh needs eval() for debugging (stack
-// reconstruction across the dev server boundary); it's never used in
-// production builds, so 'unsafe-eval' is scoped to dev only.
-// Vercel Analytics serves its script same-origin (/_vercel/insights/script.js)
-// in production, but falls back to va.vercel-scripts.com in debug/dev.
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://api.dicebear.com https://*.supabase.co",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-].join("; ");
-
+// Content-Security-Policy is NOT set here — it needs a fresh nonce per
+// request (see src/proxy.ts), which a static config-level header can't
+// provide. Every other security header below is static, so it stays here.
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Resident attachment uploads (IDs, complaint evidence) can be up to 5MB
+    // each and are sent through server actions; the default limit is 1MB.
+    serverActions: { bodySizeLimit: "12mb" },
+  },
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
-          { key: "Content-Security-Policy", value: csp },
           {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains",

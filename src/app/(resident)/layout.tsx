@@ -20,10 +20,10 @@ export default async function ResidentLayout({ children }: { children: ReactNode
         <div className="h-full max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logo/one_lgu.png"
-              width={56}
-              height={56}
-              className="h-14 md:h-7 w-auto object-contain ml-2 md:ml-0"
+              src="/images/logo/landscape_logo.png"
+              width={340}
+              height={97}
+              className="h-9 md:h-8 w-auto object-contain ml-2 md:ml-0"
               alt="OneLGU Logo"
             />
             <div className="hidden md:block h-5 w-px bg-border" />

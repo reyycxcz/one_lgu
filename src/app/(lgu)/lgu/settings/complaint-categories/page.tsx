@@ -1,4 +1,5 @@
 import { TypeCategoryList } from "@/components/lgu/type-category-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
 const COMPLAINT_TYPES = [
   "noise_complaint",
@@ -9,7 +10,8 @@ const COMPLAINT_TYPES = [
   "other",
 ];
 
-export default function ComplaintCategoriesPage() {
+export default async function ComplaintCategoriesPage() {
+  await requireSuperAdmin();
   return (
     <TypeCategoryList
       title="Complaint Categories"

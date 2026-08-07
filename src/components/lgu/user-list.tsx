@@ -3,6 +3,7 @@ import { LguPageHeader } from "@/components/lgu/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
 import { UserToggleActive } from "@/components/lgu/user-toggle-active";
+import { AccountRequestActions } from "@/components/lgu/account-request-actions";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 
@@ -22,7 +23,8 @@ export async function UserList({
   let query = supabase
     .from("profiles")
     .select("id, full_name, email, phone, role, is_active, barangays(name)")
-    .order("full_name", { ascending: true });
+    .order("full_name", { ascending: true })
+    .limit(1000);
 
   if (roles && roles.length > 0) {
     query = query.in("role", roles);
@@ -44,9 +46,13 @@ export async function UserList({
         <span key="email" className="text-muted-foreground">{u.email}</span>,
         <span key="phone" className="text-muted-foreground">{u.phone || "—"}</span>,
         <Badge key="status" variant={u.is_active ? "default" : "outline"}>
-          {u.is_active ? "Active" : "Inactive"}
+          {u.is_active ? "Active" : onlyInactive ? "Pending" : "Inactive"}
         </Badge>,
-        <UserToggleActive key="actions" userId={u.id} isActive={u.is_active} />,
+        onlyInactive ? (
+          <AccountRequestActions key="actions" userId={u.id} />
+        ) : (
+          <UserToggleActive key="actions" userId={u.id} isActive={u.is_active} />
+        ),
       ],
     };
   });

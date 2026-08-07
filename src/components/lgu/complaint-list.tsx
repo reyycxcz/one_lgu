@@ -20,7 +20,10 @@ export async function ComplaintList({
   let query = supabase
     .from("complaints")
     .select("id, subject, type, status, created_at, profiles!complaints_complainant_id_fkey(full_name), barangays(name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    // Hard cap — FilterableTable paginates client-side, so an unbounded
+    // fetch-all would grow without limit as complaints accumulate.
+    .limit(500);
 
   if (statuses && statuses.length > 0) {
     query = query.in("status", statuses);

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { LguPageHeader } from "@/components/lgu/page-header";
 import { LguEmptyState } from "@/components/lgu/empty-state";
+import { AuditExportButton } from "@/components/lgu/audit-export-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ export default async function SystemLogsPage() {
       <LguPageHeader
         title="System Logs"
         description="Automated, system-triggered events with no associated user actor."
+        action={<AuditExportButton />}
       />
       <Card>
         <CardContent className="p-0">

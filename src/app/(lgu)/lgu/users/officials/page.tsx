@@ -1,6 +1,8 @@
 import { UserList } from "@/components/lgu/user-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
-export default function BarangayOfficialsPage() {
+export default async function BarangayOfficialsPage() {
+  await requireSuperAdmin();
   return (
     <UserList
       title="Barangay Officials"

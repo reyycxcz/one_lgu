@@ -70,3 +70,16 @@ export async function requireRole(allowedRoles: UserRole[]) {
 
   return profile;
 }
+
+// Stricter than requireRole(["super_admin"]) callers might expect: this one
+// does NOT auto-pass every role, it only ever allows super_admin. Use for
+// settings/user-management/audit-export pages that lgu_reviewer must not reach.
+export async function requireSuperAdmin() {
+  const profile = await requireProfile();
+
+  if (profile.role !== "super_admin") {
+    redirect("/not-found"); // Silent rejection for security
+  }
+
+  return profile;
+}

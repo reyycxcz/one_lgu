@@ -20,7 +20,8 @@ export async function CertificationList({
   let query = supabase
     .from("certification_requests")
     .select("id, type, purpose, status, created_at, profiles!certification_requests_requester_id_fkey(full_name), barangays(name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(500);
 
   if (statuses && statuses.length > 0) {
     query = query.in("status", statuses);

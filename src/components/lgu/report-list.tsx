@@ -20,7 +20,8 @@ export async function ReportList({
   let query = supabase
     .from("reports")
     .select("id, title, type, status, created_at, profiles!reports_submitted_by_fkey(full_name), barangays(name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(500);
 
   if (statuses && statuses.length > 0) {
     query = query.in("status", statuses);

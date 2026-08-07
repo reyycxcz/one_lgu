@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { MfaStatusCard } from "@/components/mfa-status-card";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 
 export default async function BarangayProfilePage() {
   const session = await requireSession();
@@ -27,11 +28,7 @@ export default async function BarangayProfilePage() {
       <Card className="max-w-2xl">
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4 pb-4 border-b border-border">
-            <img
-              src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${profile?.full_name || "User"}`}
-              alt="Avatar"
-              className="w-16 h-16 rounded-full border border-border"
-            />
+            <InitialsAvatar name={profile?.full_name || "User"} size={64} />
             <div>
               <h2 className="text-lg font-bold text-foreground">{profile?.full_name || "N/A"}</h2>
               <p className="text-xs text-muted-foreground">{profile?.email || "N/A"}</p>

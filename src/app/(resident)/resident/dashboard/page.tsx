@@ -5,6 +5,7 @@ import { FileText, AlertOctagon, Clock, ChevronRight, MapPin, Bell, User, FilePl
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import ServiceSearch from "./service-search";
 
 export default async function ResidentDashboard() {
@@ -61,11 +62,7 @@ export default async function ResidentDashboard() {
           <p className="font-display font-bold text-xl md:text-3xl text-primary leading-tight">Mabuhay, {firstName}</p>
           <p className="text-xs md:text-sm text-foreground/50 leading-tight mt-0.5">Welcome to OneLGU</p>
         </div>
-        <img
-          src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${encodeURIComponent(profile?.full_name || "Resident")}`}
-          alt="Avatar"
-          className="h-11 w-11 md:h-12 md:w-12 rounded-full border border-border bg-white"
-        />
+        <InitialsAvatar name={profile?.full_name || "Resident"} size={48} />
       </div>
 
       {/* Location + date pill */}

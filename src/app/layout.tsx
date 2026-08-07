@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { GeistMono } from "geist/font/mono";
-import { LenisProvider } from "@/components/providers/lenis-provider";
+import { headers } from "next/headers";
 import "./globals.css";
 import { NavigationEvents } from "@/components/navigation-events";
 import { PwaRegister } from "@/components/pwa-register";
@@ -64,7 +64,11 @@ export const metadata: Metadata = {
   category: "government",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/images/logo/one_lgu.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
     apple: "/icons/icon-192.png",
   },
   alternates: {
@@ -121,11 +125,13 @@ const structuredData = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") || undefined;
+
   return (
     <html
       lang="en"
@@ -134,12 +140,11 @@ export default function RootLayout({
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <LenisProvider>
-          {children}
-          <NavigationEvents />
-        </LenisProvider>
+        {children}
+        <NavigationEvents />
         <PwaRegister />
         <Analytics />
       </body>

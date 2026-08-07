@@ -20,7 +20,8 @@ export async function DocumentList({
   let query = supabase
     .from("reports")
     .select("id, title, file_name, file_url, status, created_at, barangays(name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(500);
 
   if (statuses && statuses.length > 0) {
     query = query.in("status", statuses);

@@ -1,7 +1,10 @@
 import Link from "next/link";
+import QRCode from "qrcode";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://one-lgu.vercel.app";
 
 export default async function CertificationDetailPage({ params }: { params: { id: string } }) {
   const session = await requireSession();
@@ -27,6 +30,9 @@ export default async function CertificationDetailPage({ params }: { params: { id
       </div>
     );
   }
+
+  const verifyUrl = `${SITE_URL}/verify/${cert.id}`;
+  const qrDataUrl = cert.status === "released" ? await QRCode.toDataURL(verifyUrl, { margin: 1, width: 160 }) : null;
 
   return (
     <div className="space-y-8 animate-stagger-in">
@@ -104,6 +110,18 @@ export default async function CertificationDetailPage({ params }: { params: { id
               )}
             </div>
           </div>
+
+          {qrDataUrl && (
+            <div className="bg-white border border-border p-6 rounded-xl space-y-3 text-center">
+              <h4 className="font-sans text-sm font-bold text-foreground">Verify Authenticity</h4>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={qrDataUrl} alt="QR code to verify this certificate" className="mx-auto h-32 w-32 rounded-lg border border-border" />
+              <p className="text-[11px] text-foreground/55 leading-relaxed">
+                Scan to confirm this certificate is genuine, or share this link:{" "}
+                <a href={verifyUrl} className="text-primary font-medium break-all hover:underline">{verifyUrl}</a>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { TypeCategoryList } from "@/components/lgu/type-category-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
 const CERTIFICATION_TYPES = [
   "barangay_clearance",
@@ -10,7 +11,8 @@ const CERTIFICATION_TYPES = [
   "scholarship_certificate",
 ];
 
-export default function CertificationTypesPage() {
+export default async function CertificationTypesPage() {
+  await requireSuperAdmin();
   return (
     <TypeCategoryList
       title="Certification Types"

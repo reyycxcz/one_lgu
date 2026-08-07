@@ -1,15 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, ShieldAlert, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, ShieldAlert, Loader2, FileCheck2, X } from "lucide-react";
 import { submitComplaint } from "@/actions/complaints";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
 export default function NewComplaintPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFilesSelected(selected: FileList | null) {
+    if (!selected) return;
+    const next: File[] = [];
+    for (const f of Array.from(selected)) {
+      if (f.size > MAX_FILE_SIZE) {
+        setError(`"${f.name}" is too large. Maximum is 5MB per file.`);
+        continue;
+      }
+      if (!ALLOWED_TYPES.includes(f.type)) {
+        setError(`"${f.name}" is not a supported type. Use JPG, PNG, or PDF.`);
+        continue;
+      }
+      next.push(f);
+    }
+    if (next.length > 0) setError(null);
+    setFiles((prev) => [...prev, ...next].slice(0, 5));
+  }
+
+  function removeFile(i: number) {
+    setFiles((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,7 +44,8 @@ export default function NewComplaintPage() {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    formData.set("attachments", "[]");
+    formData.delete("files");
+    files.forEach((f) => formData.append("files", f));
 
     const result = await submitComplaint(formData);
 
@@ -45,7 +73,7 @@ export default function NewComplaintPage() {
         {/* Incident Form */}
         <div className="bryl-card p-6 lg:col-span-2 space-y-6">
           {error && (
-            <div className="p-3 rounded-xl text-sm font-sans bg-red-50 border border-red-200 text-red-700">
+            <div role="alert" aria-live="assertive" className="p-3 rounded-xl text-sm font-sans bg-red-50 border border-red-200 text-red-700">
               {error}
             </div>
           )}
@@ -113,17 +141,44 @@ export default function NewComplaintPage() {
 
             <div>
               <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                Evidence / Media Attachments
+                Evidence / Media Attachments <span className="text-foreground/40 font-normal">(optional)</span>
               </label>
-              <div className="border border-dashed border-border rounded-xl p-8 bg-muted/10 flex flex-col items-center justify-center text-center space-y-3 hover:bg-muted/20 transition-all cursor-pointer">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                multiple
+                className="hidden"
+                onChange={(e) => handleFilesSelected(e.target.files)}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border border-dashed border-border rounded-xl p-8 bg-muted/10 flex flex-col items-center justify-center text-center space-y-3 hover:bg-muted/20 transition-all"
+              >
                 <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
                   <Upload className="h-5 w-5 text-foreground/80" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">Click to upload media files</p>
-                  <p className="text-xs text-foreground/50 mt-1">Upload JPEG, PNG, MP4, or PDF (up to 15MB)</p>
+                  <p className="text-sm font-semibold">Click to upload evidence</p>
+                  <p className="text-xs text-foreground/50 mt-1">Photos or documents (JPG, PNG, PDF up to 5MB, max 5 files)</p>
                 </div>
-              </div>
+              </button>
+
+              {files.length > 0 && (
+                <ul className="mt-3 space-y-2">
+                  {files.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 text-xs">
+                      <FileCheck2 className="h-4 w-4 text-primary shrink-0" />
+                      <span className="truncate flex-1">{f.name}</span>
+                      <span className="text-foreground/40 shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
+                      <button type="button" onClick={() => removeFile(i)} className="text-foreground/40 hover:text-red-600 shrink-0">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <button
@@ -156,7 +211,7 @@ export default function NewComplaintPage() {
                 <strong>Mediation Schedule:</strong> If approved, both complainant and respondent will receive notification of the scheduled arbitration face-to-face.
               </li>
               <li>
-                <strong>Privacy:</strong> Resident identity and uploaded files are secure and encrypted under L6 data protection policies.
+                <strong>Privacy:</strong> Resident identity and uploaded files are encrypted in transit and at rest, and handled in accordance with the Data Privacy Act (RA 10173).
               </li>
             </ul>
           </div>

@@ -1,6 +1,8 @@
 import { UserList } from "@/components/lgu/user-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
-export default function AccountRequestsPage() {
+export default async function AccountRequestsPage() {
+  await requireSuperAdmin();
   return (
     <UserList
       title="Account Requests"

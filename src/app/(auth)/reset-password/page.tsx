@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoginPageLayout } from "@/components/login-form";
 import { createClient } from "@/lib/supabase/client";
+import { strongPasswordSchema } from "@/lib/validations/profile.schema";
 
 function ResetPasswordForm({
   className,
@@ -45,8 +46,9 @@ function ResetPasswordForm({
     const newPassword = formData.get("newPassword") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    if (!newPassword || newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+    const parsed = strongPasswordSchema.safeParse(newPassword);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -100,7 +102,7 @@ function ResetPasswordForm({
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+        <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
       )}
 
       <div className="grid gap-6">

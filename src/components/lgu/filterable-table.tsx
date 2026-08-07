@@ -66,6 +66,7 @@ export function FilterableTable({
               placeholder={searchPlaceholder}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              maxLength={100}
               className="pl-8 h-8 text-xs"
             />
           </div>

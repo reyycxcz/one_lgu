@@ -52,7 +52,7 @@ export function AnnouncementForm() {
           className="space-y-4"
         >
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}

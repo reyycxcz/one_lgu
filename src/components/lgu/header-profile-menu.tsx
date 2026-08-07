@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import { signOut } from "@/actions/auth";
 
 export function HeaderProfileMenu({ name, email }: { name: string; email: string }) {
@@ -20,11 +21,7 @@ export function HeaderProfileMenu({ name, email }: { name: string; email: string
             <p className="text-xs font-bold text-foreground">{name}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">{email}</p>
           </div>
-          <img
-            src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${name}`}
-            alt="Avatar"
-            className="w-9 h-9 rounded-full border border-border bg-secondary"
-          />
+          <InitialsAvatar name={name} size={36} />
           <CaretDown className="h-3 w-3 text-muted-foreground hidden sm:block" />
         </button>
       </DropdownMenuTrigger>

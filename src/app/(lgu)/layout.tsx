@@ -134,6 +134,7 @@ export default async function LGULayout({ children }: { children: ReactNode }) {
   const userProfile = {
     name: profile.full_name || profile.email || "Super Admin",
     email: profile.email || "",
+    role: profile.role as "super_admin" | "lgu_reviewer",
   };
 
   // Pending items awaiting LGU action, for the header approvals indicator.

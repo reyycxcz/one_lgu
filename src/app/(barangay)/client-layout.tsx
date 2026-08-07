@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, ReactNode } from "react";
+import { ReactNode } from "react";
 import { LogOut, Mail } from "lucide-react";
 import { SquaresFour, FileArrowUp, FolderOpen, Signature, Scales, Pulse, AddressBook } from "@phosphor-icons/react/dist/ssr";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import { signOut } from "@/actions/auth";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -25,8 +26,6 @@ interface BarangayClientLayoutProps {
 }
 
 export default function BarangayClientLayout({ children, userProfile, navGroups }: BarangayClientLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
-
   const resolvedNavGroups = navGroups.map(group => ({
     ...group,
     items: group.items.map(item => ({
@@ -39,8 +38,6 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
     <div className="min-h-screen bg-[#f5f8f6] flex">
       <div className="hidden md:block sticky top-0 h-screen">
         <Sidebar
-          collapsed={collapsed}
-          onToggle={() => setCollapsed(!collapsed)}
           user={userProfile}
           appTitle="ONELGU"
           appSubtitle={userProfile.barangayName}
@@ -61,11 +58,7 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
                 <p className="text-xs font-bold text-foreground">{userProfile.name}</p>
                 <p className="text-[10px] text-foreground/50 mt-0.5">{userProfile.email}</p>
               </div>
-              <img
-                src={`https://api.dicebear.com/10.x/open-peeps/svg?seed=${userProfile.name}`}
-                alt="Avatar"
-                className="w-9 h-9 rounded-full border border-border"
-              />
+              <InitialsAvatar name={userProfile.name} size={36} />
             </div>
           </div>
         </header>

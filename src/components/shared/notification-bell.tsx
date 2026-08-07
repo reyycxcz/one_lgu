@@ -17,6 +17,9 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  // Hides the unread dot once the panel has been opened this session, without
+  // stripping the per-item highlight while the user is still reading them.
+  const [dismissedDot, setDismissedDot] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,6 +32,14 @@ export default function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Poll for new notifications so the unread dot stays current without a refresh.
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60_000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function fetchNotifications() {
     setLoading(true);
     try {
@@ -36,6 +47,10 @@ export default function NotificationBell() {
       const data = await res.json();
       if (Array.isArray(data)) {
         setNotifications(data);
+        // A newly-arrived unread item should bring the dot back.
+        if (data.some((n: Notification) => !n.is_read)) {
+          setDismissedDot(false);
+        }
       }
     } catch {
       // silent
@@ -43,25 +58,46 @@ export default function NotificationBell() {
     setLoading(false);
   }
 
+  async function markAllRead() {
+    try {
+      await fetch("/api/notifications", { method: "POST" });
+    } catch {
+      // silent
+    }
+  }
+
   function toggleOpen() {
     const next = !open;
     setOpen(next);
-    if (next) fetchNotifications();
+    if (next) {
+      fetchNotifications();
+      setDismissedDot(true); // clear the dot immediately on open
+      markAllRead(); // persist read state server-side (highlights stay until next fetch)
+    }
   }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const hasUnread = !dismissedDot && notifications.some((n) => !n.is_read);
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleOpen}
+        aria-label={hasUnread ? "Notifications (unread)" : "Notifications"}
+        aria-haspopup="true"
+        aria-expanded={open}
         className="relative p-2 hover:bg-muted/40 rounded-lg transition-colors"
       >
         <Bell className="h-4.5 w-4.5 text-foreground/60" />
-        {unreadCount > 0 && (
+        {hasUnread && (
           <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full" />
         )}
       </button>
+
+      {/* Announces new unread notifications to screen readers without an
+          intrusive visible alert — the visible dot already covers sighted users. */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {hasUnread ? "You have unread notifications" : ""}
+      </span>
 
       <AnimatePresence>
         {open && (
@@ -110,7 +146,7 @@ export default function NotificationBell() {
                           {!notif.is_read && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
                         </div>
                         <p className="text-[11px] text-foreground/60 leading-relaxed mt-0.5 line-clamp-2">{notif.message}</p>
-                        <p className="text-[9px] text-foreground/35 mt-1 font-sans">{new Date(notif.created_at).toLocaleDateString()}</p>
+                        <p className="text-[9px] text-foreground/55 mt-1 font-sans">{new Date(notif.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>

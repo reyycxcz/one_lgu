@@ -23,6 +23,8 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
   const [verifying, setVerifying] = useState(false);
   const [done, setDone] = useState(false);
   const startedRef = useRef(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   // Enroll a fresh factor whenever the modal opens.
   useEffect(() => {
@@ -102,18 +104,56 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
     verify();
   }, [code, factorId, verifying, done, onSuccess, onClose]);
 
-  // Escape to close + lock scroll
+  // Escape to close, lock scroll, trap Tab focus within the panel, and
+  // restore focus to whatever triggered the modal once it closes.
   useEffect(() => {
     if (!open) return;
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    // Panel renders after this effect's first run (portal + AnimatePresence),
+    // so defer the initial focus to the next tick. The code input has its
+    // own autoFocus once it mounts (post-loading); this covers the loading
+    // state and the "done" state, which have no autoFocus target.
+    const focusTimer = setTimeout(() => {
+      if (document.activeElement && panelRef.current?.contains(document.activeElement)) return;
+      const first = panelRef.current?.querySelector<HTMLElement>(focusableSelector);
+      (first ?? panelRef.current)?.focus();
+    }, 0);
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !verifying) onClose();
+      if (e.key === "Escape" && !verifying) {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !panelRef.current) return;
+
+      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(focusableSelector));
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
+
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
+      clearTimeout(focusTimer);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      previouslyFocused.current?.focus();
     };
   }, [open, verifying, onClose]);
 
@@ -133,13 +173,16 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
           />
 
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
+            aria-labelledby="mfa-setup-title"
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8, transition: { duration: 0.12 } }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-sm rounded-2xl bg-white border border-border shadow-2xl p-6 font-sans"
+            className="relative w-full max-w-sm rounded-2xl bg-white border border-border shadow-2xl p-6 font-sans outline-none"
           >
             <button
               onClick={() => !verifying && onClose()}
@@ -154,20 +197,20 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
                 <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                   <ShieldCheck className="h-6 w-6" />
                 </div>
-                <h2 className="text-base font-bold text-foreground">Two-factor authentication enabled</h2>
+                <h2 id="mfa-setup-title" className="text-base font-bold text-foreground">Two-factor authentication enabled</h2>
                 <p className="text-sm text-muted-foreground">Your account is now protected.</p>
               </div>
             ) : (
               <>
                 <div className="text-center space-y-1 mb-5">
-                  <h2 className="text-base font-bold text-foreground">Set up two-factor authentication</h2>
+                  <h2 id="mfa-setup-title" className="text-base font-bold text-foreground">Set up two-factor authentication</h2>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Scan the QR code with your authenticator app (Google Authenticator, Authy, 1Password), then enter the 6-digit code.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm mb-4">
+                  <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm mb-4">
                     {error}
                   </div>
                 )}

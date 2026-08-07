@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { ArrowRight, FileText, Landmark, Users, Smartphone, MapPin, Lock, Scale, Bell, Zap, CheckCircle2, Clock, Check, BookOpen, ShieldAlert, Sparkles, Award, Megaphone, Plus, Minus, Upload, ClipboardCheck, FileSignature, Menu, X } from "lucide-react";
+import { ArrowRight, FileText, Landmark, Users, Smartphone, MapPin, Lock, Scale, Bell, Zap, CheckCircle2, Clock, Check, BookOpen, ShieldAlert, Sparkles, Award, Megaphone, Plus, Minus, Upload, ClipboardCheck, FileSignature, Menu, X, Home, Download } from "lucide-react";
 import type { CivicPost } from "@/lib/civic-bulletin";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
@@ -25,6 +26,7 @@ const NAV_LINKS = [
   { href: "#portals", label: "Portals" },
   { href: "#security", label: "Benefits" },
   { href: "#how-it-works", label: "How It Works" },
+  { href: "#mobile-app", label: "App" },
   { href: "#faq", label: "FAQ" },
 ];
 
@@ -49,17 +51,19 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
   ];
 
   return (
+    <LenisProvider>
     <div className="relative min-h-screen bg-white flex flex-col justify-between">
-      
+
       {/* Header */}
       <header className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-[#E3F2E7] transition-all duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logo/one_lgu.png"
-              width={56}
-              height={56}
-              className="h-11 sm:h-12 w-auto object-contain"
+              src="/images/logo/landscape_logo.png"
+              width={340}
+              height={97}
+              priority
+              className="h-10 sm:h-12 w-auto object-contain"
               alt="OneLGU Logo"
             />
           </div>
@@ -585,6 +589,111 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           </div>
         </motion.section>
 
+        {/* Mobile App — Coming Soon */}
+        <motion.section
+          id="mobile-app"
+          className="max-w-6xl mx-auto px-6 py-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={staggerContainer}
+        >
+          <motion.div
+            variants={fadeUp}
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B5A30] via-[#0F8A4E] to-[#00B15E] px-6 sm:px-12 py-12 sm:py-14"
+          >
+            {/* glow accents */}
+            <div className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+
+            <div className="relative flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+              {/* Left: copy */}
+              <div className="flex-1 text-center lg:text-left">
+                <span className="inline-flex items-center gap-1.5 font-sans text-[10px] font-bold px-3.5 py-1 bg-white/15 text-white rounded-full border border-white/25 backdrop-blur-sm">
+                  <Smartphone className="h-3.5 w-3.5" /> Coming Soon
+                </span>
+                <h2 className="font-sans font-medium text-3xl sm:text-4xl md:text-5xl mt-4 text-white leading-tight">
+                  OneLGU in your pocket
+                </h2>
+                <p className="text-white/80 font-sans text-sm sm:text-base mt-4 max-w-md mx-auto lg:mx-0 leading-relaxed">
+                  Request certificates, file complaints, and track everything in real time — soon on your phone. The OneLGU mobile app for residents is on the way.
+                </p>
+
+                {/* Download options (coming soon — not clickable yet) */}
+                <div className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
+                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-black/25 border border-white/20 backdrop-blur-sm cursor-default">
+                    <svg viewBox="0 0 512 512" className="h-6 w-6" aria-hidden><path fill="#fff" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
+                    <div className="text-left">
+                      <p className="text-[9px] text-white/60 font-sans leading-none">Coming soon on</p>
+                      <p className="text-sm text-white font-sans font-bold leading-tight">Google Play</p>
+                    </div>
+                  </div>
+                  <a
+                    href="https://github.com/dvshaoo/one_lgu/releases/latest/download/onelgu.apk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-white text-primary border border-white backdrop-blur-sm transition-transform hover:-translate-y-0.5"
+                  >
+                    <Download className="h-6 w-6" />
+                    <div className="text-left">
+                      <p className="text-[9px] text-primary/60 font-sans leading-none">Direct install · Android</p>
+                      <p className="text-sm font-sans font-bold leading-tight">Download APK</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              {/* Right: phone mockup */}
+              <div className="relative shrink-0">
+                <div className="relative w-[200px] h-[400px] rounded-[2.2rem] bg-[#0A2E1C] border-[6px] border-black/30 shadow-2xl overflow-hidden">
+                  {/* notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-black/50 rounded-b-2xl z-10" />
+                  {/* screen */}
+                  <div className="absolute inset-0 bg-[#F8FDF9] flex flex-col">
+                    <div className="pt-8 px-4 flex items-center justify-between">
+                      <Image src="/images/logo/landscape_logo.png" width={90} height={26} className="h-6 w-auto object-contain" alt="OneLGU" />
+                      <Bell className="h-4 w-4 text-foreground/50" />
+                    </div>
+                    <div className="px-4 mt-4">
+                      <div className="rounded-2xl gradient-primary p-3">
+                        <p className="text-[9px] font-bold text-white/80 uppercase tracking-wide">Barangay Services</p>
+                        <p className="text-xs font-bold text-white mt-0.5">Request certificates online</p>
+                      </div>
+                    </div>
+                    <div className="px-4 mt-3 flex gap-2">
+                      <div className="flex-1 rounded-xl bg-white border border-[#E3F2E7] p-2.5">
+                        <p className="text-[8px] text-foreground/50 uppercase">Certificates</p>
+                        <p className="text-lg font-bold text-foreground">2</p>
+                      </div>
+                      <div className="flex-1 rounded-xl bg-white border border-[#E3F2E7] p-2.5">
+                        <p className="text-[8px] text-foreground/50 uppercase">Complaints</p>
+                        <p className="text-lg font-bold text-foreground">1</p>
+                      </div>
+                    </div>
+                    <div className="px-4 mt-3 space-y-2">
+                      {["Barangay Clearance", "Certificate of Residency"].map((t) => (
+                        <div key={t} className="flex items-center gap-2 rounded-xl bg-white border border-[#E3F2E7] p-2.5">
+                          <div className="h-6 w-6 rounded-lg bg-secondary flex items-center justify-center">
+                            <FileText className="h-3 w-3 text-primary" />
+                          </div>
+                          <p className="text-[10px] text-foreground flex-1">{t}</p>
+                          <span className="text-[7px] font-bold text-white bg-primary px-1.5 py-0.5 rounded-full">Approved</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* bottom nav */}
+                    <div className="mt-auto flex items-center justify-around border-t border-[#E3F2E7] bg-white py-2">
+                      {[Home, FileText, Bell, Users].map((Icon, i) => (
+                        <Icon key={i} className={`h-4 w-4 ${i === 0 ? "text-primary" : "text-foreground/30"}`} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.section>
+
         {/* FAQ Section */}
         <motion.section
           id="faq"
@@ -638,7 +747,7 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
             <h2 className="font-sans font-medium text-4xl md:text-5xl text-[#143D2A]">Ready to go paperless?</h2>
             <p className="text-foreground/55 text-sm font-sans max-w-lg mx-auto">
-              Join thousands of residents who are already using OneLGU to request certificates, file complaints, and access barangay services online.
+              Request certificates, file complaints, and access barangay services online with OneLGU.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/register" className="px-8 py-3 bg-primary text-white rounded-full font-sans text-sm font-bold transition-all duration-200 hover:bg-primary/95 hover:shadow-[0_4px_12px_rgba(0,177,94,0.2)] hover:translate-y-[-1px]">
@@ -658,15 +767,14 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             {/* Column 1: Brand Info */}
             <div className="col-span-2 space-y-4">
-              <div className="flex items-center gap-3">
-                <Image 
-                  src="/images/logo/one_lgu.png" 
-                  width={28}
-                  height={28}
-                  className="h-7 w-auto object-contain" 
+              <div className="flex items-center">
+                <Image
+                  src="/images/logo/landscape_logo.png"
+                  width={340}
+                  height={97}
+                  className="h-11 w-auto object-contain"
                   alt="OneLGU Logo"
                 />
-                <span className="font-sans font-bold text-base tracking-tight"><span className="text-primary">ONE</span><span className="text-white" style={{textShadow: "0 0 1px #000, 0 0 1px #000, 0 0 1px #000, 0 0 1px #000"}}>LGU</span></span>
               </div>
               <p className="text-xs text-foreground/65 max-w-sm leading-relaxed font-sans">
                 Unified digital governance platform for local government units, barangays, and residents. Connecting communities with secure, paperless, and real-time administrative workflows.
@@ -713,5 +821,6 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
         </div>
       </footer>
     </div>
+    </LenisProvider>
   );
 }

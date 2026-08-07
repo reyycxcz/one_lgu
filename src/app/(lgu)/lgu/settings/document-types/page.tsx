@@ -1,8 +1,10 @@
 import { TypeCategoryList } from "@/components/lgu/type-category-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
 const REPORT_TYPES = ["monthly", "financial", "accomplishment", "compliance"];
 
-export default function DocumentTypesPage() {
+export default async function DocumentTypesPage() {
+  await requireSuperAdmin();
   return (
     <TypeCategoryList
       title="Document Types"

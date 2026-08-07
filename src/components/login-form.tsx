@@ -142,10 +142,10 @@ export function LoginPageLayout({
         <div className="flex justify-center gap-2 md:justify-start">
           <Link href="/" className="flex items-center gap-2.5">
             <Image
-              src="/images/logo/one_lgu.png"
-              width={200}
-              height={200}
-              className="h-20 w-auto object-contain"
+              src="/images/logo/landscape_logo.png"
+              width={340}
+              height={97}
+              className="h-11 w-auto object-contain"
               alt="OneLGU Logo"
             />
           </Link>

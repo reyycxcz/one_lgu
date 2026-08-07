@@ -1,14 +1,19 @@
 import { z } from "zod";
+import { strongPasswordSchema } from "./profile.schema";
 
 export const loginSchema = z.object({
   email: z.string().email("Please provide a valid government or personal email"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  // Intentionally just "non-empty", not the strong-password rule: this checks
+  // credentials against accounts that may predate the current policy. Raising
+  // this to match registerSchema would risk locking out real existing users
+  // whose password was created under a weaker rule.
+  password: z.string().min(1, "Password is required"),
 });
 
 export const registerSchema = z.object({
   fullName: z.string().min(3, "Full name must be at least 3 characters"),
   email: z.string().email("Please provide a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters long for residents"),
+  password: strongPasswordSchema,
 });
 
 export const onboardingSchema = z.object({

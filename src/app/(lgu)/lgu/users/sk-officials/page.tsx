@@ -1,6 +1,8 @@
 import { UserList } from "@/components/lgu/user-list";
+import { requireSuperAdmin } from "@/lib/auth/session";
 
-export default function SKOfficialsPage() {
+export default async function SKOfficialsPage() {
+  await requireSuperAdmin();
   return (
     <UserList
       title="SK Officials"

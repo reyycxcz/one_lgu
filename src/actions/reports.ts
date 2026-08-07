@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { reportSchema } from "@/lib/validations/report.schema";
 import { logAction } from "@/lib/audit/logger";
+import { notifyUser } from "@/lib/notifications/notify";
 import { requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
 
@@ -70,6 +71,12 @@ export async function reviewReport(
 
   const supabase = await createClient();
 
+  const { data: before } = await supabase
+    .from("reports")
+    .select("status")
+    .eq("id", id)
+    .single();
+
   const { data, error } = await supabase
     .from("reports")
     .update({
@@ -91,7 +98,24 @@ export async function reviewReport(
     entityId: id,
     barangayId: data.barangay_id,
     metadata: { notes },
+    oldValue: before ? { status: before.status } : undefined,
+    newValue: { status },
   });
+
+  // Notify the barangay official who submitted the report.
+  if (data.submitted_by) {
+    await notifyUser({
+      recipientId: data.submitted_by,
+      title: `Report ${status === "approved" ? "approved" : "returned"}`,
+      message:
+        status === "approved"
+          ? `Your report "${data.title}" was approved by the LGU.`
+          : `Your report "${data.title}" was returned.${notes ? ` Reason: ${notes}` : " Please review and resubmit."}`,
+      type: "report_update",
+      entityType: "report",
+      entityId: id,
+    });
+  }
 
   return { data };
 }

@@ -45,6 +45,7 @@ export default function ServiceSearch() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        maxLength={100}
         onKeyDown={(e) => {
           if (e.key === "Escape") setQuery("");
           if (e.key === "Enter" && matches.length > 0) handleSelect(matches[0].href);

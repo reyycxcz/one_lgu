@@ -53,10 +53,10 @@ export default async function CivicPostPage({
         <div className="bg-white/90 backdrop-blur-md border border-[#E3F2E7] rounded-2xl shadow-[0_2px_12px_rgba(20,61,42,0.04)] px-4 sm:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/images/logo/one_lgu.png"
-              width={48}
-              height={48}
-              className="h-9 sm:h-10 w-auto object-contain"
+              src="/images/logo/landscape_logo.png"
+              width={340}
+              height={97}
+              className="h-8 sm:h-9 w-auto object-contain"
               alt="OneLGU Logo"
             />
           </Link>

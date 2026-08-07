@@ -1,13 +1,20 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 const chartConfig = {
-  reports: { label: "Reports", color: "hsl(var(--chart-1))" },
-  certifications: { label: "Certifications", color: "hsl(var(--chart-2))" },
-  complaints: { label: "Complaints", color: "hsl(var(--chart-3))" },
+  reports: { label: "Reports", color: "#16A34A" },
+  certifications: { label: "Certifications", color: "#2563EB" },
+  complaints: { label: "Complaints", color: "#F59E0B" },
 } satisfies ChartConfig;
 
 export function SubmissionsTrendChart({
@@ -23,21 +30,7 @@ export function SubmissionsTrendChart({
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[280px] w-full">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="fillReports" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-reports)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-reports)" stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillCertifications" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-certifications)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-certifications)" stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillComplaints" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-complaints)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-complaints)" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
+          <BarChart data={data} barCategoryGap={4}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -47,8 +40,9 @@ export function SubmissionsTrendChart({
               minTickGap={32}
               tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} width={28} />
             <ChartTooltip
-              cursor={false}
+              cursor={{ fill: "rgba(0,0,0,0.04)" }}
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -56,10 +50,11 @@ export function SubmissionsTrendChart({
                 />
               }
             />
-            <Area dataKey="complaints" type="natural" fill="url(#fillComplaints)" stroke="var(--color-complaints)" stackId="a" />
-            <Area dataKey="certifications" type="natural" fill="url(#fillCertifications)" stroke="var(--color-certifications)" stackId="a" />
-            <Area dataKey="reports" type="natural" fill="url(#fillReports)" stroke="var(--color-reports)" stackId="a" />
-          </AreaChart>
+            <Bar dataKey="reports" fill="var(--color-reports)" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="certifications" fill="var(--color-certifications)" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="complaints" fill="var(--color-complaints)" radius={[3, 3, 0, 0]} />
+            <ChartLegend content={<ChartLegendContent />} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

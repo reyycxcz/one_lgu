@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      Array.from(citiesMap.entries()).map(([name, code]) => ({ name, code }))
+      Array.from(citiesMap.entries()).map(([name, code]) => ({ name, code })),
+      // Public reference data (municipality/barangay lists), safe to cache
+      // briefly at the edge/browser — cuts load on repeated onboarding visits.
+      { headers: { "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400" } }
     );
   }
 
@@ -33,6 +36,7 @@ export async function GET(request: NextRequest) {
     .order("name");
 
   return NextResponse.json(
-    (data || []).map((b) => ({ name: b.name, code: b.code, fullName: b.name }))
+    (data || []).map((b) => ({ name: b.name, code: b.code, fullName: b.name })),
+    { headers: { "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400" } }
   );
 }

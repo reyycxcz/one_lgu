@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import {
   SquaresFour,
@@ -87,30 +87,35 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 
 interface LGUClientLayoutProps {
   children: ReactNode;
-  userProfile: { name: string; email: string };
+  userProfile: { name: string; email: string; role: "super_admin" | "lgu_reviewer" };
   navGroups: { label: string; items: { path: string; label: string; icon: string }[] }[];
   pending: PendingCounts;
 }
 
-export default function LGUClientLayout({ children, userProfile, navGroups, pending }: LGUClientLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const pathname = usePathname();
+// Sidebar groups that only super_admin should see — lgu_reviewer's pages
+// under these are gated server-side too (requireSuperAdmin), this just
+// keeps the nav from listing links they can't actually open.
+const SUPER_ADMIN_ONLY_GROUPS = new Set(["User Management", "System Management"]);
 
-  const resolvedNavGroups = navGroups.map((group) => ({
-    ...group,
-    items: group.items.map((item) => ({
-      ...item,
-      icon: ICON_MAP[item.icon],
-    })),
-  }));
+export default function LGUClientLayout({ children, userProfile, navGroups, pending }: LGUClientLayoutProps) {
+  const pathname = usePathname();
+  const isSuperAdmin = userProfile.role === "super_admin";
+
+  const resolvedNavGroups = navGroups
+    .filter((group) => isSuperAdmin || !SUPER_ADMIN_ONLY_GROUPS.has(group.label))
+    .map((group) => ({
+      ...group,
+      items: group.items.map((item) => ({
+        ...item,
+        icon: ICON_MAP[item.icon],
+      })),
+    }));
 
   return (
     <div className="min-h-screen bg-[#f5f8f6] flex">
       <div className="hidden md:block sticky top-0 h-screen">
         <Sidebar
-          collapsed={collapsed}
-          onToggle={() => setCollapsed(!collapsed)}
-          user={{ name: userProfile.name, email: userProfile.email, role: "Super Admin" }}
+          user={{ name: userProfile.name, email: userProfile.email, role: isSuperAdmin ? "Super Admin" : "LGU Reviewer" }}
           appTitle="ONELGU"
           appSubtitle="Ilocos Norte"
           navGroups={resolvedNavGroups}

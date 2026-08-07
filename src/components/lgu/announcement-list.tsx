@@ -23,6 +23,7 @@ export async function AnnouncementList({
   const { data: announcements } = await supabase
     .from("announcements")
     .select("id, slug, category, title, tag, status, published_at, created_at")
+    .limit(500)
     .in("status", statuses)
     .order("published_at", { ascending: false, nullsFirst: false });
 

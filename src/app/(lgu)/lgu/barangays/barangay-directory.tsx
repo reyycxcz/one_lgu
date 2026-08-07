@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin } from "lucide-react";
-import { Avatar } from "@/components/base/avatar/avatar";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import { BadgeWithDot } from "@/components/base/badges/badges";
 import { TableCard } from "@/components/application/table/table-card";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
@@ -65,6 +65,7 @@ export default function BarangayDirectory({ barangays, totalBarangays }: { baran
                 placeholder="Search..."
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1); }}
+                maxLength={100}
                 className="pl-8 h-8 text-xs w-52"
               />
             </div>
@@ -117,11 +118,7 @@ export default function BarangayDirectory({ barangays, totalBarangays }: { baran
                           <td className="px-5 py-3 text-muted-foreground">{rowNumber}</td>
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
-                              <Avatar
-                                src={`https://api.dicebear.com/10.x/initials/svg?seed=${bgy.name}`}
-                                alt={bgy.name}
-                                size="sm"
-                              />
+                              <InitialsAvatar name={bgy.name} size={32} />
                               <span className="font-medium text-foreground">{bgy.name}</span>
                             </div>
                           </td>

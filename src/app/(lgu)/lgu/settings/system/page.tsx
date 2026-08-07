@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireSuperAdmin } from "@/lib/auth/session";
 import { LguPageHeader } from "@/components/lgu/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building2, FileText, Database } from "lucide-react";
 
 export default async function SystemSettingsPage() {
+  await requireSuperAdmin();
   const supabase = await createClient();
 
   const [
