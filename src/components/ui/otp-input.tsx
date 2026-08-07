@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface OtpInputProps {
@@ -17,6 +17,18 @@ interface OtpInputProps {
 export function OtpInput({ value, onChange, length = 6, disabled, autoFocus, id }: OtpInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = Array.from({ length }, (_, i) => value[i] || "");
+
+  // When the parent clears the code externally (e.g. after a failed verify
+  // attempt), bring focus back to the first box instead of leaving it
+  // wherever it last was — otherwise typing does nothing until the user
+  // notices and clicks back in.
+  const wasEmpty = useRef(value === "");
+  useEffect(() => {
+    if (value === "" && !wasEmpty.current && document.activeElement !== inputRefs.current[0]) {
+      inputRefs.current[0]?.focus();
+    }
+    wasEmpty.current = value === "";
+  }, [value]);
 
   function setDigit(index: number, char: string) {
     const next = digits.slice();

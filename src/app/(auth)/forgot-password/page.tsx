@@ -93,6 +93,7 @@ function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithout
     if (verifyError) {
       setLoading(false);
       setError(verifyError.message || "Invalid or expired code. Please try again.");
+      setCode("");
       return;
     }
 
