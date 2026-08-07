@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OtpInput } from "@/components/ui/otp-input";
 import { createClient } from "@/lib/supabase/client";
 
 export function MfaSetupForm({
@@ -70,6 +70,7 @@ export function MfaSetupForm({
 
     if (verifyError) {
       setError(verifyError.message || "Invalid code. Please try again.");
+      setCode("");
       return;
     }
 
@@ -116,17 +117,7 @@ export function MfaSetupForm({
       <form onSubmit={handleVerify} className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="code">6-digit code</Label>
-          <Input
-            id="code"
-            name="code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-            placeholder="123456"
-            required
-          />
+          <OtpInput id="code" value={code} onChange={setCode} />
         </div>
         <Button type="submit" className="w-full" disabled={verifying || code.length !== 6}>
           {verifying ? "Verifying..." : "Verify & Continue"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface OtpInputProps {
@@ -63,32 +63,38 @@ export function OtpInput({ value, onChange, length = 6, disabled, autoFocus, id 
     inputRefs.current[focusIndex]?.focus();
   }
 
+  // Visually group into halves (e.g. "123 - 456") — easier to read/relay
+  // aloud than six boxes in an undifferentiated row.
+  const midpoint = Math.ceil(length / 2);
+
   return (
-    <div id={id} role="group" aria-label="One-time verification code" className="flex gap-2 justify-center">
+    <div id={id} role="group" aria-label="One-time verification code" className="flex items-center gap-2 justify-center">
       {digits.map((digit, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            inputRefs.current[i] = el;
-          }}
-          type="text"
-          inputMode="numeric"
-          autoComplete={i === 0 ? "one-time-code" : "off"}
-          maxLength={1}
-          value={digit}
-          disabled={disabled}
-          autoFocus={autoFocus && i === 0}
-          aria-label={`Digit ${i + 1} of ${length}`}
-          onChange={(e) => handleChange(i, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(i, e)}
-          onPaste={handlePaste}
-          onFocus={(e) => e.target.select()}
-          className={cn(
-            "h-12 w-10 sm:w-11 rounded-lg border border-input bg-background text-center text-lg font-mono font-semibold",
-            "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
-            "disabled:opacity-60"
-          )}
-        />
+        <Fragment key={i}>
+          {i === midpoint && <span className="text-muted-foreground px-0.5 select-none">-</span>}
+          <input
+            ref={(el) => {
+              inputRefs.current[i] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            autoComplete={i === 0 ? "one-time-code" : "off"}
+            maxLength={1}
+            value={digit}
+            disabled={disabled}
+            autoFocus={autoFocus && i === 0}
+            aria-label={`Digit ${i + 1} of ${length}`}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            onPaste={handlePaste}
+            onFocus={(e) => e.target.select()}
+            className={cn(
+              "h-12 w-10 sm:w-11 rounded-lg border border-input bg-background text-center text-lg font-mono font-semibold",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
+              "disabled:opacity-60"
+            )}
+          />
+        </Fragment>
       ))}
     </div>
   );

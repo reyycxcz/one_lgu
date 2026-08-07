@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OtpInput } from "@/components/ui/otp-input";
 import { createClient } from "@/lib/supabase/client";
 
 interface MfaSetupModalProps {
@@ -237,17 +238,7 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
                       <label className="block text-xs font-medium text-foreground/60 mb-1.5 text-center">
                         6-digit code
                       </label>
-                      <input
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        maxLength={6}
-                        value={code}
-                        onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                        placeholder="123456"
-                        autoFocus
-                        disabled={verifying}
-                        className="w-full h-11 rounded-lg border border-input bg-background text-center text-lg font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
-                      />
+                      <OtpInput value={code} onChange={setCode} disabled={verifying} autoFocus />
                       <div className="h-5 mt-2 flex items-center justify-center">
                         {verifying && (
                           <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
