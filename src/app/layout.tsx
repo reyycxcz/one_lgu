@@ -141,6 +141,11 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           nonce={nonce}
+          // Browsers deliberately hide the `nonce` attribute's value from JS
+          // after the element mounts (so a script can't read/leak its own
+          // nonce), so client-side hydration always sees nonce="" here even
+          // though the server set it correctly. Harmless — CSP still passes.
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {children}
