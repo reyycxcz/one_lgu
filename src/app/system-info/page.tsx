@@ -3,8 +3,9 @@ import {
   Layers, Database, ShieldCheck, Palette, Code2, Cloud, Bell, QrCode,
   FileText, Scale, ClipboardList, BarChart3, Megaphone, Users, KeyRound,
   Lock, Bug, Sparkles, GitCommit, CalendarDays, Boxes, Smartphone, Mail,
-  Gauge, Eye,
+  Gauge, Eye, ExternalLink,
 } from "lucide-react";
+import { fetchRecentCommits } from "@/lib/github";
 
 // Not indexed/crawled — deliberately unauthenticated (single-person internal
 // reference, no external links to it), so keep it out of search results as
@@ -65,7 +66,20 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
   );
 }
 
-export default function SystemInfoPage() {
+// Static fallback — used until GITHUB_TOKEN is set (repo is private, so an
+// unauthenticated API call 404s) and kept as a readable summary either way
+// for the early history before this page existed to auto-track anything.
+const STATIC_TIMELINE = [
+  { date: "Jul 8, 2026", label: "Initial commit", detail: "Full-stack scaffold — Next.js App Router, Supabase schema, RBAC middleware, core auth/certification/complaint/report server actions." },
+  { date: "Jul 19–21, 2026", label: "Portal build-out", detail: "Resident dashboard optimization, PWA support, SEO/structured data, Civic Bulletin." },
+  { date: "Jul 22, 2026", label: "Analytics & polish", detail: "Vercel Web Analytics, live clock, LGU header components, loading skeletons across all portals." },
+  { date: "Aug 7, 2026", label: "Security & a11y hardening pass", detail: "RBAC role split, enriched audit trail, QR certificate verification, nonce-based CSP, focus-trap modals, OTP consistency." },
+  { date: "Aug 10, 2026", label: "Hardening pass 2", detail: "Data-subject rights (export/delete account), CAPTCHA, durable Upstash rate limiting, Sentry, is_active enforcement bug fix, this page." },
+];
+
+export default async function SystemInfoPage() {
+  const commits = await fetchRecentCommits();
+
   return (
     <div className="min-h-screen bg-[#FAFDFB]">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-14 space-y-16">
@@ -260,36 +274,79 @@ export default function SystemInfoPage() {
 
         {/* ─── Timeline ─── */}
         <section>
-          <SectionHeading eyebrow="History" title="Build Timeline" />
-          <div className="rounded-lg border border-border bg-white p-6 space-y-5">
-            {[
-              { date: "Jul 8, 2026", label: "Initial commit", detail: "Full-stack scaffold — Next.js App Router, Supabase schema, RBAC middleware, core auth/certification/complaint/report server actions." },
-              { date: "Jul 19–21, 2026", label: "Portal build-out", detail: "Resident dashboard optimization, PWA support, SEO/structured data, Civic Bulletin." },
-              { date: "Jul 22, 2026", label: "Analytics & polish", detail: "Vercel Web Analytics, live clock, LGU header components, loading skeletons across all portals." },
-              { date: "Aug 7, 2026", label: "Security & a11y hardening pass", detail: "RBAC role split, enriched audit trail, QR certificate verification, nonce-based CSP, focus-trap modals, OTP consistency." },
-              { date: "Aug 10, 2026", label: "Hardening pass 2", detail: "Data-subject rights (export/delete account), CAPTCHA, durable Upstash rate limiting, Sentry, is_active enforcement bug fix, this page." },
-            ].map((item) => (
-              <div key={item.label} className="flex gap-4">
-                <div className="flex flex-col items-center pt-1">
-                  <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                  <div className="w-px flex-1 bg-border mt-1" />
-                </div>
-                <div className="pb-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <CalendarDays className="h-3 w-3 text-primary/70" />
-                    <span className="text-[11px] font-bold text-primary/80 font-sans">{item.date}</span>
-                  </div>
-                  <p className="text-sm font-bold text-foreground font-sans">{item.label}</p>
-                  <p className="text-xs text-foreground/60 font-sans leading-relaxed mt-0.5">{item.detail}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <SectionHeading eyebrow="History" title="Build Timeline" />
+            {commits && (
+              <span className="text-[11px] font-semibold text-foreground/40 font-sans flex items-center gap-1.5">
+                <GitCommit className="h-3 w-3" /> Live from GitHub
+              </span>
+            )}
           </div>
+
+          {commits ? (
+            <div className="rounded-lg border border-border bg-white p-6 space-y-5 max-h-[600px] overflow-y-auto">
+              {commits.map((c) => (
+                <a
+                  key={c.sha}
+                  href={c.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex gap-4 group"
+                >
+                  <div className="flex flex-col items-center pt-1">
+                    <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                    <div className="w-px flex-1 bg-border mt-1" />
+                  </div>
+                  <div className="pb-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <CalendarDays className="h-3 w-3 text-primary/70 shrink-0" />
+                      <span className="text-[11px] font-bold text-primary/80 font-sans">
+                        {c.date ? new Date(c.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+                      </span>
+                      <span className="text-[10px] font-mono text-foreground/35">{c.sha}</span>
+                      <ExternalLink className="h-2.5 w-2.5 text-foreground/25 group-hover:text-primary transition-colors shrink-0" />
+                    </div>
+                    <p className="text-sm font-bold text-foreground font-sans group-hover:text-primary transition-colors">
+                      {c.message}
+                    </p>
+                    {c.detail && (
+                      <p className="text-xs text-foreground/60 font-sans leading-relaxed mt-0.5 whitespace-pre-line">
+                        {c.detail}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border bg-white p-6 space-y-5">
+              {STATIC_TIMELINE.map((item) => (
+                <div key={item.label} className="flex gap-4">
+                  <div className="flex flex-col items-center pt-1">
+                    <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                    <div className="w-px flex-1 bg-border mt-1" />
+                  </div>
+                  <div className="pb-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <CalendarDays className="h-3 w-3 text-primary/70" />
+                      <span className="text-[11px] font-bold text-primary/80 font-sans">{item.date}</span>
+                    </div>
+                    <p className="text-sm font-bold text-foreground font-sans">{item.label}</p>
+                    <p className="text-xs text-foreground/60 font-sans leading-relaxed mt-0.5">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <footer className="pt-6 border-t border-border flex items-center gap-2 text-[11px] text-foreground/40 font-sans">
           <GitCommit className="h-3 w-3" />
-          <span>Latest tracked change reflected here — update this page as the system evolves.</span>
+          <span>
+            {commits
+              ? "Timeline pulled live from GitHub (hourly cache) — every push to master shows up here automatically."
+              : "Static summary — set GITHUB_TOKEN to pull this live from commit history instead."}
+          </span>
         </footer>
       </div>
     </div>
