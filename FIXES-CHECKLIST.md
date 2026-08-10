@@ -27,7 +27,6 @@ Derived from [AUDIT-REPORT.md](AUDIT-REPORT.md) (2026-07-26). Check items off as
 
 ## Medium
 
-- [ ] [OWNER] Enable **leaked-password protection** (HaveIBeenPwned) — needs Supabase plan upgrade (was 402)
 - [x] [CODE] Unify **password rules** — register/reset/change-password now share `strongPasswordSchema` (min 8 + letter + number); login intentionally stays "non-empty only" so existing accounts created under the old rule aren't locked out
 - [x] [CODE] Add **caps on unbounded LGU list queries** — `complaint-list`, `certification-list`, `report-list`, `document-list`, `user-list`, `announcement-list` now hard-cap at 500–1000 rows instead of fetching all rows unbounded. (True server-driven `range()` pagination with server-side search/filter is a larger UX rework — not done, flagged for later if needed)
 - [ ] [CODE] Add **`deleted_at` soft-delete** to core records + RLS exclusion (RA 10173 retention) — **N/A for now**: there is no delete functionality anywhere in the app yet (no `.delete()` call exists), so there's nothing to soft-delete. Add this when an actual delete feature is built.
