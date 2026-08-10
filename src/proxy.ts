@@ -11,16 +11,19 @@ const isDev = process.env.NODE_ENV === "development";
 // framework-injected <script> tags inherit trust from the nonce'd script
 // that loads them, which is the standard Next.js nonce pattern.
 function buildCsp(nonce: string) {
+  // Turnstile's anti-automation checks load assets from randomized
+  // per-session subdomains (e.g. brunhild.challenges.cloudflare.com), not
+  // just the bare challenges.cloudflare.com — CSP host matching isn't
+  // implicitly wildcarded, so without the *.challenges.cloudflare.com
+  // entries the widget silently fails to render and never produces a token.
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://*.supabase.co",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://challenges.cloudflare.com",
-    // Turnstile's challenge widget renders in an iframe from this origin —
-    // harmless to allow even when TURNSTILE_SITE_KEY isn't set (unused source).
-    "frame-src https://challenges.cloudflare.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com https://*.challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
