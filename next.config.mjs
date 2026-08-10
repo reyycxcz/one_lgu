@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 // Content-Security-Policy is NOT set here — it needs a fresh nonce per
 // request (see src/proxy.ts), which a static config-level header can't
@@ -34,4 +36,13 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// withSentryConfig only uploads source maps when SENTRY_AUTH_TOKEN/ORG/PROJECT
+// are set — without them it degrades gracefully to a no-op wrapper (a build-time
+// log line, nothing else), same "unconfigured = inert" behavior as the rest
+// of the Sentry setup (src/instrumentation.ts, src/instrumentation-client.ts).
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+});

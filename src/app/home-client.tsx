@@ -810,7 +810,7 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
                 <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">How to Register</Link></li>
                 <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">Frequently Asked Questions</Link></li>
                 <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">Contact Barangay</Link></li>
-                <li><Link href="#" className="hover:text-[#143D2A] transition-colors duration-150">Privacy Policy</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-[#143D2A] transition-colors duration-150">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>

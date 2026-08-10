@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { register } from "@/actions/auth";
 import { LoginPageLayout } from "@/components/login-form";
+import { TurnstileWidget } from "@/components/ui/turnstile-widget";
+import { PrivacyPolicyModal } from "@/components/privacy-policy-modal";
 
 function RegisterForm({
   className,
@@ -20,6 +22,8 @@ function RegisterForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [policyOpen, setPolicyOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -106,7 +110,30 @@ function RegisterForm({
             </button>
           </div>
         </div>
-        <Button type="submit" className="w-full" disabled={loading || success}>
+        <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            name="consent"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            required
+            className="mt-0.5 h-3.5 w-3.5 rounded border-input accent-primary shrink-0"
+          />
+          <span>
+            I have read and agree to the{" "}
+            <button
+              type="button"
+              onClick={() => setPolicyOpen(true)}
+              className="font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              Privacy Policy
+            </button>{" "}
+            and consent to the collection and processing of my personal data as described.
+          </span>
+        </label>
+
+        <TurnstileWidget />
+        <Button type="submit" className="w-full" disabled={loading || success || !consent}>
           {success ? "Account created!" : loading ? "Creating account..." : "Create Account"}
         </Button>
       </div>
@@ -116,6 +143,8 @@ function RegisterForm({
           Log in here
         </Link>
       </div>
+
+      <PrivacyPolicyModal open={policyOpen} onClose={() => setPolicyOpen(false)} />
     </form>
   );
 }

@@ -19,9 +19,15 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient();
 
+  // Only meaningful once Captcha protection is turned on in the Supabase
+  // Auth dashboard with a Turnstile secret key — until then Supabase ignores
+  // this field entirely, so it's safe to always pass through.
+  const captchaToken = formData.get("cf-turnstile-response") as string | undefined;
+
   const { data: authData, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: captchaToken ? { captchaToken } : undefined,
   });
 
   if (error) {
@@ -70,7 +76,15 @@ export async function register(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
+  // The checkbox is `required` client-side, but that's trivially bypassed by
+  // posting the form directly — re-check server-side so consent is actually
+  // enforced, not just suggested.
+  if (formData.get("consent") !== "on") {
+    return { error: "You must agree to the Privacy Policy to create an account." };
+  }
+
   const supabase = await createClient();
+  const captchaToken = formData.get("cf-turnstile-response") as string | undefined;
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -80,6 +94,7 @@ export async function register(formData: FormData) {
         full_name: parsed.data.fullName,
         role: "resident",
       },
+      ...(captchaToken ? { captchaToken } : {}),
     },
   });
 
@@ -90,11 +105,14 @@ export async function register(formData: FormData) {
   // profiles directly, since a client-writable insert policy would be a
   // privilege-escalation vector.
   if (authData.user) {
+    // Evidence-of-consent trail for RA 10173 — stored in the existing
+    // metadata jsonb rather than a new profiles column, no migration needed.
     await logAction({
       actorId: authData.user.id,
       action: "auth.registered",
       entityType: "profile",
       entityId: authData.user.id,
+      metadata: { privacy_policy_consent: true, consent_given_at: new Date().toISOString() },
     });
   }
 

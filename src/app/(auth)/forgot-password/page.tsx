@@ -11,6 +11,7 @@ import { LoginPageLayout } from "@/components/login-form";
 import { OtpInput } from "@/components/ui/otp-input";
 import { createClient } from "@/lib/supabase/client";
 import { strongPasswordSchema } from "@/lib/validations/profile.schema";
+import { TurnstileWidget } from "@/components/ui/turnstile-widget";
 
 type Step = "email" | "code";
 
@@ -27,13 +28,16 @@ function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithout
   const [resent, setResent] = useState(false);
 
   // Step 1 — send the 6-digit recovery code to the email.
-  async function sendCode(e: React.FormEvent) {
+  async function sendCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    const captchaToken = new FormData(e.currentTarget).get("cf-turnstile-response") as string | undefined;
     const supabase = createClient();
-    const { error: sendError } = await supabase.auth.resetPasswordForEmail(email.trim());
+    const { error: sendError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      captchaToken: captchaToken || undefined,
+    });
 
     setLoading(false);
     // Always advance (don't reveal whether the email exists — anti-enumeration).
@@ -153,6 +157,7 @@ function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithout
               required
             />
           </div>
+          <TurnstileWidget />
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Sending..." : "Send Code"}
           </Button>

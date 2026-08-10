@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { canAccessPath, UserRole } from "@/lib/auth/rbac";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -12,11 +13,14 @@ const isDev = process.env.NODE_ENV === "development";
 function buildCsp(nonce: string) {
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://*.supabase.co",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://challenges.cloudflare.com",
+    // Turnstile's challenge widget renders in an iframe from this origin —
+    // harmless to allow even when TURNSTILE_SITE_KEY isn't set (unused source).
+    "frame-src https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -24,12 +28,9 @@ function buildCsp(nonce: string) {
   ].join("; ");
 }
 
-// Basic per-IP rate limiting for auth entry points (login/register/forgot
-// password), which are Next.js Server Actions POSTed to these page routes.
-// This is an in-memory, single-instance limiter — good enough for a single
-// deployment region, but resets on redeploy/restart and isn't shared across
-// serverless instances. For a multi-region production deployment, replace
-// this with a durable store (e.g. Upstash Redis + @upstash/ratelimit).
+// Per-IP rate limiting for auth entry points and a few API routes. Uses
+// Upstash Redis when configured (durable, shared across instances), falling
+// back to an in-memory Map otherwise — see lib/rate-limit.ts.
 const RATE_LIMITS: Record<string, { windowMs: number; max: number; methods?: string[] }> = {
   "/login": { windowMs: 60_000, max: 8, methods: ["POST"] },
   "/register": { windowMs: 60_000, max: 5, methods: ["POST"] },
@@ -37,26 +38,8 @@ const RATE_LIMITS: Record<string, { windowMs: number; max: number; methods?: str
   "/api/barangays": { windowMs: 60_000, max: 60 },
   "/api/notifications": { windowMs: 60_000, max: 30 },
   "/api/audit-logs/export": { windowMs: 60_000, max: 5 },
+  "/api/account/export": { windowMs: 60_000, max: 5 },
 };
-
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(key: string, windowMs: number, max: number): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
-    return true;
-  }
-
-  if (entry.count >= max) {
-    return false;
-  }
-
-  entry.count += 1;
-  return true;
-}
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -68,7 +51,7 @@ export async function proxy(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "unknown";
 
-    const allowed = checkRateLimit(`${path}:${ip}`, rateLimit.windowMs, rateLimit.max);
+    const allowed = await checkRateLimit(`${path}:${ip}`, rateLimit.windowMs, rateLimit.max);
     if (!allowed) {
       return NextResponse.json(
         { error: "Too many attempts. Please wait a moment and try again." },

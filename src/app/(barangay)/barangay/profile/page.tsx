@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { MfaStatusCard } from "@/components/mfa-status-card";
+import { DataPrivacyCard } from "@/components/data-privacy-card";
 import { InitialsAvatar } from "@/components/shared/initials-avatar";
 
 export default async function BarangayProfilePage() {
@@ -64,8 +65,9 @@ export default async function BarangayProfilePage() {
         </CardContent>
       </Card>
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl space-y-6">
         <MfaStatusCard />
+        <DataPrivacyCard />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSession, requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
 import { logAction } from "@/lib/audit/logger";
@@ -197,6 +198,68 @@ export async function rejectAccountRequest(userId: string, reason: string) {
     entityType: "profile",
     entityId: userId,
   });
+
+  return { success: true };
+}
+
+/**
+ * Data-subject "delete my account" (RA 10173 right to erasure). Anonymizes
+ * PII rather than hard-deleting the row: certification_requests, complaints,
+ * reports, and audit_logs all reference profiles(id) with the default
+ * ON DELETE NO ACTION, so a hard delete would fail with a foreign-key
+ * violation for any user with submission history anyway — and government
+ * records-retention rules require keeping the transactional record even
+ * when the requester's personal data is erased. Uses the admin client
+ * because `role`/`is_active` are trigger-protected against self-service
+ * updates (see protect_profile_privileged_fields in 0001_init.sql).
+ */
+export async function deleteMyAccount(confirmText: string) {
+  const session = await requireSession();
+
+  if (confirmText.trim().toUpperCase() !== "DELETE") {
+    return { error: 'Please type "DELETE" to confirm.' };
+  }
+
+  const admin = createAdminClient();
+  const anonymizedEmail = `deleted-${session.user.id}@onelgu.invalid`;
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({
+      full_name: "Deleted User",
+      email: anonymizedEmail,
+      phone: null,
+      address: null,
+      is_active: false,
+    })
+    .eq("id", session.user.id);
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+
+  // Lock the auth account out too: randomize the password, swap the email
+  // so it can't be recovered, and ban sign-in outright as a second layer
+  // on top of the is_active check.
+  const { error: authError } = await admin.auth.admin.updateUserById(session.user.id, {
+    password: crypto.randomUUID() + crypto.randomUUID(),
+    email: anonymizedEmail,
+    ban_duration: "876000h", // ~100 years — effectively permanent
+  });
+
+  if (authError) {
+    return { error: authError.message };
+  }
+
+  await logAction({
+    actorId: session.user.id,
+    action: "profile.account_deleted",
+    entityType: "profile",
+    entityId: session.user.id,
+  });
+
+  const supabase = await createClient();
+  await supabase.auth.signOut();
 
   return { success: true };
 }

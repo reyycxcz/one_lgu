@@ -42,6 +42,15 @@ export async function requireProfile() {
     redirect("/login");
   }
 
+  // is_active backs both the admin deactivate-account toggle and account
+  // deletion (which anonymizes + deactivates rather than hard-deleting, to
+  // preserve records-retention obligations) — neither does anything unless
+  // this is actually enforced here.
+  if (!profile.is_active) {
+    await supabase.auth.signOut();
+    redirect("/login?deactivated=1");
+  }
+
   return profile;
 }
 

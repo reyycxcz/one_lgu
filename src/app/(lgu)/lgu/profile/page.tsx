@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth/session";
 import { LguPageHeader } from "@/components/lgu/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { MfaStatusCard } from "@/components/mfa-status-card";
+import { DataPrivacyCard } from "@/components/data-privacy-card";
 import LguProfileForm from "./profile-form";
 
 export default async function MyProfilePage() {
@@ -11,7 +12,7 @@ export default async function MyProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, phone")
+    .select("full_name, email, phone, role")
     .eq("id", session.user.id)
     .single();
 
@@ -28,6 +29,11 @@ export default async function MyProfilePage() {
         </CardContent>
       </Card>
       <MfaStatusCard />
+      {/* Self-deleting the only super_admin would lock the whole municipality
+          out of settings/user management, so account deletion is limited to
+          lgu_reviewer here — a super_admin who wants out should hand off the
+          role first via User Management. */}
+      <DataPrivacyCard allowDelete={profile?.role !== "super_admin"} />
     </div>
   );
 }
