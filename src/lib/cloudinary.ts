@@ -73,6 +73,12 @@ export interface CloudinaryUsage {
   plan: string;
   creditsUsed: number;
   creditsLimit: number | null;
+  // Cloudinary's free/plus plans don't have a storage-specific byte cap —
+  // storage, bandwidth, and transformations all draw from one shared credit
+  // pool (documented conversion: 1 credit ≈ 1GB storage). This is that pool
+  // expressed as a storage ceiling *if every remaining credit went to
+  // storage* — a ceiling, not a guarantee, since bandwidth/transforms share it.
+  approxStorageLimitBytes: number | null;
   storageBytes: number;
   bandwidthBytes: number;
   requests: number;
@@ -85,10 +91,12 @@ export async function getCloudinaryUsage(): Promise<CloudinaryUsage | null> {
   ensureConfigured();
   try {
     const usage = await cloudinary.api.usage();
+    const creditsLimit = usage.credits?.limit ?? null;
     return {
       plan: usage.plan,
       creditsUsed: usage.credits?.usage ?? 0,
-      creditsLimit: usage.credits?.limit ?? null,
+      creditsLimit,
+      approxStorageLimitBytes: creditsLimit ? creditsLimit * 1024 * 1024 * 1024 : null,
       storageBytes: usage.storage?.usage ?? 0,
       bandwidthBytes: usage.bandwidth?.usage ?? 0,
       requests: usage.requests ?? 0,
