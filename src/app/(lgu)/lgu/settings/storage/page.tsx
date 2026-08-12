@@ -101,9 +101,6 @@ export default async function StorageStatusPage() {
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-muted-foreground pt-1">
-              Limit shown is the Free-tier 1GB cap — set <code className="bg-muted px-1 rounded">SUPABASE_STORAGE_LIMIT_GB</code> if on a paid plan.
-            </p>
           </CardContent>
         </Card>
 
@@ -131,11 +128,6 @@ export default async function StorageStatusPage() {
                   <span className="text-muted-foreground">Total files</span>
                   <span className="font-medium text-foreground">{cloudinaryUsage.resourceCount.toLocaleString()}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground pt-1 border-t border-border">
-                  Cloudinary&apos;s {cloudinaryUsage.plan} plan shares one credit pool across storage, bandwidth, and
-                  transformations (1 credit ≈ 1GB) — the limit above is what storage could reach if every remaining
-                  credit went to it, not a dedicated storage cap.
-                </p>
               </>
             ) : (
               <p className="text-xs text-muted-foreground py-4 text-center">Couldn&apos;t reach Cloudinary&apos;s usage API right now.</p>
