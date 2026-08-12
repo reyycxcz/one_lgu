@@ -1,0 +1,180 @@
+import { requireSuperAdmin } from "@/lib/auth/session";
+import { isCloudinaryConfigured, getCloudinaryUsage, listCloudinaryAssets } from "@/lib/cloudinary";
+import { LguPageHeader } from "@/components/lgu/page-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { HardDrive, Gauge, Repeat, Zap, FileImage, CloudOff, ExternalLink } from "lucide-react";
+
+function formatBytes(bytes: number) {
+  if (bytes === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function UsageBar({ used, limit, label }: { used: number; limit: number | null; label: string }) {
+  const pct = limit ? Math.min(100, (used / limit) * 100) : null;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium text-foreground">
+          {used.toLocaleString()} {limit ? `/ ${limit.toLocaleString()}` : ""}
+        </span>
+      </div>
+      {pct !== null && (
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+          <div
+            className={`h-full rounded-full ${pct > 90 ? "bg-red-500" : pct > 70 ? "bg-amber-500" : "bg-primary"}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default async function StorageStatusPage() {
+  await requireSuperAdmin();
+
+  const configured = isCloudinaryConfigured();
+
+  if (!configured) {
+    return (
+      <div className="space-y-6">
+        <LguPageHeader
+          title="Storage Status"
+          description="Cloudinary usage, bandwidth, and uploaded files across the system."
+        />
+        <Card>
+          <CardContent className="pt-10 pb-10 flex flex-col items-center text-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+              <CloudOff className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-bold text-foreground">Cloudinary not connected</h3>
+            <p className="text-xs text-muted-foreground max-w-sm">
+              Set <code className="bg-muted px-1 py-0.5 rounded">CLOUDINARY_CLOUD_NAME</code>,{" "}
+              <code className="bg-muted px-1 py-0.5 rounded">CLOUDINARY_API_KEY</code>, and{" "}
+              <code className="bg-muted px-1 py-0.5 rounded">CLOUDINARY_API_SECRET</code> to enable storage
+              monitoring here. New uploads fall back to Supabase Storage until then — nothing else changes.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const [usage, assetsResult] = await Promise.all([
+    getCloudinaryUsage(),
+    listCloudinaryAssets(50),
+  ]);
+
+  const stats = usage
+    ? [
+        { label: "Storage Used", value: formatBytes(usage.storageBytes), icon: HardDrive },
+        { label: "Bandwidth (this cycle)", value: formatBytes(usage.bandwidthBytes), icon: Gauge },
+        { label: "Transformations", value: usage.transformations.toLocaleString(), icon: Repeat },
+        { label: "Total Assets", value: usage.resourceCount.toLocaleString(), icon: FileImage },
+      ]
+    : [];
+
+  return (
+    <div className="space-y-6">
+      <LguPageHeader
+        title="Storage Status"
+        description="Cloudinary usage, bandwidth, and uploaded files across the system."
+      />
+
+      {usage ? (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map((s) => (
+              <Card key={s.label}>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-xs font-medium text-muted-foreground">{s.label}</CardTitle>
+                  <s.icon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{s.value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" /> Plan &amp; Credits
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Plan</span>
+                <Badge variant="outline" className="capitalize">{usage.plan}</Badge>
+              </div>
+              <UsageBar used={usage.creditsUsed} limit={usage.creditsLimit} label="Credits used this cycle" />
+              <div className="flex justify-between text-sm pt-1">
+                <span className="text-muted-foreground">API requests (this cycle)</span>
+                <span className="font-medium text-foreground">{usage.requests.toLocaleString()}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-xs text-muted-foreground">Couldn&apos;t reach Cloudinary&apos;s usage API right now — check the credentials or try again shortly.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-bold">Recent Files</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-2">
+          {!assetsResult || assetsResult.assets.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-6 text-center">No files uploaded to Cloudinary yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted-foreground border-b border-border">
+                    <th className="pb-2 font-medium">File</th>
+                    <th className="pb-2 font-medium">Folder</th>
+                    <th className="pb-2 font-medium">Type</th>
+                    <th className="pb-2 font-medium">Size</th>
+                    <th className="pb-2 font-medium">Uploaded</th>
+                    <th className="pb-2 font-medium"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assetsResult.assets.map((a) => (
+                    <tr key={a.publicId} className="border-b border-border/50 last:border-0">
+                      <td className="py-2.5 pr-4 font-medium text-foreground truncate max-w-[220px]">
+                        {a.publicId.split("/").pop()}
+                      </td>
+                      <td className="py-2.5 pr-4 text-muted-foreground">{a.folder.replace("onelgu/", "") || "—"}</td>
+                      <td className="py-2.5 pr-4">
+                        <Badge variant="outline" className="uppercase text-[10px]">{a.format}</Badge>
+                      </td>
+                      <td className="py-2.5 pr-4 text-muted-foreground">{formatBytes(a.bytes)}</td>
+                      <td className="py-2.5 pr-4 text-muted-foreground">
+                        {new Date(a.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </td>
+                      <td className="py-2.5">
+                        <a href={a.url} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs">
+                          View <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

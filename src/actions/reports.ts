@@ -6,6 +6,7 @@ import { logAction } from "@/lib/audit/logger";
 import { notifyUser } from "@/lib/notifications/notify";
 import { requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
+import { uploadReportFile } from "@/lib/storage/upload";
 
 export async function submitReport(formData: FormData) {
   const profile = await requireProfile();
@@ -14,13 +15,23 @@ export async function submitReport(formData: FormData) {
     return { error: "Only barangay officials can submit reports" };
   }
 
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Please select a report file to upload." };
+  }
+
+  const uploaded = await uploadReportFile(file);
+  if (!uploaded) {
+    return { error: "Upload failed — check the file type (PDF/Excel/CSV) and size (max 10MB)." };
+  }
+
   const parsed = reportSchema.safeParse({
     type: formData.get("type"),
     title: formData.get("title"),
     period_start: formData.get("period_start"),
     period_end: formData.get("period_end"),
-    file_url: formData.get("file_url"),
-    file_name: formData.get("file_name"),
+    file_url: uploaded.file_url,
+    file_name: uploaded.name,
   });
 
   if (!parsed.success) {

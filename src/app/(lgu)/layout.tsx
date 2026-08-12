@@ -108,6 +108,7 @@ const LGU_NAV_GROUPS = [
       { path: "/lgu/settings/complaint-categories", label: "Complaint Categories", icon: "AlertTriangle" },
       { path: "/lgu/settings/barangays", label: "Barangay Management", icon: "Building2" },
       { path: "/lgu/settings/system", label: "System Settings", icon: "Settings" },
+      { path: "/lgu/settings/storage", label: "Storage Status", icon: "HardDrive" },
     ],
   },
   {

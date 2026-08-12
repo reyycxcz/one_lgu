@@ -37,6 +37,7 @@ import {
   UserCircle,
   Lock,
   SignOut,
+  HardDrives,
 } from "@phosphor-icons/react/dist/ssr";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
@@ -83,6 +84,7 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   UserCircle,
   Lock,
   LogOut: SignOut,
+  HardDrive: HardDrives,
 };
 
 interface LGUClientLayoutProps {

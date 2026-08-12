@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, FileCheck2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { submitReport } from "@/actions/reports";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -51,24 +50,8 @@ export default function ReportForm() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const path = `${crypto.randomUUID()}-${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("reports")
-        .upload(path, file, { upsert: false });
-
-      if (uploadError) {
-        setError(`Upload failed: ${uploadError.message}`);
-        setLoading(false);
-        return;
-      }
-
-      const { data: publicUrl } = supabase.storage.from("reports").getPublicUrl(path);
-
       const formData = new FormData(e.currentTarget);
-      formData.set("file_url", publicUrl.publicUrl);
-      formData.set("file_name", file.name);
+      formData.set("file", file);
 
       const result = await submitReport(formData);
 
