@@ -13,16 +13,26 @@ function formatBytes(bytes: number) {
   return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-function UsageBar({ used, limit, label }: { used: number; limit: number | null; label: string }) {
+function UsageBar({
+  used,
+  limit,
+  label,
+  unit = "count",
+}: {
+  used: number;
+  limit: number | null;
+  label: string;
+  unit?: "bytes" | "count";
+}) {
   const pct = limit ? Math.min(100, (used / limit) * 100) : null;
+  const format = (n: number) => (unit === "bytes" ? formatBytes(n) : n.toLocaleString());
+
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-xs">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-medium text-foreground">
-          {typeof used === "number" && used > 1000 && limit && limit > 1000
-            ? `${formatBytes(used)} / ${formatBytes(limit)}`
-            : `${used.toLocaleString()}${limit ? ` / ${limit.toLocaleString()}` : ""}`}
+          {format(used)}{limit !== null ? ` / ${format(limit)}` : ""}
         </span>
       </div>
       {pct !== null && (
@@ -77,6 +87,7 @@ export default async function StorageStatusPage() {
               used={supabaseUsage.totalBytes}
               limit={supabaseUsage.limitBytes}
               label="Storage used"
+              unit="bytes"
             />
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total files</span>
@@ -114,6 +125,7 @@ export default async function StorageStatusPage() {
                   used={cloudinaryUsage.storageBytes}
                   limit={cloudinaryUsage.approxStorageLimitBytes}
                   label="Storage used"
+                  unit="bytes"
                 />
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total files</span>
