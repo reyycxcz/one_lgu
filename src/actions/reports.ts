@@ -71,13 +71,13 @@ export async function submitReport(formData: FormData) {
 
 export async function reviewReport(
   id: string,
-  status: "approved" | "rejected",
+  status: "approved" | "returned",
   notes?: string
 ) {
   const profile = await requireProfile();
 
-  if (!hasRole(profile.role, ["super_admin"])) {
-    return { error: "Only LGU admins can review reports" };
+  if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
+    return { error: "Only LGU admins and reviewers can review reports" };
   }
 
   const supabase = await createClient();

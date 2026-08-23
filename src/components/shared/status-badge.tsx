@@ -26,13 +26,16 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     "scheduled",
     "mediation",
     "draft",
+    "pending",
+    "pending captain approval",
+    "resubmitted",
   ].includes(normalized);
 
   // Completed / neutral (low emphasis)
   const isLowEmphasis = ["generated", "closed", "archived"].includes(normalized);
 
   // Negative
-  const isNegative = ["rejected", "cancelled"].includes(normalized);
+  const isNegative = ["rejected", "cancelled", "returned", "resubmission required"].includes(normalized);
 
   return (
     <span

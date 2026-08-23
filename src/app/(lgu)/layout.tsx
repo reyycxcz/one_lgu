@@ -1,122 +1,64 @@
 import { ReactNode } from "react";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { getDepartmentReportTypes, type LguDepartment } from "@/lib/auth/departments";
 import LGUClientLayout from "./client-layout";
 
 const LGU_NAV_GROUPS = [
   {
-    label: "Dashboard",
+    label: "Overview & Monitoring",
     items: [
       { path: "/lgu/dashboard", label: "Overview", icon: "LayoutDashboard" },
-      { path: "/lgu/dashboard/submission-summary", label: "Submission Summary", icon: "FileText" },
-      { path: "/lgu/dashboard/pending-approvals", label: "Pending Approvals", icon: "ClipboardCheck" },
-      { path: "/lgu/dashboard/compliance-overview", label: "Compliance Overview", icon: "TrendingUp" },
-      { path: "/lgu/dashboard/recent-activities", label: "Recent Activities", icon: "Activity" },
+      { path: "/lgu/compliance/status", label: "Compliance Matrix", icon: "ClipboardList" },
+      { path: "/lgu/compliance/late", label: "Overdue & Missing", icon: "AlertCircle" },
+      { path: "/lgu/dashboard/recent-activities", label: "Activity Stream", icon: "Activity" },
     ],
   },
   {
-    label: "Barangays",
+    label: "Document Requester",
     items: [
-      { path: "/lgu/barangays", label: "Barangay List", icon: "Building2" },
-      { path: "/lgu/barangays/profiles", label: "Barangay Profiles", icon: "FileText" },
-      { path: "/lgu/barangays/officials", label: "Assigned Officials", icon: "Users" },
-      { path: "/lgu/barangays/performance", label: "Performance Monitoring", icon: "BarChart3" },
+      { path: "/lgu/requests/new", label: "Create Request", icon: "Plus" },
+      { path: "/lgu/requests/active", label: "Active Requests", icon: "FileText" },
+      { path: "/lgu/settings/document-types", label: "Requirement Templates", icon: "FolderOpen" },
     ],
   },
   {
-    label: "Barangay Reports",
+    label: "Document Receiver",
     items: [
-      { path: "/lgu/reports/pending", label: "Pending Reports", icon: "Clock" },
-      { path: "/lgu/reports/approved", label: "Approved Reports", icon: "CheckCircle" },
-      { path: "/lgu/reports/returned", label: "Returned Reports", icon: "XCircle" },
-      { path: "/lgu/reports/archived", label: "Archived Reports", icon: "Archive" },
-      { path: "/lgu/reports/categories", label: "Report Categories", icon: "FolderOpen" },
+      { path: "/lgu/documents/pending", label: "Review Inbox", icon: "Upload" },
+      { path: "/lgu/documents/approved", label: "Approved Registry", icon: "CheckCircle" },
+      { path: "/lgu/documents/returned", label: "Returned & Action Needed", icon: "XCircle" },
+      { path: "/lgu/documents/archived", label: "Archived Records", icon: "Archive" },
     ],
   },
   {
-    label: "Document Submissions",
+    label: "Barangay Directory & Performance",
     items: [
-      { path: "/lgu/documents/pending", label: "Pending Documents", icon: "Upload" },
-      { path: "/lgu/documents/approved", label: "Approved Documents", icon: "CheckCircle" },
-      { path: "/lgu/documents/returned", label: "Returned Documents", icon: "XCircle" },
-      { path: "/lgu/documents/archived", label: "Archived Documents", icon: "Archive" },
+      { path: "/lgu/barangays/profiles", label: "Barangay Profiles", icon: "Building2" },
+      { path: "/lgu/barangays/officials", label: "Barangay Officials", icon: "Users" },
+      { path: "/lgu/compliance/rankings", label: "Compliance Rankings", icon: "Award" },
     ],
   },
   {
-    label: "Certification Requests",
+    label: "Public Services",
     items: [
-      { path: "/lgu/certifications/all", label: "All Requests", icon: "ListChecks" },
-      { path: "/lgu/certifications/pending", label: "Pending", icon: "Clock" },
-      { path: "/lgu/certifications/approved", label: "Approved", icon: "CheckCircle" },
-      { path: "/lgu/certifications/rejected", label: "Rejected", icon: "XCircle" },
-      { path: "/lgu/certifications/issued", label: "Issued Certificates", icon: "Award" },
+      { path: "/lgu/certifications/all", label: "Certifications", icon: "ListChecks" },
+      { path: "/lgu/complaints/all", label: "Complaints Console", icon: "AlertTriangle" },
     ],
   },
   {
-    label: "Complaint Reports",
+    label: "Communications",
     items: [
-      { path: "/lgu/complaints/all", label: "All Complaints", icon: "AlertTriangle" },
-      { path: "/lgu/complaints/pending", label: "Pending Cases", icon: "Clock" },
-      { path: "/lgu/complaints/investigation", label: "Under Investigation", icon: "Search" },
-      { path: "/lgu/complaints/resolved", label: "Resolved Cases", icon: "CheckCircle" },
-      { path: "/lgu/complaints/closed", label: "Closed Cases", icon: "Archive" },
+      { path: "/lgu/announcements/create", label: "Send Broadcast", icon: "Megaphone" },
+      { path: "/lgu/announcements/sent", label: "Broadcast History", icon: "Bell" },
     ],
   },
   {
-    label: "Compliance Monitoring",
+    label: "System & User Management",
     items: [
-      { path: "/lgu/compliance/status", label: "Submission Status", icon: "ClipboardList" },
-      { path: "/lgu/compliance/late", label: "Late Submissions", icon: "AlertCircle" },
-      { path: "/lgu/compliance/missing", label: "Missing Requirements", icon: "AlertTriangle" },
-      { path: "/lgu/compliance/rankings", label: "Barangay Rankings", icon: "Award" },
-      { path: "/lgu/compliance/history", label: "Compliance History", icon: "History" },
-    ],
-  },
-  {
-    label: "Analytics",
-    items: [
-      { path: "/lgu/analytics/submissions", label: "Submission Analytics", icon: "BarChart3" },
-      { path: "/lgu/analytics/complaints", label: "Complaint Analytics", icon: "PieChart" },
-      { path: "/lgu/analytics/certifications", label: "Certification Analytics", icon: "FileBarChart" },
-      { path: "/lgu/analytics/compliance", label: "Compliance Analytics", icon: "TrendingUp" },
-      { path: "/lgu/analytics/annual", label: "Annual Reports", icon: "FileSpreadsheet" },
-    ],
-  },
-  {
-    label: "Announcements",
-    items: [
-      { path: "/lgu/announcements/create", label: "Create Announcement", icon: "Plus" },
-      { path: "/lgu/announcements/sent", label: "Sent Announcements", icon: "Megaphone" },
-      { path: "/lgu/announcements/history", label: "Notification History", icon: "Bell" },
-    ],
-  },
-  {
-    label: "User Management",
-    items: [
-      { path: "/lgu/users/residents", label: "Residents", icon: "Users" },
-      { path: "/lgu/users/officials", label: "Barangay Officials", icon: "UserCheck" },
-      { path: "/lgu/users/sk-officials", label: "SK Officials", icon: "UserPlus" },
-      { path: "/lgu/users/requests", label: "Account Requests", icon: "UserCog" },
-    ],
-  },
-  {
-    label: "System Management",
-    items: [
-      { path: "/lgu/settings/document-types", label: "Document Types", icon: "FileText" },
-      { path: "/lgu/settings/report-categories", label: "Report Categories", icon: "FolderOpen" },
-      { path: "/lgu/settings/certification-types", label: "Certification Types", icon: "Award" },
-      { path: "/lgu/settings/complaint-categories", label: "Complaint Categories", icon: "AlertTriangle" },
-      { path: "/lgu/settings/barangays", label: "Barangay Management", icon: "Building2" },
+      { path: "/lgu/users/departments", label: "Staff & Reviewers", icon: "UserCheck" },
       { path: "/lgu/settings/system", label: "System Settings", icon: "Settings" },
-      { path: "/lgu/settings/storage", label: "Storage Status", icon: "HardDrive" },
-    ],
-  },
-  {
-    label: "Audit Logs",
-    items: [
-      { path: "/lgu/audit-logs/activities", label: "User Activities", icon: "Activity" },
-      { path: "/lgu/audit-logs/login-history", label: "Login History", icon: "History" },
-      { path: "/lgu/audit-logs/system", label: "System Logs", icon: "Database" },
+      { path: "/lgu/audit-logs/activities", label: "Audit Logs", icon: "Database" },
     ],
   },
   {
@@ -131,24 +73,84 @@ const LGU_NAV_GROUPS = [
 
 export default async function LGULayout({ children }: { children: ReactNode }) {
   const profile = await requireRole(["lgu_reviewer"]);
+  const department = profile.department as LguDepartment | null;
+  const departmentReportTypes = getDepartmentReportTypes(department);
 
   const userProfile = {
     name: profile.full_name || profile.email || "Super Admin",
     email: profile.email || "",
     role: profile.role as "super_admin" | "lgu_reviewer",
+    department,
   };
 
   // Pending items awaiting LGU action, for the header approvals indicator.
+  // A department-scoped reviewer only ever handles reports of their own
+  // type(s) — certifications/complaints aren't theirs to act on, so those
+  // stay at 0 rather than showing municipality-wide counts that don't apply.
   const supabase = await createClient();
-  const [certs, reports, complaints] = await Promise.all([
-    supabase.from("certification_requests").select("id", { count: "exact", head: true }).in("status", ["submitted", "verified"]),
-    supabase.from("reports").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
-    supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+
+  // Fetch requested titles for department reviewers to align header count indicators
+  let requestedTitles: string[] = [];
+  if (department) {
+    const { data: deptReviewers } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("department", department);
+
+    const reviewerIds = (deptReviewers || []).map((r) => r.id);
+
+    if (reviewerIds.length > 0) {
+      const { data: logs } = await supabase
+        .from("audit_logs")
+        .select("metadata")
+        .eq("action", "document_request.created")
+        .in("actor_id", reviewerIds);
+
+      requestedTitles = (logs || [])
+        .map((log) => {
+          const title = (log.metadata as any)?.title;
+          if (!title) return [];
+          return [title, `Document Request: ${title}`];
+        })
+        .flat()
+        .filter(Boolean) as string[];
+    }
+  }
+
+  // Build the OR query filters to select standard types or ad-hoc requests
+  const orFilters: string[] = [];
+  if (departmentReportTypes && departmentReportTypes.length > 0) {
+    orFilters.push(`type.in.(${departmentReportTypes.join(",")})`);
+  }
+  if (requestedTitles.length > 0) {
+    const titleFilterList = requestedTitles.map(t => `"${t.replace(/"/g, '\\"')}"`).join(",");
+    orFilters.push(`title.in.(${titleFilterList})`);
+  }
+
+  let reportsQuery = supabase.from("reports").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]);
+  
+  if (department) {
+    if (orFilters.length > 0) {
+      reportsQuery = reportsQuery.or(orFilters.join(","));
+    } else {
+      reportsQuery = reportsQuery.eq("id", "00000000-0000-0000-0000-000000000000");
+    }
+  }
+
+  const [certs, reports, complaints, customSub] = await Promise.all([
+    departmentReportTypes
+      ? Promise.resolve({ count: 0 })
+      : supabase.from("certification_requests").select("id", { count: "exact", head: true }).in("status", ["submitted", "verified"]),
+    reportsQuery,
+    departmentReportTypes
+      ? Promise.resolve({ count: 0 })
+      : supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+    supabase.from("document_submissions").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review", "resubmitted"]),
   ]);
 
   const pending = {
     certifications: certs.count || 0,
-    reports: reports.count || 0,
+    reports: (reports.count || 0) + (customSub.count || 0),
     complaints: complaints.count || 0,
   };
 

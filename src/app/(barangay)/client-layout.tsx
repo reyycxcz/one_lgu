@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import { LogOut, Mail } from "lucide-react";
-import { SquaresFour, FileArrowUp, FolderOpen, Signature, Scales, Pulse, AddressBook } from "@phosphor-icons/react/dist/ssr";
+import { SquaresFour, FileArrowUp, FolderOpen, Signature, Scales, Pulse, AddressBook, SealCheck, Package, CalendarCheck, Wrench } from "@phosphor-icons/react/dist/ssr";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
 import NotificationBell from "@/components/shared/notification-bell";
 import { InitialsAvatar } from "@/components/shared/initials-avatar";
@@ -17,11 +17,15 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   Scale: Scales,
   Activity: Pulse,
   Contact: AddressBook,
+  SealCheck,
+  Package,
+  CalendarClock: CalendarCheck,
+  Wrench,
 };
 
 interface BarangayClientLayoutProps {
   children: ReactNode;
-  userProfile: { name: string; email: string; barangayName: string };
+  userProfile: { name: string; email: string; barangayName: string; positionLabel: string };
   navGroups: { label: string; items: { path: string; label: string; icon: string }[] }[];
 }
 
@@ -35,10 +39,10 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
   }));
 
   return (
-    <div className="min-h-screen bg-[#f5f8f6] flex">
-      <div className="hidden md:block sticky top-0 h-screen">
+    <div className="min-h-screen bg-[#f5f8f6] flex print:block print:bg-white">
+      <div className="hidden md:block sticky top-0 h-screen print:hidden">
         <Sidebar
-          user={userProfile}
+          user={{ name: userProfile.name, email: userProfile.email, role: userProfile.positionLabel }}
           appTitle="ONELGU"
           appSubtitle={userProfile.barangayName}
           navGroups={resolvedNavGroups}
@@ -46,8 +50,8 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
         />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="hidden md:flex h-16 border-b border-[#e3ede9] bg-white px-8 items-center justify-end sticky top-0 z-40">
+      <div className="flex-1 flex flex-col min-w-0 print:block">
+        <header className="hidden md:flex h-16 border-b border-[#e3ede9] bg-white px-8 items-center justify-end sticky top-0 z-40 print:hidden">
           <div className="flex items-center gap-6">
             <button className="w-8 h-8 rounded-full border border-[#e3ede9] flex items-center justify-center text-foreground/60 hover:bg-slate-50 transition-colors">
               <Mail className="h-4 w-4" />
@@ -63,7 +67,7 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
           </div>
         </header>
 
-        <header className="h-16 border-b border-[#e3ede9] bg-white px-6 flex items-center justify-between md:hidden sticky top-0 z-40">
+        <header className="h-16 border-b border-[#e3ede9] bg-white px-6 flex items-center justify-between md:hidden sticky top-0 z-40 print:hidden">
           <div className="flex items-center gap-3">
             <img
               src="/images/logo/one_lgu.png"
@@ -77,7 +81,7 @@ export default function BarangayClientLayout({ children, userProfile, navGroups 
           </Link>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 w-full max-w-none">
+        <main className="flex-1 p-6 md:p-8 w-full max-w-none print:p-0">
           {children}
         </main>
       </div>

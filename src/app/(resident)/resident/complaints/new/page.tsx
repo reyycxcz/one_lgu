@@ -3,14 +3,18 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, ShieldAlert, Loader2, FileCheck2, X } from "lucide-react";
+import { ArrowLeft, Upload, ShieldAlert, Info, Loader2, FileCheck2, X, Wrench, Scale } from "lucide-react";
 import { submitComplaint } from "@/actions/complaints";
+import { SERVICE_REPORT_CATEGORIES, DISPUTE_CATEGORIES } from "@/lib/complaints/taxonomy";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
+type RecordType = "service_report" | "formal_complaint";
+
 export default function NewComplaintPage() {
   const router = useRouter();
+  const [recordType, setRecordType] = useState<RecordType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -50,7 +54,7 @@ export default function NewComplaintPage() {
     const result = await submitComplaint(formData);
 
     if (result?.error) {
-      setError(typeof result.error === "string" ? result.error : "Failed to file complaint. Please check the form and try again.");
+      setError(typeof result.error === "string" ? result.error : "Failed to submit. Please check the form and try again.");
       setLoading(false);
       return;
     }
@@ -58,19 +62,74 @@ export default function NewComplaintPage() {
     router.push("/resident/complaints");
   }
 
+  // Step 1: pick what kind of record this is — everything else depends on it.
+  if (!recordType) {
+    return (
+      <div className="space-y-8 animate-stagger-in max-w-3xl">
+        <div>
+          <Link href="/resident/complaints" className="inline-flex items-center gap-1.5 font-sans text-xs font-medium text-foreground/60 hover:text-foreground mb-4">
+            <ArrowLeft className="h-4 w-4" /> Back to List
+          </Link>
+          <h1 className="font-display font-bold text-3xl text-foreground">What would you like to file?</h1>
+          <p className="text-sm text-foreground/60 mt-1">Choose the option that best matches your situation.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-6">
+          <button
+            type="button"
+            onClick={() => setRecordType("service_report")}
+            className="bryl-card p-6 text-left space-y-3 hover:border-primary hover:shadow-md transition-all"
+          >
+            <div className="h-11 w-11 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Wrench className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="font-display font-semibold text-lg">Community / Service Report</h2>
+            <p className="text-xs text-foreground/60 leading-relaxed">
+              A barangay facility, infrastructure, sanitation, or safety concern — e.g. a broken streetlight, uncollected garbage, or a damaged road. Handled as an administrative service request, not a dispute.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRecordType("formal_complaint")}
+            className="bryl-card p-6 text-left space-y-3 hover:border-primary hover:shadow-md transition-all"
+          >
+            <div className="h-11 w-11 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <Scale className="h-5 w-5 text-destructive" />
+            </div>
+            <h2 className="font-display font-semibold text-lg">Formal Complaint / Dispute</h2>
+            <p className="text-xs text-foreground/60 leading-relaxed">
+              A dispute against a specific person — e.g. a neighbor, property, or personal dispute. May be referred to barangay conciliation (mediation) if applicable.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isService = recordType === "service_report";
+
   return (
     <div className="space-y-8 animate-stagger-in">
-      {/* Header */}
       <div>
-        <Link href="/resident/complaints" className="inline-flex items-center gap-1.5 font-sans text-xs font-medium text-foreground/60 hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to List
-        </Link>
-        <h1 className="font-display font-bold text-3xl text-foreground">File Incident Complaint</h1>
-        <p className="text-sm text-foreground/60 mt-1">Describe the incident details and attach evidence (photos, video clips, or docs).</p>
+        <button
+          type="button"
+          onClick={() => setRecordType(null)}
+          className="inline-flex items-center gap-1.5 font-sans text-xs font-medium text-foreground/60 hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" /> Change Type
+        </button>
+        <h1 className="font-display font-bold text-3xl text-foreground">
+          {isService ? "Submit a Community Report" : "File a Formal Complaint"}
+        </h1>
+        <p className="text-sm text-foreground/60 mt-1">
+          {isService
+            ? "Describe the concern and, if relevant, where and when it happened."
+            : "Describe the incident details and attach evidence (photos or documents)."}
+        </p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Incident Form */}
         <div className="bryl-card p-6 lg:col-span-2 space-y-6">
           {error && (
             <div role="alert" aria-live="assertive" className="p-3 rounded-xl text-sm font-sans bg-red-50 border border-red-200 text-red-700">
@@ -79,60 +138,108 @@ export default function NewComplaintPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <input type="hidden" name="record_type" value={recordType} />
+
             <div>
-              <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                Complaint Category
-              </label>
+              <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">Category</label>
               <select
                 name="type"
                 className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                 required
                 defaultValue=""
               >
-                <option value="" disabled>Select complaint category...</option>
-                <option value="noise_complaint">Noise Complaint</option>
-                <option value="garbage_illegal_dumping">Garbage / Illegal Dumping</option>
-                <option value="road_infrastructure">Road or Infrastructure</option>
-                <option value="streetlight_problem">Streetlight Problem</option>
-                <option value="stray_aggressive_animals">Stray or Aggressive Animals</option>
-                <option value="other">Other</option>
+                <option value="" disabled>Select a category...</option>
+                {isService
+                  ? SERVICE_REPORT_CATEGORIES.map((group) => (
+                      <optgroup key={group.group} label={group.group}>
+                        {group.items.map((item) => (
+                          <option key={item.value} value={item.value}>{item.label}</option>
+                        ))}
+                      </optgroup>
+                    ))
+                  : DISPUTE_CATEGORIES.map((item) => (
+                      <option key={item.value} value={item.value}>{item.label}</option>
+                    ))}
               </select>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className={isService ? "grid sm:grid-cols-2 gap-6" : "grid sm:grid-cols-2 gap-6"}>
               <div>
                 <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                  Subject / Incident Type
+                  {isService ? "Report Title" : "Subject"}
                 </label>
                 <input
                   type="text"
                   name="subject"
-                  placeholder="e.g. Boundary Fence Dispute, Noise Disturbance..."
+                  placeholder={isService ? "e.g. Broken streetlight along Rizal St." : "e.g. Boundary Fence Dispute, Noise Disturbance..."}
                   className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                  Respondent / Involved Party
-                </label>
-                <input
-                  type="text"
-                  name="respondent_name"
-                  placeholder="e.g. Full name or property address..."
-                  className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-                />
-              </div>
+              {isService ? (
+                <div>
+                  <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
+                    Location <span className="text-foreground/40 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="e.g. Purok 3, near the basketball court"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
+                    Respondent / Involved Party
+                  </label>
+                  <input
+                    type="text"
+                    name="respondent_name"
+                    placeholder="e.g. Full name or property address..."
+                    className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                    required
+                  />
+                </div>
+              )}
             </div>
+
+            {isService && (
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
+                    Date/Time of Incident <span className="text-foreground/40 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="incident_at"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">Priority</label>
+                  <select
+                    name="priority"
+                    defaultValue="medium"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                Detailed Incident Description
+                {isService ? "Description" : "Detailed Incident Description"}
               </label>
               <textarea
                 name="description"
-                placeholder="Provide a detailed timeline of events, including dates, times, and exact details of the incident..."
+                placeholder={isService ? "Describe the concern in detail..." : "Provide a detailed timeline of events, including dates, times, and exact details of the incident..."}
                 rows={6}
                 className="w-full px-4 py-2.5 border border-border rounded-lg bg-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                 required
@@ -141,7 +248,7 @@ export default function NewComplaintPage() {
 
             <div>
               <label className="block font-sans text-xs font-semibold text-foreground/75 mb-2">
-                Evidence / Media Attachments <span className="text-foreground/40 font-normal">(optional)</span>
+                {isService ? "Photo / Evidence" : "Evidence / Media Attachments"} <span className="text-foreground/40 font-normal">(optional)</span>
               </label>
               <input
                 ref={fileInputRef}
@@ -181,6 +288,13 @@ export default function NewComplaintPage() {
               )}
             </div>
 
+            {isService && (
+              <label className="flex items-center gap-2 text-xs font-sans text-foreground/70">
+                <input type="checkbox" name="is_anonymous" className="rounded border-border" />
+                Submit this report anonymously (your name won&apos;t be shown to barangay staff)
+              </label>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -188,33 +302,49 @@ export default function NewComplaintPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> Filing Complaint...
+                  <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> Submitting...
                 </>
-              ) : (
-                "File Complaint"
-              )}
+              ) : isService ? "Submit Report" : "File Complaint"}
             </button>
           </form>
         </div>
 
-        {/* Regulatory mediation warnings */}
         <div className="space-y-6">
-          <div className="bryl-card-faint p-6 space-y-4">
-            <h3 className="font-display text-base font-semibold flex items-center gap-2 text-destructive">
-              <ShieldAlert className="h-4.5 w-4.5" /> Mediation Rules
-            </h3>
-            <ul className="space-y-3 text-xs text-foreground/75 font-sans leading-relaxed">
-              <li>
-                <strong>Lupon Tagapamayapa:</strong> Filed complaints are evaluated by the Barangay Captain and referred to local community mediators.
-              </li>
-              <li>
-                <strong>Mediation Schedule:</strong> If approved, both complainant and respondent will receive notification of the scheduled arbitration face-to-face.
-              </li>
-              <li>
-                <strong>Privacy:</strong> Resident identity and uploaded files are encrypted in transit and at rest, and handled in accordance with the Data Privacy Act (RA 10173).
-              </li>
-            </ul>
-          </div>
+          {isService ? (
+            <div className="bryl-card-faint p-6 space-y-4">
+              <h3 className="font-display text-base font-semibold flex items-center gap-2">
+                <Info className="h-4.5 w-4.5 text-primary" /> What Happens Next
+              </h3>
+              <ul className="space-y-3 text-xs text-foreground/75 font-sans leading-relaxed">
+                <li>
+                  <strong>Review:</strong> The Barangay Secretary reviews and classifies your report.
+                </li>
+                <li>
+                  <strong>Assignment:</strong> It&apos;s assigned to the appropriate barangay personnel for action.
+                </li>
+                <li>
+                  <strong>Updates:</strong> You&apos;ll be notified as the status changes, until it&apos;s resolved and closed.
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div className="bryl-card-faint p-6 space-y-4">
+              <h3 className="font-display text-base font-semibold flex items-center gap-2 text-destructive">
+                <ShieldAlert className="h-4.5 w-4.5" /> Mediation Rules
+              </h3>
+              <ul className="space-y-3 text-xs text-foreground/75 font-sans leading-relaxed">
+                <li>
+                  <strong>Review First:</strong> The Barangay Secretary records your complaint; the Barangay Captain determines the appropriate process — not every complaint requires mediation.
+                </li>
+                <li>
+                  <strong>Lupon Tagapamayapa:</strong> If applicable, both parties will be notified of any scheduled conciliation proceedings.
+                </li>
+                <li>
+                  <strong>Privacy:</strong> Your identity and uploaded files are encrypted in transit and at rest, and handled in accordance with the Data Privacy Act (RA 10173).
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -130,7 +130,7 @@ export default function NotificationBell() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="h-7 w-7 rounded-lg bg-white border border-border flex items-center justify-center shrink-0 mt-0.5">
-                        {notif.type === "certification_update" ? (
+                        {notif.type === "document_request" || notif.type === "certification_update" ? (
                           <FileText className="h-3.5 w-3.5 text-foreground/60" />
                         ) : notif.type === "complaint_update" ? (
                           <AlertOctagon className="h-3.5 w-3.5 text-foreground/60" />
@@ -138,8 +138,7 @@ export default function NotificationBell() {
                           <Megaphone className="h-3.5 w-3.5 text-foreground/60" />
                         ) : (
                           <Bell className="h-3.5 w-3.5 text-foreground/60" />
-                        )}
-                      </div>
+                        )}                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="text-xs font-semibold text-foreground truncate">{notif.title}</p>

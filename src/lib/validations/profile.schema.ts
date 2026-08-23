@@ -32,3 +32,48 @@ export const passwordUpdateSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+export const createOfficialSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters long").max(150),
+  email: z.string().email("Invalid email address"),
+  phone: z
+    .string()
+    .max(30)
+    .regex(PH_PHONE_REGEX, "Enter a valid PH mobile number (e.g. +639171234567 or 09171234567)")
+    .optional()
+    .or(z.literal("")),
+  password: strongPasswordSchema,
+  barangayId: z.string().uuid("Select a barangay"),
+  position: z.enum(["captain", "secretary", "treasurer"]).optional().or(z.literal("")),
+});
+
+export const createDepartmentReceiverSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters long").max(150),
+  email: z.string().email("Invalid email address"),
+  phone: z
+    .string()
+    .max(30)
+    .regex(PH_PHONE_REGEX, "Enter a valid PH mobile number (e.g. +639171234567 or 09171234567)")
+    .optional()
+    .or(z.literal("")),
+  password: strongPasswordSchema,
+  department: z.enum([
+    "mayor_office",
+    "vice_mayor_office",
+    "administrator_office",
+    "treasurer_office",
+    "assessor_office",
+    "budget_office",
+    "accounting_office",
+    "planning_office",
+    "civil_registrar_office",
+    "health_office",
+    "social_welfare_office",
+    "agriculture_office",
+    "engineering_office",
+    "drrm_office",
+    "business_permits_office",
+    "hr_office",
+    "general_services_office",
+  ]),
+});

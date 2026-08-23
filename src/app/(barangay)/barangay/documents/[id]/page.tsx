@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile } from "@/lib/auth/session";
+import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
 import { notFound } from "next/navigation";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -11,7 +11,7 @@ export default async function DocumentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const profile = await requireProfile();
+  const profile = await requireBarangaySection("documents");
   const supabase = await createClient();
 
   const { data: report } = await supabase

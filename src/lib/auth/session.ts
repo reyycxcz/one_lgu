@@ -57,10 +57,20 @@ export async function requireProfile() {
 export async function requireRole(allowedRoles: UserRole[]) {
   const profile = await requireProfile();
 
+  const supabase = await createClient();
+
+  // Accounts provisioned by an admin (e.g. barangay officials created via
+  // the "Add Official" form) start with an admin-set password and are
+  // flagged must_change_password: true — they can't reach anything else
+  // until they've replaced it with one only they know.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.user_metadata?.must_change_password) {
+    redirect("/change-password");
+  }
+
   // MFA is opt-in — we don't force anyone to set it up. But if a user HAS
   // enrolled a verified TOTP factor, they must complete the challenge on a
   // fresh session (aal1 -> aal2), otherwise enabling it would be meaningless.
-  const supabase = await createClient();
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
   // nextLevel === "aal2" while currentLevel is lower means a verified factor

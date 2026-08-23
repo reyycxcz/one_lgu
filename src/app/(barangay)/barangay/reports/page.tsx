@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { requireSession } from "@/lib/auth/session";
+import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
+import { DocumentRequestsCard } from "@/components/barangay/document-requests-card";
 import Link from "next/link";
-import { Plus, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const REPORT_TYPE_COLORS: Record<string, string> = {
   accomplishment: "bg-[#C7FFCF] text-[#2D2A32]",
@@ -11,38 +12,28 @@ const REPORT_TYPE_COLORS: Record<string, string> = {
 };
 
 export default async function BarangayReportsPage() {
-  const session = await requireSession();
+  const profile = await requireBarangaySection("reports");
   const supabase = await createClient();
 
   const { data: reports } = await supabase
     .from("reports")
     .select("*")
-    .eq("submitted_by", session.user.id)
+    .eq("submitted_by", profile.id)
     .order("created_at", { ascending: false });
 
   return (
     <div className="space-y-8 animate-stagger-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">Submit Reports</h1>
-          <p className="text-sm text-foreground/60 mt-1">Submit reports and track review decisions from the municipal office.</p>
-        </div>
-        <Link
-          href="/barangay/reports/new"
-          className="px-4 py-2 bg-primary text-white hover:bg-primary/95 rounded-full font-sans text-xs font-bold flex items-center gap-1.5 transition-all"
-        >
-          <Plus className="h-4 w-4" /> Submit New Report
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">Reports</h1>
+        <p className="text-sm text-foreground/60 mt-1">Respond to document requests from LGU departments below, and track review decisions here.</p>
       </div>
 
-      <div className="space-y-4">
-        {!reports || reports.length === 0 ? (
-          <div className="text-center py-16 text-foreground/40">
-            <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p className="text-sm font-sans">No reports submitted yet.</p>
-          </div>
-        ) : (
-          reports.map((report) => (
+      <DocumentRequestsCard barangayId={profile.barangay_id} />
+
+      {reports && reports.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="font-sans font-semibold text-sm text-foreground/70 uppercase tracking-wide">Past Submissions</h2>
+          {reports.map((report) => (
             <Link
               key={report.id}
               href={`/barangay/reports/${report.id}`}
@@ -80,9 +71,9 @@ export default async function BarangayReportsPage() {
                 </div>
               </div>
             </Link>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

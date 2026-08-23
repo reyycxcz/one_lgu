@@ -9,4 +9,5 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   financial: "Financial Report",
   accomplishment: "Accomplishment Report",
   compliance: "Compliance Report",
+  other: "Other (One-Time) Request",
 };

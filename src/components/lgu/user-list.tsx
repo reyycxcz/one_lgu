@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
 import { UserToggleActive } from "@/components/lgu/user-toggle-active";
 import { AccountRequestActions } from "@/components/lgu/account-request-actions";
+import { DepartmentSelect } from "@/components/lgu/department-select";
+import type { LguDepartment } from "@/lib/auth/departments";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 
@@ -12,17 +14,21 @@ export async function UserList({
   description,
   roles,
   onlyInactive,
+  showDepartment,
+  action,
 }: {
   title: string;
   description: string;
   roles?: string[];
   onlyInactive?: boolean;
+  showDepartment?: boolean;
+  action?: React.ReactNode;
 }) {
   const supabase = await createClient();
 
   let query = supabase
     .from("profiles")
-    .select("id, full_name, email, phone, role, is_active, barangays(name)")
+    .select("id, full_name, email, phone, role, department, is_active, barangays(name)")
     .order("full_name", { ascending: true })
     .limit(1000);
 
@@ -45,6 +51,9 @@ export async function UserList({
         <span key="barangay" className="text-muted-foreground">{barangay?.name || "—"}</span>,
         <span key="email" className="text-muted-foreground">{u.email}</span>,
         <span key="phone" className="text-muted-foreground">{u.phone || "—"}</span>,
+        ...(showDepartment
+          ? [<DepartmentSelect key="department" userId={u.id} department={u.department as LguDepartment | null} />]
+          : []),
         <Badge key="status" variant={u.is_active ? "default" : "outline"}>
           {u.is_active ? "Active" : onlyInactive ? "Pending" : "Inactive"}
         </Badge>,
@@ -59,7 +68,7 @@ export async function UserList({
 
   return (
     <div className="space-y-6">
-      <LguPageHeader title={title} description={description} />
+      <LguPageHeader title={title} description={description} action={action} />
       <Card>
         <CardContent className="p-0">
           <FilterableTable
@@ -68,8 +77,9 @@ export async function UserList({
               { label: "Barangay" },
               { label: "Email" },
               { label: "Phone" },
-              { label: "Status", align: "right" },
-              { label: "Actions", align: "right" },
+              ...(showDepartment ? [{ label: "Department" }] : []),
+              { label: "Status", align: "right" as const },
+              { label: "Actions", align: "right" as const },
             ]}
             rows={rows}
             emptyIcon={<Users />}

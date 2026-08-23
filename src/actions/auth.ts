@@ -39,7 +39,20 @@ export async function login(formData: FormData) {
     return { error: "User session not found after login." };
   }
 
-  const role = user.app_metadata?.role || user.user_metadata?.role || "resident";
+  // The profiles table is the source of truth for role — NOT auth metadata.
+  // Admin-provisioned accounts (barangay officials, LGU department
+  // receivers) only ever get their role written to profiles.role, never to
+  // the auth user's app_metadata/user_metadata, so relying on the latter
+  // here misrouted every admin-created account to /resident/dashboard
+  // (which then bounced them to /not-found, since their real role isn't
+  // "resident").
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, department")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role || "resident";
 
   await logAction({
     actorId: user.id,
@@ -49,8 +62,10 @@ export async function login(formData: FormData) {
   });
 
   let redirectTo = "/resident/dashboard";
-  if (role === "super_admin" || role === "lgu_reviewer") {
+  if (role === "super_admin") {
     redirectTo = "/lgu/dashboard";
+  } else if (role === "lgu_reviewer") {
+    redirectTo = profile?.department ? "/lgu/department/dashboard" : "/lgu/dashboard";
   } else if (role === "barangay_official") {
     redirectTo = "/barangay/dashboard";
   }

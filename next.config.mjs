@@ -1,4 +1,8 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 // Content-Security-Policy is NOT set here — it needs a fresh nonce per
@@ -10,6 +14,9 @@ const nextConfig = {
     // Resident attachment uploads (IDs, complaint evidence) can be up to 5MB
     // each and are sent through server actions; the default limit is 1MB.
     serverActions: { bodySizeLimit: "12mb" },
+  },
+  turbopack: {
+    root: __dirname,
   },
   async headers() {
     return [

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile } from "@/lib/auth/session";
+import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RowActions } from "@/components/lgu/row-actions";
 import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
@@ -7,7 +7,7 @@ import { FileText } from "lucide-react";
 import Link from "next/link";
 
 export default async function BarangayCertificationsPage() {
-  const profile = await requireProfile();
+  const profile = await requireBarangaySection("certifications");
   const supabase = await createClient();
 
   const { data: requests } = await supabase

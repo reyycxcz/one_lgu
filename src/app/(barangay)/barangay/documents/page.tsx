@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile } from "@/lib/auth/session";
+import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
 import { FolderOpen, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 
 const REQUIRED_TYPES = [
@@ -11,7 +11,7 @@ const REQUIRED_TYPES = [
 ];
 
 export default async function BarangayDocumentsPage() {
-  const profile = await requireProfile();
+  const profile = await requireBarangaySection("documents");
   const supabase = await createClient();
 
   const { data: reports } = await supabase
@@ -72,10 +72,10 @@ export default async function BarangayDocumentsPage() {
                   </Link>
                 ) : (
                   <Link
-                    href="/barangay/reports/new"
+                    href="/barangay/reports"
                     className="inline-flex items-center gap-1 font-sans text-[10px] font-bold text-foreground hover:underline"
                   >
-                    Upload File <ArrowRight className="h-3 w-3" />
+                    View Requests <ArrowRight className="h-3 w-3" />
                   </Link>
                 )}
               </div>
