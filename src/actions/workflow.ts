@@ -213,13 +213,23 @@ export async function submitDocumentResponseAction(formData: FormData) {
     .eq("role", "barangay_official")
     .eq("is_active", true);
 
-  const captainIds = (approvers || [])
-    .filter((a) => !a.position || a.position === "captain")
+  const isSkSubmitter = ["sk_chairman", "sk_secretary", "sk_treasurer"].includes(profile.position || "");
+  const targetApproverPosition = isSkSubmitter ? "sk_chairman" : "captain";
+
+  const approverIds = (approvers || [])
+    .filter((a) => {
+      if (isSkSubmitter) {
+        return a.position === "sk_chairman";
+      } else {
+        return !a.position || a.position === "captain";
+      }
+    })
     .map((a) => a.id);
 
-  if (request && captainIds.length > 0) {
+  if (request && approverIds.length > 0) {
+    const approverLabel = isSkSubmitter ? "SK Chairman" : "Captain";
     await supabase.from("notifications").insert(
-      captainIds.map((recId) => ({
+      approverIds.map((recId) => ({
         recipient_id: recId,
         title: `Awaiting your approval: ${request.title}`,
         message: `${profile.full_name} prepared a document response and needs your sign-off before it's sent to the LGU.`,
@@ -233,7 +243,7 @@ export async function submitDocumentResponseAction(formData: FormData) {
   // 5. Log Action
   await logAction({
     actorId: profile.id,
-    action: "document_submission.sent_to_captain",
+    action: isSkSubmitter ? "document_submission.sent_to_sk_chairman" : "document_submission.sent_to_captain",
     entityType: "document_submission",
     entityId: submission.id,
     barangayId: profile.barangay_id,
@@ -266,15 +276,20 @@ export async function captainDecisionAction(
     return { error: "Access Denied: Only barangay officials can approve documents." };
   }
 
-  if (profile.position && profile.position !== "captain") {
-    return { error: "Access Denied: Only the Barangay Captain can approve or return documents." };
+  const allowedPositions = ["captain", "sk_chairman"];
+  if (profile.position && !allowedPositions.includes(profile.position)) {
+    return { error: "Access Denied: Only the Barangay Captain or SK Chairman can approve or return documents." };
   }
 
   const supabase = await createClient();
 
   const { data: submission, error: subError } = await supabase
     .from("document_submissions")
-    .select("*, document_requests(title, requesting_department_id)")
+    .select(`
+      *,
+      document_requests(title, requesting_department_id),
+      submitter:profiles!document_submissions_submitted_by_fkey(position)
+    `)
     .eq("id", submissionId)
     .single();
 
@@ -284,6 +299,19 @@ export async function captainDecisionAction(
 
   if (submission.barangay_id !== profile.barangay_id) {
     return { error: "Access Denied: This submission is not from your barangay." };
+  }
+
+  const submitterPosition = (submission.submitter as any)?.position || "";
+  const isSkSubmitter = ["sk_chairman", "sk_secretary", "sk_treasurer"].includes(submitterPosition);
+
+  if (isSkSubmitter) {
+    if (profile.position && profile.position !== "sk_chairman") {
+      return { error: "Access Denied: Only the SK Chairman can approve SK submissions." };
+    }
+  } else {
+    if (profile.position && profile.position !== "captain") {
+      return { error: "Access Denied: Only the Barangay Captain can approve Barangay submissions." };
+    }
   }
 
   if (submission.status !== "pending_captain_approval") {
@@ -341,16 +369,20 @@ export async function captainDecisionAction(
     }
   }
 
-  // Tell the Secretary who prepared it either way — approved-and-forwarded,
-  // or returned with the Captain's notes for revision.
+  // Tell the Secretary/submitter who prepared it either way — approved-and-forwarded,
+  // or returned with the notes for revision.
+  const officialLabel = isSkSubmitter ? "SK Chairman" : "Captain";
+
   if (submission.submitted_by) {
     await supabase.from("notifications").insert({
       recipient_id: submission.submitted_by,
-      title: decision === "approved" ? `Approved & forwarded: ${request?.title || "Document"}` : `Returned by your Captain: ${request?.title || "Document"}`,
+      title: decision === "approved" 
+        ? `Approved & forwarded: ${request?.title || "Document"}` 
+        : `Returned by your ${officialLabel}: ${request?.title || "Document"}`,
       message:
         decision === "approved"
-          ? "Your Captain approved this document — it's been forwarded to the requesting department."
-          : `Your Captain returned this document for revision.${notes ? ` Notes: ${notes}` : ""}`,
+          ? `Your ${officialLabel} approved this document — it's been forwarded to the requesting department.`
+          : `Your ${officialLabel} returned this document for revision.${notes ? ` Notes: ${notes}` : ""}`,
       type: "captain_decision",
       entity_type: "document_submission",
       entity_id: submissionId,
@@ -359,7 +391,7 @@ export async function captainDecisionAction(
 
   await logAction({
     actorId: profile.id,
-    action: `document_submission.captain_${decision}`,
+    action: isSkSubmitter ? `document_submission.sk_chairman_${decision}` : `document_submission.captain_${decision}`,
     entityType: "document_submission",
     entityId: submissionId,
     barangayId: submission.barangay_id,

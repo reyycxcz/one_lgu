@@ -42,7 +42,7 @@ export type BarangaySection =
 const SECTION_ALLOWLIST: Partial<Record<BarangayPosition, BarangaySection[]>> = {
   secretary: ["certifications", "reports", "documents", "compliance", "service_reports", "complaints"],
   treasurer: ["reports", "compliance", "documents"],
-  sk_chairman: ["reports", "compliance", "documents"],
+  sk_chairman: ["reports", "compliance", "documents", "approvals"],
   sk_secretary: ["reports", "compliance", "documents"],
   sk_treasurer: ["reports", "compliance", "documents"],
 };

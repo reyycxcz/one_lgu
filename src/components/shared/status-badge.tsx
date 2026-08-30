@@ -37,6 +37,11 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   // Negative
   const isNegative = ["rejected", "cancelled", "returned", "resubmission required"].includes(normalized);
 
+  let displayLabel = normalized;
+  if (normalized === "pending captain approval") {
+    displayLabel = "pending sign-off";
+  }
+
   return (
     <span
       className={cn(
@@ -51,7 +56,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       {isHighEmphasis && (
         <span className="h-1.5 w-1.5 rounded-full bg-white/80 animate-pulse" />
       )}
-      {normalized}
+      {displayLabel}
     </span>
   );
 }
