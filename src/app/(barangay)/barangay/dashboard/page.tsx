@@ -43,8 +43,17 @@ export default async function BarangayDashboard() {
   const showServiceReports = canAccessBarangaySection(position, "service_reports");
   // Only shown when none of the above apply — the Treasurer's case.
   const showReportsPanel = !showCertifications && !showComplaints && !showServiceReports;
+  const isSk = ["sk_chairman", "sk_secretary", "sk_treasurer"].includes(position || "");
 
-  const [isServiceOpen, certResult, complaintResult, serviceReportResult, reportResult] = await Promise.all([
+  const [
+    isServiceOpen,
+    certResult,
+    complaintResult,
+    serviceReportResult,
+    reportResult,
+    skRequestsResult,
+    skSubmissionsResult
+  ] = await Promise.all([
     barangayUuid ? getBarangayServiceStatus(barangayUuid) : Promise.resolve(true),
     showCertifications
       ? supabase
@@ -78,7 +87,79 @@ export default async function BarangayDashboard() {
       .eq("barangay_id", barangayUuid || "")
       .order("created_at", { ascending: false })
       .limit(10),
+    isSk
+      ? supabase
+          .from("request_recipients")
+          .select(`
+            request_id,
+            document_requests (
+              id,
+              title,
+              deadline,
+              status,
+              target_audience,
+              created_at
+            )
+          `)
+          .eq("barangay_id", barangayUuid || "")
+      : Promise.resolve({ data: null }),
+    isSk
+      ? supabase
+          .from("document_submissions")
+          .select(`
+            id,
+            request_id,
+            status,
+            file_name,
+            file_url,
+            submitted_at,
+            document_requests!inner (
+              title,
+              target_audience
+            )
+          `)
+          .eq("barangay_id", barangayUuid || "")
+          .in("document_requests.target_audience", ["sk_official", "both"])
+      : Promise.resolve({ data: null }),
   ]);
+
+  // SK specific calculations
+  const skRequestsRaw = skRequestsResult?.data || [];
+  const skSubmissions = skSubmissionsResult?.data || [];
+  const submissionByRequest = new Map(skSubmissions.map((s) => [s.request_id, s]));
+
+  const skRequests = skRequestsRaw
+    .map((r: any) => r.document_requests)
+    .filter((req: any) => {
+      if (!req || req.status !== "active") return false;
+      if (req.hasOwnProperty("target_audience")) {
+        return req.target_audience === "sk_official" || req.target_audience === "both";
+      }
+      return true;
+    });
+
+  const activeRequestsCount = skRequests.length;
+  const NEEDS_ACTION_STATUSES = new Set(["returned", "resubmission_required"]);
+  
+  const skNeedsActionCount = skRequests.filter((req: any) => {
+    const sub = submissionByRequest.get(req.id);
+    return !sub || NEEDS_ACTION_STATUSES.has(sub.status);
+  }).length;
+
+  const skUnderReviewCount = skSubmissions.filter((s: any) => 
+    ["submitted", "under_review", "pending_captain_approval"].includes(s.status)
+  ).length;
+
+  const skApprovedCount = skSubmissions.filter((s: any) => s.status === "approved").length;
+
+  const skPendingRequests = skRequests.filter((req: any) => {
+    const sub = submissionByRequest.get(req.id);
+    return !sub || NEEDS_ACTION_STATUSES.has(sub.status);
+  });
+
+  const skRecentSubmissions = [...skSubmissions]
+    .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
+    .slice(0, 5);
 
   const pendingCerts = certResult.data?.filter(c => c.status === "submitted" || c.status === "verified").length || 0;
   const activeComplaints = complaintResult.data?.filter(c => !["settled", "not_settled", "closed"].includes(c.status)).length || 0;
@@ -94,6 +175,157 @@ export default async function BarangayDashboard() {
   const subtitle = position
     ? `${barangayName ? `${barangayName} — ` : ""}${POSITION_LABELS[position]}`
     : (barangayName ? `${barangayName} — Operations Center` : "Operations Center");
+
+  if (isSk) {
+    const quickAction = { href: "/barangay/documents", label: "View LGU Requests" };
+
+    return (
+      <div className="space-y-6 animate-stagger-in">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">SK Operations Dashboard</h1>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">{subtitle} (Sangguniang Kabataan)</p>
+          </div>
+          <Button asChild>
+            <Link href={quickAction.href}>
+              {quickAction.label}
+            </Link>
+          </Button>
+        </div>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border border-border/60 shadow-xs">
+            <CardHeader className="p-5 pb-2">
+              <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+                Active Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0">
+              <p className="text-2xl font-bold font-sans tracking-tight text-foreground">{activeRequestsCount}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-primary text-primary-foreground border-0 shadow-sm">
+            <CardHeader className="p-5 pb-2">
+              <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-inherit opacity-90">
+                Needs Your Action
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0">
+              <p className="text-2xl font-bold font-sans tracking-tight">{skNeedsActionCount}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/60 shadow-xs">
+            <CardHeader className="p-5 pb-2">
+              <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+                Under Review
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0">
+              <p className="text-2xl font-bold font-sans tracking-tight text-foreground">{skUnderReviewCount}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/60 shadow-xs">
+            <CardHeader className="p-5 pb-2">
+              <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+                Approved Documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0">
+              <p className="text-2xl font-bold font-sans tracking-tight text-foreground">{skApprovedCount}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Action Required Column */}
+          <Card className="border border-border/60 shadow-xs">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-3">
+              <CardTitle className="font-bold text-sm">Action Required (Pending Submissions)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {skPendingRequests.length === 0 ? (
+                <div className="text-center py-10 px-6">
+                  <p className="text-xs font-semibold text-emerald-600 font-sans">Great Job!</p>
+                  <p className="text-[11px] text-muted-foreground mt-1 font-medium">All compliance reports and document requests are up to date.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border/50">
+                  {skPendingRequests.map((req: any) => {
+                    const sub = submissionByRequest.get(req.id);
+                    const isReturned = sub && NEEDS_ACTION_STATUSES.has(sub.status);
+                    
+                    return (
+                      <div key={req.id} className="flex items-center justify-between px-6 py-4 text-xs hover:bg-slate-50/30 transition-colors">
+                        <div className="space-y-1 pr-4">
+                          <p className="font-bold text-foreground line-clamp-1">{req.title}</p>
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 font-medium">
+                            <span>Deadline: {new Date(req.deadline).toLocaleDateString()}</span>
+                            {isReturned && (
+                              <span className="inline-flex items-center text-rose-600 font-semibold gap-0.5">
+                                • Returned: {sub.status.replace(/_/g, " ")}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <Button size="sm" variant={isReturned ? "destructive" : "default"} asChild className="shrink-0 font-bold text-[10px] px-3">
+                          <Link href={`/barangay/documents/${req.id}`}>
+                            {isReturned ? "Fix & Resubmit" : "Submit"}
+                          </Link>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Submissions Column */}
+          <Card className="border border-border/60 shadow-xs">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-3">
+              <CardTitle className="font-bold text-sm">Recent LGU Submissions</CardTitle>
+              <Button variant="link" size="sm" asChild className="text-xs font-bold">
+                <Link href="/barangay/documents">View History</Link>
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              {skRecentSubmissions.length === 0 ? (
+                <div className="text-center py-10 px-6">
+                  <p className="text-xs text-muted-foreground font-medium">No submissions recorded yet.</p>
+                </div>
+              ) : (
+                // Render the list of recent submissions
+                <div className="divide-y divide-border/50">
+                  {skRecentSubmissions.map((sub: any) => {
+                    const request = sub.document_requests as any;
+                    
+                    return (
+                      <div key={sub.id} className="flex items-center justify-between px-6 py-4 text-xs">
+                        <div className="space-y-1 pr-4">
+                          <p className="font-bold text-foreground line-clamp-1">{request?.title || "Document Submission"}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1 font-medium">
+                            File: {sub.file_name} · Submitted: {new Date(sub.submitted_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge variant={statusVariant[sub.status] || "secondary"} className="uppercase text-[10px] shrink-0">
+                          {sub.status.replace(/_/g, " ")}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-stagger-in">
