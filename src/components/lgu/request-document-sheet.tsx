@@ -34,6 +34,7 @@ export function RequestDocumentSheet({ defaultDocumentType, allowedTypes, barang
   const [recurrence, setRecurrence] = useState("one_time");
   const [recipientMode, setRecipientMode] = useState<"all" | "specific">("all");
   const [selectedBarangays, setSelectedBarangays] = useState<string[]>([]);
+  const [targetAudience, setTargetAudience] = useState<string>("both");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +55,7 @@ export function RequestDocumentSheet({ defaultDocumentType, allowedTypes, barang
     const result = await createDocumentRequestAction(title, description, deadline, {
       documentType,
       recurrence,
+      targetAudience: targetAudience as "barangay_official" | "sk_official" | "both",
       targetBarangays: recurrence === "one_time" && recipientMode === "specific" ? selectedBarangays : undefined,
     });
 
@@ -149,6 +151,21 @@ export function RequestDocumentSheet({ defaultDocumentType, allowedTypes, barang
                     {RECURRENCE_OPTIONS.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">Target Audience</label>
+                <input type="hidden" name="targetAudience" value={targetAudience} />
+                <Select value={targetAudience} onValueChange={setTargetAudience}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Select target audience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">Both (Barangay & SK)</SelectItem>
+                    <SelectItem value="barangay_official">Barangay Only</SelectItem>
+                    <SelectItem value="sk_official">SK Only</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

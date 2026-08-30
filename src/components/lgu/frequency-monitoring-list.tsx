@@ -2,35 +2,25 @@ import { createClient } from "@/lib/supabase/server";
 import { LguPageHeader } from "@/components/lgu/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RowActions } from "@/components/lgu/row-actions";
-import { Card, CardContent } from "@/components/ui/card";
-import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
-import { FileText, Download, ExternalLink } from "lucide-react";
 import { requireProfile } from "@/lib/auth/session";
-import { DEPARTMENT_LABELS, type LguDepartment } from "@/lib/auth/departments";
+import { DEPARTMENT_LABELS, getDepartmentReportTypes, type LguDepartment } from "@/lib/auth/departments";
 import { getFileViewUrl } from "@/lib/storage/file-url";
+import { Download } from "lucide-react";
+import { FrequencyTabsClient } from "@/components/lgu/frequency-tabs-client";
 
-export async function DocumentList({
-  title,
-  description,
-  statuses,
-  types,
-  submissionStatuses,
-  targetAudience,
-}: {
-  title: string;
-  description: string;
-  statuses?: string[];
-  types?: string[];
-  // document_submissions uses a different status vocabulary than the old
-  // reports table ('returned'/'resubmission_required' vs 'rejected', no
-  submissionStatuses?: string[];
+interface FrequencyMonitoringListProps {
   targetAudience?: "barangay_official" | "sk_official";
-}) {
+}
+
+export async function FrequencyMonitoringList({ targetAudience }: FrequencyMonitoringListProps) {
   const supabase = await createClient();
   const profile = await requireProfile();
   const department = profile.department as LguDepartment | null;
 
-  // Fetch all document request actions from audit logs to resolve requesting departments (both new and past requests)
+  // Resolve the report types based on the user's department scope
+  const reportTypes = getDepartmentReportTypes(department) || [];
+
+  // Fetch all document request actions from audit logs to resolve requesting departments
   const { data: logs } = await supabase
     .from("audit_logs")
     .select("actor_id, metadata")
@@ -61,6 +51,7 @@ export async function DocumentList({
     }
   });
 
+  // Resolve the requested titles for the current department to align standard report filtering
   let requestedTitles: string[] = [];
   if (department) {
     const { data: deptReviewers } = await supabase
@@ -90,94 +81,99 @@ export async function DocumentList({
 
   // Build the OR query filters to select standard types or ad-hoc requests
   const orFilters: string[] = [];
-  if (types && types.length > 0) {
-    orFilters.push(`type.in.(${types.join(",")})`);
+  if (reportTypes.length > 0) {
+    orFilters.push(`type.in.(${reportTypes.join(",")})`);
   }
   if (requestedTitles.length > 0) {
     const titleFilterList = requestedTitles.map(t => `"${t.replace(/"/g, '\\"')}"`).join(",");
     orFilters.push(`title.in.(${titleFilterList})`);
   }
 
-  // `types` distinguishes "no filter" (undefined — an unscoped viewer) from
-  // "filter to nothing" ([] — a department with no report type routed to it
-  // yet). Only the former should skip the .in("type", ...) filter; treating
-  // an empty array as "no filter" would incorrectly show a department-scoped
-  // viewer every barangay's documents instead of none.
-  const { data: documents } = (types && types.length === 0 && requestedTitles.length === 0) || targetAudience === "sk_official"
+  // 1. Fetch standard reports (legacy reports are only Barangay, skip if targetAudience is sk_official)
+  const { data: reports } = targetAudience === "sk_official"
     ? { data: [] }
     : await (() => {
         let query = supabase
           .from("reports")
-          .select("id, title, file_name, file_url, status, created_at, barangays(name)")
-          .order("created_at", { ascending: false })
-          .limit(500);
+          .select("id, title, type, status, created_at, file_name, file_url, period_end, barangays(name)")
+          .order("created_at", { ascending: false });
 
-        if (statuses && statuses.length > 0) {
-          query = query.in("status", statuses);
+        if (department) {
+          if (orFilters.length > 0) {
+            query = query.or(orFilters.join(","));
+          } else {
+            // Return nothing if department reviewer has no standard report types mapped
+            return { data: [] };
+          }
         }
-        
-        // If department-scoped, apply the OR filter of standard types + requested titles
-        if (department && orFilters.length > 0) {
-          query = query.or(orFilters.join(","));
-        } else if (types) {
-          // Fallback for unscoped/super_admin where department is null but types is provided
-          query = query.in("type", types);
-        }
-
         return query;
       })();
 
-  // Fetch new department workflow submissions from document_submissions.
-  // An explicit empty array (as opposed to undefined) means "this category
-  // doesn't apply to submissions yet" (e.g. there's no 'archived' concept
-  // for them) — skip the query rather than let an empty .in() fall through
-  // to "no filter, return everything".
-  const subStatuses = submissionStatuses ?? statuses;
-  const { data: dbSubmissions } = subStatuses && subStatuses.length === 0
-    ? { data: [] }
-    : await (() => {
-        let subQuery = supabase
-          .from("document_submissions")
-          .select(`
-            id,
-            request_id,
-            file_name,
-            file_url,
-            status,
-            submitted_at,
-            barangays (
-              name
-            ),
-            document_requests!inner (
-              title,
-              requesting_department_id,
-              target_audience
-            )
-          `)
-          .order("submitted_at", { ascending: false });
+  // 2. Fetch new workflow document submissions
+  let subQuery = supabase
+    .from("document_submissions")
+    .select(`
+      id,
+      request_id,
+      file_name,
+      file_url,
+      status,
+      submitted_at,
+      barangays (
+        name
+      ),
+      document_requests!inner (
+        title,
+        requesting_department_id,
+        recurrence,
+        deadline,
+        target_audience
+      )
+    `)
+    .order("submitted_at", { ascending: false });
 
-        if (subStatuses && subStatuses.length > 0) {
-          subQuery = subQuery.in("status", subStatuses);
-        }
+  if (targetAudience) {
+    subQuery = subQuery.in("document_requests.target_audience", [targetAudience, "both"]);
+  }
 
-        if (targetAudience) {
-          subQuery = subQuery.in("document_requests.target_audience", [targetAudience, "both"]);
-        }
+  const { data: dbSubmissions } = await subQuery;
 
-        return subQuery;
-      })();
+  // Filter submissions by department if reviewer is department-scoped
+  const submissions = (dbSubmissions || []).filter((sub: any) => {
+    if (!department) return true;
+    return sub.document_requests?.requesting_department_id === department;
+  });
 
-  const reportRows = (documents || []).map((d) => {
+  // Map legacy reports to rows
+  const reportRows = (reports || []).map((d) => {
     const barangay = d.barangays as unknown as { name: string } | null;
     const requestedDept = titleToDeptMap.get(d.title);
     const departmentLabel = requestedDept
       ? (DEPARTMENT_LABELS[requestedDept as keyof typeof DEPARTMENT_LABELS] || requestedDept)
       : null;
 
+    // Determine target year and label from covered period end or creation date
+    const reportDate = d.period_end ? new Date(d.period_end) : new Date(d.created_at);
+    const rYear = reportDate.getFullYear().toString();
+    const rMonth = reportDate.toLocaleDateString("en-US", { month: "long" });
+
+    // Map legacy reports: "other" is one-time, others are monthly recurring
+    const recurrence = d.type === "other" ? "one_time" : "monthly";
+
+    let periodLabel = "";
+    if (d.type === "other") {
+      periodLabel = `One-Time (${rYear})`;
+    } else {
+      periodLabel = reportDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+
     return {
-      date: new Date(d.created_at),
+      recurrence,
+      year: rYear,
+      month: rMonth,
+      dateStr: d.created_at,
       row: {
-        searchText: `${d.file_name || ""} ${d.title} ${barangay?.name || ""} ${departmentLabel || ""}`,
+        searchText: `${d.file_name || ""} ${d.title} ${barangay?.name || ""} ${departmentLabel || ""} ${periodLabel} ${rYear}`,
         barangay: barangay?.name,
         cells: [
           <a
@@ -190,6 +186,7 @@ export async function DocumentList({
             <Download className="h-3.5 w-3.5" /> {d.file_name || "Download"}
           </a>,
           <span key="report" className="text-muted-foreground">{d.title}</span>,
+          <span key="period" className="font-semibold text-foreground">{periodLabel}</span>,
           <span key="barangay" className="text-muted-foreground">{barangay?.name || "—"}</span>,
           <span key="department" className="font-semibold text-foreground">
             {departmentLabel ? (
@@ -210,17 +207,38 @@ export async function DocumentList({
     };
   });
 
-  const submissionRows = (dbSubmissions || []).map((sub: any) => {
+  // Map new workflow submissions to rows
+  const submissionRows = submissions.map((sub: any) => {
     const barangay = sub.barangays;
     const request = sub.document_requests;
     const departmentLabel = request?.requesting_department_id
       ? (DEPARTMENT_LABELS[request.requesting_department_id as keyof typeof DEPARTMENT_LABELS] || request.requesting_department_id)
       : "LGU Department";
+    const recurrence = request?.recurrence || "one_time";
+
+    const subDate = request?.deadline ? new Date(request.deadline) : new Date(sub.submitted_at);
+    const sYear = subDate.getFullYear().toString();
+    const sMonth = subDate.toLocaleDateString("en-US", { month: "long" });
+
+    let periodLabel = "";
+    if (recurrence === "monthly") {
+      periodLabel = subDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    } else if (recurrence === "quarterly") {
+      const q = Math.floor(subDate.getMonth() / 3) + 1;
+      periodLabel = `Q${q} ${sYear}`;
+    } else if (recurrence === "annual") {
+      periodLabel = `FY ${sYear}`;
+    } else {
+      periodLabel = `One-Time (${sYear})`;
+    }
 
     return {
-      date: new Date(sub.submitted_at),
+      recurrence,
+      year: sYear,
+      month: sMonth,
+      dateStr: sub.submitted_at,
       row: {
-        searchText: `${sub.file_name || ""} ${request?.title || ""} ${barangay?.name || ""} ${departmentLabel || ""}`,
+        searchText: `${sub.file_name || ""} ${request?.title || ""} ${barangay?.name || ""} ${departmentLabel || ""} ${periodLabel} ${sYear}`,
         barangay: barangay?.name,
         cells: [
           <a
@@ -233,6 +251,7 @@ export async function DocumentList({
             <Download className="h-3.5 w-3.5" /> {sub.file_name || "Download"}
           </a>,
           <span key="report" className="text-muted-foreground">{request?.title || "Document Response"}</span>,
+          <span key="period" className="font-semibold text-foreground">{periodLabel}</span>,
           <span key="barangay" className="text-muted-foreground">{barangay?.name || "—"}</span>,
           <span key="department" className="font-semibold text-foreground">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
@@ -249,32 +268,18 @@ export async function DocumentList({
     };
   });
 
-  const rows = [...reportRows, ...submissionRows]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .map(item => item.row);
+  const allRows = [...reportRows, ...submissionRows].sort((a, b) => new Date(b.dateStr).getTime() - new Date(a.dateStr).getTime());
+
+  const pageTitle = targetAudience === "sk_official" ? "SK Frequency Monitoring" : "Barangay Frequency Monitoring";
 
   return (
     <div className="space-y-6">
-      <LguPageHeader title={title} description={description} />
-      <Card>
-        <CardContent className="p-0">
-          <FilterableTable
-            columns={[
-              { label: "File" },
-              { label: "Related Report" },
-              { label: "Barangay" },
-              { label: "Department" },
-              { label: "Date" },
-              { label: "Status", align: "right" },
-              { label: "Actions", align: "right" },
-            ]}
-            rows={rows}
-            emptyIcon={<FileText />}
-            emptyMessage="No document submissions in this category yet."
-            searchPlaceholder="Search file or report..."
-          />
-        </CardContent>
-      </Card>
+      <LguPageHeader
+        title={pageTitle}
+        description="Monitor submitted reports and documents grouped by recurrence or schedule."
+      />
+
+      <FrequencyTabsClient initialRows={allRows} />
     </div>
   );
 }

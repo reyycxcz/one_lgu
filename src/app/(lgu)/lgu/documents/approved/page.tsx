@@ -12,6 +12,7 @@ export default async function ApprovedDocumentsPage() {
       description="Documents reviewed and approved by the LGU."
       statuses={["approved"]}
       types={types}
+      targetAudience="barangay_official"
     />
   );
 }

@@ -111,16 +111,33 @@ const DEPARTMENT_NAV_GROUPS = [
     label: "Overview & Monitoring",
     items: [
       { path: "/lgu/department/dashboard", label: "Overview", icon: "LayoutDashboard" },
-      { path: "/lgu/documents/frequency", label: "Frequency Monitoring", icon: "History" },
+      { path: "/lgu/documents/frequency", label: "Frequency (Barangay)", icon: "History" },
+      { path: "/lgu/documents/sk-frequency", label: "Frequency (SK)", icon: "History" },
     ],
   },
   {
-    label: "Document Receiver",
+    label: "Document Requester",
+    items: [
+      { path: "/lgu/requests/new", label: "Create Request", icon: "Plus" },
+      { path: "/lgu/requests/active", label: "Active Requests", icon: "FileText" },
+    ],
+  },
+  {
+    label: "Document Receiver (Barangay)",
     items: [
       { path: "/lgu/documents/pending", label: "Review Inbox", icon: "Upload" },
       { path: "/lgu/documents/approved", label: "Approved Registry", icon: "CheckCircle" },
       { path: "/lgu/documents/returned", label: "Returned & Action Needed", icon: "XCircle" },
       { path: "/lgu/documents/archived", label: "Archived Records", icon: "Archive" },
+    ],
+  },
+  {
+    label: "Document Receiver (SK)",
+    items: [
+      { path: "/lgu/documents/sk-pending", label: "Review Inbox", icon: "Upload" },
+      { path: "/lgu/documents/sk-approved", label: "Approved Registry", icon: "CheckCircle" },
+      { path: "/lgu/documents/sk-returned", label: "Returned & Action Needed", icon: "XCircle" },
+      { path: "/lgu/documents/sk-archived", label: "Archived Records", icon: "Archive" },
     ],
   },
   {

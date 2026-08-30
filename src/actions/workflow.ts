@@ -25,6 +25,7 @@ export async function createDocumentRequestAction(
     // standalone request; the column defaults to a new group id.
     recurrenceGroupId?: string;
     targetBarangays?: string[];
+    targetAudience?: "barangay_official" | "sk_official" | "both";
   } = {}
 ) {
   const profile = await requireProfile();
@@ -60,6 +61,7 @@ export async function createDocumentRequestAction(
       deadline,
       document_type: options.documentType || null,
       recurrence: options.recurrence || "one_time",
+      target_audience: options.targetAudience || "both",
       ...(options.recurrenceGroupId ? { recurrence_group_id: options.recurrenceGroupId } : {}),
       created_by: profile.id,
       status: "active",

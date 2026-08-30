@@ -5,9 +5,18 @@ import { useRouter } from "next/navigation";
 import { setBarangayPosition } from "@/actions/profile";
 import { POSITION_LABELS, type BarangayPosition } from "@/lib/auth/positions";
 
-const POSITION_OPTIONS: (BarangayPosition | "")[] = ["", "captain", "secretary", "treasurer", "sk_chairman", "sk_secretary", "sk_treasurer"];
-
-export function PositionSelect({ userId, position }: { userId: string; position: BarangayPosition | null }) {
+export function PositionSelect({
+  userId,
+  position,
+  isSk = false,
+}: {
+  userId: string;
+  position: BarangayPosition | null;
+  isSk?: boolean;
+}) {
+  const options = (isSk
+    ? ["", "sk_chairman", "sk_secretary", "sk_treasurer"]
+    : ["", "captain", "secretary", "treasurer"]) as (BarangayPosition | "")[];
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +42,7 @@ export function PositionSelect({ userId, position }: { userId: string; position:
         disabled={isPending}
         className="text-[11px] font-semibold rounded-md border border-border bg-white px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {POSITION_OPTIONS.map((opt) => (
+        {options.map((opt) => (
           <option key={opt} value={opt}>
             {opt ? POSITION_LABELS[opt] : "Unassigned"}
           </option>

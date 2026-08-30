@@ -16,6 +16,15 @@ import { getFileViewUrl } from "@/lib/storage/file-url";
 export async function DocumentRequestsCard({ barangayId }: { barangayId: string | null }) {
   const supabase = await createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("position")
+    .eq("id", user?.id || "")
+    .maybeSingle();
+
+  const isSk = ["sk_chairman", "sk_secretary", "sk_treasurer"].includes(userProfile?.position || "");
+
   const { data: rawRequests } = await supabase
     .from("request_recipients")
     .select(`
@@ -27,6 +36,7 @@ export async function DocumentRequestsCard({ barangayId }: { barangayId: string 
         deadline,
         status,
         requesting_department_id,
+        target_audience,
         created_at
       )
     `)
@@ -35,7 +45,14 @@ export async function DocumentRequestsCard({ barangayId }: { barangayId: string 
 
   const dbRequests = (rawRequests || [])
     .map((r: any) => r.document_requests)
-    .filter((req: any) => req && req.status === "active");
+    .filter((req: any) => {
+      if (!req || req.status !== "active") return false;
+      if (isSk) {
+        return req.target_audience === "sk_official" || req.target_audience === "both";
+      } else {
+        return req.target_audience === "barangay_official" || req.target_audience === "both";
+      }
+    });
 
   const requestIds = dbRequests.map((r: any) => r.id);
 

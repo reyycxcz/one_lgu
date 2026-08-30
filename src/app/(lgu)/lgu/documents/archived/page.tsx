@@ -13,6 +13,7 @@ export default async function ArchivedDocumentsPage() {
       statuses={["archived"]}
       submissionStatuses={[]}
       types={types}
+      targetAudience="barangay_official"
     />
   );
 }

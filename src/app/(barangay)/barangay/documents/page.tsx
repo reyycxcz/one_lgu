@@ -16,6 +16,8 @@ export default async function BarangayDocumentsPage() {
   const profile = await requireBarangaySection("documents");
   const supabase = await createClient();
 
+  const isSk = ["sk_chairman", "sk_secretary", "sk_treasurer"].includes(profile.position || "");
+
   const { data: rawRequests } = await supabase
     .from("request_recipients")
     .select(`
@@ -28,6 +30,7 @@ export default async function BarangayDocumentsPage() {
         requesting_department_id,
         document_type,
         recurrence,
+        target_audience,
         created_at
       )
     `)
@@ -35,7 +38,14 @@ export default async function BarangayDocumentsPage() {
 
   const requests = (rawRequests || [])
     .map((r: any) => r.document_requests)
-    .filter(Boolean)
+    .filter((req: any) => {
+      if (!req) return false;
+      if (isSk) {
+        return req.target_audience === "sk_official" || req.target_audience === "both";
+      } else {
+        return req.target_audience === "barangay_official" || req.target_audience === "both";
+      }
+    })
     .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const requestIds = requests.map((r: any) => r.id);
@@ -74,6 +84,7 @@ export default async function BarangayDocumentsPage() {
 
     const subDate = req.deadline ? new Date(req.deadline) : new Date(req.created_at);
     const sYear = subDate.getFullYear().toString();
+    const sMonth = subDate.toLocaleDateString("en-US", { month: "long" });
     const recurrence = req.recurrence || "one_time";
 
     let periodLabel = "";
@@ -90,6 +101,7 @@ export default async function BarangayDocumentsPage() {
 
     return {
       year: sYear,
+      month: sMonth,
       row: {
         searchText: `${req.title} ${departmentLabel} ${typeLabel} ${periodLabel} ${sYear}`,
         cells: [

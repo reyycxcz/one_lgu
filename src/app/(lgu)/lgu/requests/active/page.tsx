@@ -28,6 +28,7 @@ export default async function ActiveRequestsPage() {
       requesting_department_id,
       document_type,
       recurrence,
+      target_audience,
       request_recipients (
         barangay_id,
         barangays (
@@ -124,6 +125,9 @@ export default async function ActiveRequestsPage() {
                         )}
                         <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
                           {documentRequestTypeLabel(req.document_type)}
+                        </span>
+                        <span className="text-[10px] bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
+                          Target: {req.target_audience === "both" ? "Barangay & SK" : req.target_audience === "sk_official" ? "SK Only" : "Barangay Only"}
                         </span>
                         {req.recurrence && req.recurrence !== "one_time" && (
                           <span className="inline-flex items-center gap-1 text-[10px] bg-violet-50 text-violet-700 border border-violet-200/60 px-2.5 py-0.5 rounded-full font-semibold shrink-0">

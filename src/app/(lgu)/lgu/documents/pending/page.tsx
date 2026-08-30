@@ -12,6 +12,7 @@ export default async function PendingDocumentsPage() {
       description="Uploaded documents awaiting LGU review."
       statuses={["submitted", "under_review"]}
       types={types}
+      targetAudience="barangay_official"
     />
   );
 }

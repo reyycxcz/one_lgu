@@ -17,13 +17,15 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { POSITION_LABELS, type BarangayPosition } from "@/lib/auth/positions";
 import { Plus, Eye, EyeOff } from "lucide-react";
 
-const POSITION_OPTIONS: BarangayPosition[] = ["captain", "secretary", "treasurer", "sk_chairman", "sk_secretary", "sk_treasurer"];
-
 interface CreateOfficialSheetProps {
   barangays: { id: string; name: string }[];
+  isSk?: boolean;
 }
 
-export function CreateOfficialSheet({ barangays }: CreateOfficialSheetProps) {
+export function CreateOfficialSheet({ barangays, isSk = false }: CreateOfficialSheetProps) {
+  const options = (isSk
+    ? ["sk_chairman", "sk_secretary", "sk_treasurer"]
+    : ["captain", "secretary", "treasurer"]) as BarangayPosition[];
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -134,7 +136,7 @@ export function CreateOfficialSheet({ barangays }: CreateOfficialSheetProps) {
                     <SelectValue placeholder="Unassigned" />
                   </SelectTrigger>
                   <SelectContent>
-                    {POSITION_OPTIONS.map((p) => (
+                    {options.map((p) => (
                       <SelectItem key={p} value={p}>{POSITION_LABELS[p]}</SelectItem>
                     ))}
                   </SelectContent>

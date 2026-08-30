@@ -32,7 +32,7 @@ export default async function AssignedSkOfficialsPage() {
       <span key="barangay" className="text-muted-foreground">{barangay?.name || "—"}</span>,
       <span key="email" className="text-muted-foreground">{o.email}</span>,
       <span key="phone" className="text-muted-foreground">{o.phone || "—"}</span>,
-      <PositionSelect key="position" userId={o.id} position={o.position as BarangayPosition | null} />,
+      <PositionSelect key="position" userId={o.id} position={o.position as BarangayPosition | null} isSk={true} />,
       <Badge key="status" variant={o.is_active ? "default" : "outline"}>
         {o.is_active ? "Active" : "Inactive"}
       </Badge>,
@@ -44,7 +44,7 @@ export default async function AssignedSkOfficialsPage() {
       <LguPageHeader
         title="Assigned SK Officials"
         description="Sangguniang Kabataan officials registered across the municipality. Assign each account's position to scope what they can access in the barangay portal."
-        action={<CreateOfficialSheet barangays={barangays || []} />}
+        action={<CreateOfficialSheet barangays={barangays || []} isSk={true} />}
       />
       <Card>
         <CardContent className="p-0">

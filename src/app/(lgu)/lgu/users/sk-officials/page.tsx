@@ -18,7 +18,7 @@ export default async function SkOfficialsPage() {
       description="Sangguniang Kabataan official accounts registered across the municipality."
       roles={["barangay_official"]}
       positions={["sk_chairman", "sk_secretary", "sk_treasurer"]}
-      action={<CreateOfficialSheet barangays={barangays || []} />}
+      action={<CreateOfficialSheet barangays={barangays || []} isSk={true} />}
     />
   );
 }

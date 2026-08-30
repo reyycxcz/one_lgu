@@ -45,6 +45,7 @@ export function RequestDocumentForm({ prefill, allowedTypes, barangays }: Reques
   const [recurrence, setRecurrence] = useState(prefill?.recurrence || "one_time");
   const [recipientMode, setRecipientMode] = useState<"all" | "specific">("all");
   const [selectedBarangays, setSelectedBarangays] = useState<string[]>([]);
+  const [targetAudience, setTargetAudience] = useState<string>("both");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,6 +66,7 @@ export function RequestDocumentForm({ prefill, allowedTypes, barangays }: Reques
     const result = await createDocumentRequestAction(title, description, deadline, {
       documentType,
       recurrence,
+      targetAudience: targetAudience as "barangay_official" | "sk_official" | "both",
       recurrenceGroupId: prefill?.recurrenceGroupId,
       targetBarangays: recurrence === "one_time" && recipientMode === "specific" ? selectedBarangays : undefined,
     });
@@ -104,6 +106,21 @@ export function RequestDocumentForm({ prefill, allowedTypes, barangays }: Reques
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/70 mb-2">Request Title</label>
             <Input name="title" defaultValue={prefill?.title} placeholder="e.g. FY 2026 Monthly Financial Plan" required />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/70 mb-2">Target Audience</label>
+            <input type="hidden" name="targetAudience" value={targetAudience} />
+            <Select value={targetAudience} onValueChange={setTargetAudience}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select target audience" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="both">Both (Barangay & SK Officials)</SelectItem>
+                <SelectItem value="barangay_official">Barangay Officials Only</SelectItem>
+                <SelectItem value="sk_official">SK Officials Only</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
