@@ -8,8 +8,7 @@ import { FileText } from "lucide-react";
 
 interface DocumentRow {
   recurrence: string;
-  year: string;
-  month?: string;
+  periodLabel: string;
   dateStr: string;
   row: {
     searchText: string;
@@ -23,45 +22,29 @@ interface FrequencyTabsClientProps {
 }
 
 export function FrequencyTabsClient({ initialRows }: FrequencyTabsClientProps) {
-  const [selectedYear, setSelectedYear] = useState<string>("All Years");
-  const [selectedMonth, setSelectedMonth] = useState<string>("All Months");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("All Periods");
+  const [activeTab, setActiveTab] = useState<string>("monthly");
 
-  // Extract unique years present in the rows
-  const years = useMemo(() => {
+  // Extract unique periods present in the rows for the active tab's recurrence in sorted order
+  const periods = useMemo(() => {
     const set = new Set<string>();
     initialRows.forEach((r) => {
-      if (r.year) set.add(r.year);
-    });
-    return Array.from(set).sort((a, b) => b.localeCompare(a));
-  }, [initialRows]);
-
-  // Extract unique months present in the rows for the selected year
-  const months = useMemo(() => {
-    const set = new Set<string>();
-    initialRows.forEach((r) => {
-      if (selectedYear === "All Years" || r.year === selectedYear) {
-        if (r.month) set.add(r.month);
+      if (r.recurrence === activeTab && r.periodLabel) {
+        set.add(r.periodLabel);
       }
     });
-    const monthOrder = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return Array.from(set).sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
-  }, [initialRows, selectedYear]);
+    return Array.from(set);
+  }, [initialRows, activeTab]);
 
-  // Filter rows by year and month
+  // Filter rows by period
   const filteredRows = useMemo(() => {
-    return initialRows.filter((r) => {
-      const yearMatch = selectedYear === "All Years" || r.year === selectedYear;
-      const monthMatch = selectedMonth === "All Months" || r.month === selectedMonth;
-      return yearMatch && monthMatch;
-    });
-  }, [initialRows, selectedYear, selectedMonth]);
+    if (selectedPeriod === "All Periods") return initialRows;
+    return initialRows.filter((r) => r.periodLabel === selectedPeriod);
+  }, [initialRows, selectedPeriod]);
 
-  const handleYearChange = (year: string) => {
-    setSelectedYear(year);
-    setSelectedMonth("All Months");
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSelectedPeriod("All Periods");
   };
 
   // Split into recurrence groups
@@ -72,8 +55,8 @@ export function FrequencyTabsClient({ initialRows }: FrequencyTabsClientProps) {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="monthly" className="w-full">
-        {/* Year Filter & Tabs Header Row */}
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        {/* Filter & Tabs Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-border/60 shadow-xs mb-6">
           <TabsList className="grid grid-cols-4 w-full sm:max-w-xl bg-slate-100 rounded-lg p-1 h-10">
             <TabsTrigger value="monthly" className="text-xs font-semibold rounded-md py-1.5 data-[state=active]:bg-white data-[state=active]:text-foreground">
@@ -90,43 +73,23 @@ export function FrequencyTabsClient({ initialRows }: FrequencyTabsClientProps) {
             </TabsTrigger>
           </TabsList>
 
-          {/* Filters Selector */}
-          <div className="flex flex-wrap items-center gap-4 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">
-                Reporting Year:
-              </span>
-              <select
-                value={selectedYear}
-                onChange={(e) => handleYearChange(e.target.value)}
-                className="h-9 rounded-md border border-input bg-white px-3 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs font-semibold cursor-pointer"
-              >
-                <option value="All Years">All Years</option>
-                {years.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">
-                Reporting Month:
-              </span>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="h-9 rounded-md border border-input bg-white px-3 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs font-semibold cursor-pointer"
-              >
-                <option value="All Months">All Months</option>
-                {months.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Period Selector */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">
+              Reporting Period:
+            </span>
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="h-9 rounded-md border border-input bg-white px-3 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs font-semibold cursor-pointer"
+            >
+              <option value="All Periods">All Periods</option>
+              {periods.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

@@ -100,8 +100,7 @@ export default async function BarangayDocumentsPage() {
     }
 
     return {
-      year: sYear,
-      month: sMonth,
+      periodLabel,
       row: {
         searchText: `${req.title} ${departmentLabel} ${typeLabel} ${periodLabel} ${sYear}`,
         cells: [

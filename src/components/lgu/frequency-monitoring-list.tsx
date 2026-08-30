@@ -169,8 +169,7 @@ export async function FrequencyMonitoringList({ targetAudience }: FrequencyMonit
 
     return {
       recurrence,
-      year: rYear,
-      month: rMonth,
+      periodLabel,
       dateStr: d.created_at,
       row: {
         searchText: `${d.file_name || ""} ${d.title} ${barangay?.name || ""} ${departmentLabel || ""} ${periodLabel} ${rYear}`,
@@ -234,8 +233,7 @@ export async function FrequencyMonitoringList({ targetAudience }: FrequencyMonit
 
     return {
       recurrence,
-      year: sYear,
-      month: sMonth,
+      periodLabel,
       dateStr: sub.submitted_at,
       row: {
         searchText: `${sub.file_name || ""} ${request?.title || ""} ${barangay?.name || ""} ${departmentLabel || ""} ${periodLabel} ${sYear}`,
