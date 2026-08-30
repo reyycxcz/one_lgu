@@ -17,7 +17,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { POSITION_LABELS, type BarangayPosition } from "@/lib/auth/positions";
 import { Plus, Eye, EyeOff } from "lucide-react";
 
-const POSITION_OPTIONS: BarangayPosition[] = ["captain", "secretary", "treasurer"];
+const POSITION_OPTIONS: BarangayPosition[] = ["captain", "secretary", "treasurer", "sk_chairman", "sk_secretary", "sk_treasurer"];
 
 interface CreateOfficialSheetProps {
   barangays: { id: string; name: string }[];

@@ -44,7 +44,7 @@ export const createOfficialSchema = z.object({
     .or(z.literal("")),
   password: strongPasswordSchema,
   barangayId: z.string().uuid("Select a barangay"),
-  position: z.enum(["captain", "secretary", "treasurer"]).optional().or(z.literal("")),
+  position: z.enum(["captain", "secretary", "treasurer", "sk_chairman", "sk_secretary", "sk_treasurer"]).optional().or(z.literal("")),
 });
 
 export const createDepartmentReceiverSchema = z.object({

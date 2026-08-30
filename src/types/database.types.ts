@@ -25,7 +25,7 @@ export interface Database {
           id: string;
           barangay_id: string | null;
           role: "super_admin" | "barangay_official" | "lgu_reviewer" | "resident";
-          position: "captain" | "secretary" | "treasurer" | null;
+          position: "captain" | "secretary" | "treasurer" | "sk_chairman" | "sk_secretary" | "sk_treasurer" | null;
           department: "mayor_office" | "vice_mayor_office" | "administrator_office" | "treasurer_office" | "assessor_office" | "budget_office" | "accounting_office" | "planning_office" | "civil_registrar_office" | "health_office" | "social_welfare_office" | "agriculture_office" | "engineering_office" | "drrm_office" | "business_permits_office" | "hr_office" | "general_services_office" | "dilg_office" | null;
           full_name: string;
           email: string;
@@ -152,7 +152,7 @@ export interface Database {
     };
     Enums: {
       user_role: "super_admin" | "barangay_official" | "lgu_reviewer" | "resident";
-      barangay_position: "captain" | "secretary" | "treasurer";
+      barangay_position: "captain" | "secretary" | "treasurer" | "sk_chairman" | "sk_secretary" | "sk_treasurer";
       lgu_department: "mayor_office" | "vice_mayor_office" | "administrator_office" | "treasurer_office" | "assessor_office" | "budget_office" | "accounting_office" | "planning_office" | "civil_registrar_office" | "health_office" | "social_welfare_office" | "agriculture_office" | "engineering_office" | "drrm_office" | "business_permits_office" | "hr_office" | "general_services_office" | "dilg_office";
       certification_type: "barangay_clearance" | "certificate_of_residency" | "certificate_of_indigency" | "business_clearance" | "first_time_job_seeker";
       certification_status: "submitted" | "verified" | "approved" | "rejected" | "generated" | "ready_for_pickup" | "released";

@@ -3,12 +3,15 @@
 // components/lgu/position-select.tsx). Server-only guards that need
 // requireRole/redirect live in require-barangay-section.ts instead.
 
-export type BarangayPosition = "captain" | "secretary" | "treasurer";
+export type BarangayPosition = "captain" | "secretary" | "treasurer" | "sk_chairman" | "sk_secretary" | "sk_treasurer";
 
 export const POSITION_LABELS: Record<BarangayPosition, string> = {
   captain: "Barangay Captain",
   secretary: "Barangay Secretary",
   treasurer: "Barangay Treasurer",
+  sk_chairman: "SK Chairman",
+  sk_secretary: "SK Secretary",
+  sk_treasurer: "SK Treasurer",
 };
 
 export type BarangaySection =
@@ -39,6 +42,9 @@ export type BarangaySection =
 const SECTION_ALLOWLIST: Partial<Record<BarangayPosition, BarangaySection[]>> = {
   secretary: ["certifications", "reports", "documents", "compliance", "service_reports", "complaints"],
   treasurer: ["reports", "compliance", "documents"],
+  sk_chairman: ["reports", "compliance", "documents"],
+  sk_secretary: ["reports", "compliance", "documents"],
+  sk_treasurer: ["reports", "compliance", "documents"],
 };
 
 export function canAccessBarangaySection(

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { setBarangayPosition } from "@/actions/profile";
 import { POSITION_LABELS, type BarangayPosition } from "@/lib/auth/positions";
 
-const POSITION_OPTIONS: (BarangayPosition | "")[] = ["", "captain", "secretary", "treasurer"];
+const POSITION_OPTIONS: (BarangayPosition | "")[] = ["", "captain", "secretary", "treasurer", "sk_chairman", "sk_secretary", "sk_treasurer"];
 
 export function PositionSelect({ userId, position }: { userId: string; position: BarangayPosition | null }) {
   const router = useRouter();
