@@ -37,6 +37,7 @@ const LGU_NAV_GROUPS = [
     items: [
       { path: "/lgu/barangays/profiles", label: "Barangay Profiles", icon: "Building2" },
       { path: "/lgu/barangays/officials", label: "Barangay Officials", icon: "Users" },
+      { path: "/lgu/barangays/sk-officials", label: "SK Officials", icon: "Users" },
       { path: "/lgu/compliance/rankings", label: "Compliance Rankings", icon: "Award" },
     ],
   },
@@ -59,6 +60,7 @@ const LGU_NAV_GROUPS = [
     items: [
       { path: "/lgu/users/residents", label: "Residents", icon: "Users" },
       { path: "/lgu/users/officials", label: "Barangay Officials", icon: "UserCheck" },
+      { path: "/lgu/users/sk-officials", label: "SK Officials", icon: "UserCheck" },
       { path: "/lgu/users/departments", label: "Staff & Reviewers", icon: "Building2" },
       { path: "/lgu/users/requests", label: "Account Requests", icon: "UserPlus" },
     ],

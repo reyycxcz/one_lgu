@@ -17,6 +17,7 @@ export default async function BarangayOfficialsPage() {
       title="Barangay Officials"
       description="Barangay official accounts registered across the municipality."
       roles={["barangay_official"]}
+      excludePositions={["sk_chairman", "sk_secretary", "sk_treasurer"]}
       action={<CreateOfficialSheet barangays={barangays || []} />}
     />
   );

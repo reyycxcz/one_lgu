@@ -8,7 +8,7 @@ import { CreateOfficialSheet } from "@/components/lgu/create-official-sheet";
 import type { BarangayPosition } from "@/lib/auth/positions";
 import { UserCheck } from "lucide-react";
 
-export default async function AssignedOfficialsPage() {
+export default async function AssignedSkOfficialsPage() {
   const supabase = await createClient();
 
   const [{ data: officials }, { data: barangays }] = await Promise.all([
@@ -16,7 +16,7 @@ export default async function AssignedOfficialsPage() {
       .from("profiles")
       .select("id, full_name, email, phone, position, is_active, barangays(name, municipality)")
       .eq("role", "barangay_official")
-      .or("position.is.null,position.not.in.(sk_chairman,sk_secretary,sk_treasurer)")
+      .in("position", ["sk_chairman", "sk_secretary", "sk_treasurer"])
       .order("full_name", { ascending: true }),
     supabase
       .from("barangays")
@@ -42,8 +42,8 @@ export default async function AssignedOfficialsPage() {
   return (
     <div className="space-y-6">
       <LguPageHeader
-        title="Assigned Officials"
-        description="Barangay officials registered across the municipality. Assign each account's position (Secretary, Treasurer, etc.) to scope what they can access in the barangay portal."
+        title="Assigned SK Officials"
+        description="Sangguniang Kabataan officials registered across the municipality. Assign each account's position to scope what they can access in the barangay portal."
         action={<CreateOfficialSheet barangays={barangays || []} />}
       />
       <Card>
@@ -59,7 +59,7 @@ export default async function AssignedOfficialsPage() {
             ]}
             rows={rows}
             emptyIcon={<UserCheck />}
-            emptyMessage="No barangay officials registered yet."
+            emptyMessage="No SK officials registered yet."
           />
         </CardContent>
       </Card>

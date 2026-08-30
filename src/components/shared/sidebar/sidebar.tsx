@@ -74,11 +74,11 @@ export function Sidebar({
       style={{ width: SIDEBAR_W }}
     >
       {/* ─── Logo Header ─── */}
-      <div className="flex items-center justify-center flex-shrink-0 border-b border-sidebar-border px-4 py-5 gap-3">
+      <div className="flex items-center justify-center flex-shrink-0 border-b border-sidebar-border h-16 px-4 gap-2.5">
         <img
           src="/images/logo/o_icon.png"
           alt="OneLGU"
-          className="object-contain flex-shrink-0 h-11 w-11"
+          className="object-contain flex-shrink-0 h-9 w-9"
         />
         <div className="min-w-0 leading-tight text-center">
           <p className="text-sm font-bold text-foreground tracking-wider whitespace-nowrap uppercase">

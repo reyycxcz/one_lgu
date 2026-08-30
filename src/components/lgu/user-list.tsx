@@ -13,6 +13,8 @@ export async function UserList({
   title,
   description,
   roles,
+  positions,
+  excludePositions,
   onlyInactive,
   showDepartment,
   action,
@@ -20,6 +22,8 @@ export async function UserList({
   title: string;
   description: string;
   roles?: string[];
+  positions?: string[];
+  excludePositions?: string[];
   onlyInactive?: boolean;
   showDepartment?: boolean;
   action?: React.ReactNode;
@@ -34,6 +38,12 @@ export async function UserList({
 
   if (roles && roles.length > 0) {
     query = query.in("role", roles);
+  }
+  if (positions && positions.length > 0) {
+    query = query.in("position", positions);
+  }
+  if (excludePositions && excludePositions.length > 0) {
+    query = query.or(`position.is.null,position.not.in.(${excludePositions.join(",")})`);
   }
   if (onlyInactive) {
     query = query.eq("is_active", false);
