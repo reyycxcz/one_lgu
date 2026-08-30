@@ -32,8 +32,8 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
               <div
                 className={cn(
                   "h-7 w-7 rounded-full flex items-center justify-center border text-[11px] font-mono font-bold transition-all duration-200",
-                  isCompleted && "bg-primary border-primary text-primary-foreground",
-                  isActive && "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20 scale-110",
+                  isCompleted && "bg-emerald-600 border-emerald-600 text-white shadow-xs",
+                  isActive && "bg-emerald-500 border-emerald-500 text-white ring-4 ring-emerald-200 scale-110 shadow-md animate-pulse",
                   isPending && "bg-white border-border text-foreground/30"
                 )}
               >

@@ -18,7 +18,6 @@ export function MfaStatusCard() {
   const [error, setError] = useState<string | null>(null);
 
   async function refresh() {
-    setLoading(true);
     const supabase = createClient();
     const { data } = await supabase.auth.mfa.listFactors();
     const verified = data?.totp.find((f) => f.status === "verified");
@@ -28,7 +27,21 @@ export function MfaStatusCard() {
   }
 
   useEffect(() => {
-    refresh();
+    let ignore = false;
+    async function loadMfaStatus() {
+      const supabase = createClient();
+      const { data } = await supabase.auth.mfa.listFactors();
+      if (!ignore) {
+        const verified = data?.totp.find((f) => f.status === "verified");
+        setEnabled(!!verified);
+        setFactorId(verified?.id || null);
+        setLoading(false);
+      }
+    }
+    loadMfaStatus();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   async function handleDisable() {

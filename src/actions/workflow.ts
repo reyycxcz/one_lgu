@@ -5,18 +5,46 @@ import { logAction } from "@/lib/audit/logger";
 import { requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
 import { uploadReportFile } from "@/lib/storage/upload";
+import { getDepartmentDocumentTypes } from "@/lib/documents/request-types";
 import { revalidatePath } from "next/cache";
 
 export async function createDocumentRequestAction(
   title: string,
   description: string,
   deadline: string,
-  targetBarangays?: string[]
+  options: {
+    documentType?: string;
+    // "one_time" | "monthly" | "quarterly" | "annual" — kept as a plain
+    // string here (not imported from taxonomy) since server actions can't
+    // export non-async values, matching the CHECK constraint in migration
+    // 0017 rather than a hard TS union.
+    recurrence?: string;
+    // Set when this request is a new cycle of an existing recurring
+    // series (via "Create Next Period") — reuses the original series'
+    // recurrence_group_id so all cycles stay linked. Omit for a fresh,
+    // standalone request; the column defaults to a new group id.
+    recurrenceGroupId?: string;
+    targetBarangays?: string[];
+  } = {}
 ) {
   const profile = await requireProfile();
 
   if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
     return { error: "Access Denied: Only LGU admins and reviewers can create document requests." };
+  }
+
+  // Backstop for the UI restriction on the department dashboard's
+  // quick-create sheet and the full Create Document Request page — a
+  // department-scoped lgu_reviewer can't dispatch a type outside their
+  // department's list by editing the form or calling this action
+  // directly. super_admin (or an lgu_reviewer with no department, which
+  // shouldn't normally happen) is unrestricted.
+  if (profile.role === "lgu_reviewer" && profile.department) {
+    const allowed = getDepartmentDocumentTypes(profile.department);
+    const requestedType = options.documentType || "other";
+    if (requestedType !== "other" && !allowed.includes(requestedType)) {
+      return { error: "That document type isn't available to your department." };
+    }
   }
 
   const departmentId = profile.department || "super_admin";
@@ -30,6 +58,9 @@ export async function createDocumentRequestAction(
       title,
       description: description || null,
       deadline,
+      document_type: options.documentType || null,
+      recurrence: options.recurrence || "one_time",
+      ...(options.recurrenceGroupId ? { recurrence_group_id: options.recurrenceGroupId } : {}),
       created_by: profile.id,
       status: "active",
     })
@@ -41,7 +72,7 @@ export async function createDocumentRequestAction(
   }
 
   // Determine target barangays
-  let targets = targetBarangays || [];
+  let targets = options.targetBarangays || [];
   if (targets.length === 0) {
     const { data: bList } = await supabase
       .from("barangays")

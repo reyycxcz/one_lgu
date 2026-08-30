@@ -1,88 +1,155 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
-import { FolderOpen, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { DEPARTMENT_LABELS } from "@/lib/auth/departments";
+import { documentRequestTypeLabel } from "@/lib/documents/request-types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FolderOpen, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { BarangayDocumentsClient } from "@/components/barangay/barangay-documents-client";
 
-const REQUIRED_TYPES = [
-  { type: "monthly", label: "Monthly Accomplishment Report" },
-  { type: "financial", label: "Financial Expense Ledger" },
-  { type: "accomplishment", label: "Accomplishment Report" },
-  { type: "compliance", label: "Compliance / Planning Document (AIP, BDP, GAD)" },
-];
-
+// Every document ever requested of this barangay by an LGU department, with
+// whatever this barangay has submitted in response (if anything) — the
+// definitive archive/register, as opposed to /barangay/reports which only
+// surfaces *active* requests still needing a response.
 export default async function BarangayDocumentsPage() {
   const profile = await requireBarangaySection("documents");
   const supabase = await createClient();
 
-  const { data: reports } = await supabase
-    .from("reports")
-    .select("id, type, title, status, created_at")
-    .eq("barangay_id", profile.barangay_id || "")
-    .order("created_at", { ascending: false });
+  const { data: rawRequests } = await supabase
+    .from("request_recipients")
+    .select(`
+      request_id,
+      document_requests (
+        id,
+        title,
+        deadline,
+        status,
+        requesting_department_id,
+        document_type,
+        recurrence,
+        created_at
+      )
+    `)
+    .eq("barangay_id", profile.barangay_id || "");
 
-  const latestByType = new Map<string, { id: string; title: string; status: string; created_at: string }>();
-  (reports || []).forEach((r) => {
-    if (!latestByType.has(r.type)) latestByType.set(r.type, r);
+  const requests = (rawRequests || [])
+    .map((r: any) => r.document_requests)
+    .filter(Boolean)
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const requestIds = requests.map((r: any) => r.id);
+
+  let submissions: any[] = [];
+  if (requestIds.length > 0) {
+    const { data } = await supabase
+      .from("document_submissions")
+      .select("id, request_id, status, created_at")
+      .in("request_id", requestIds)
+      .eq("barangay_id", profile.barangay_id || "");
+    submissions = data || [];
+  }
+
+  const submissionByRequest = new Map(submissions.map((s) => [s.request_id, s]));
+
+  const NEEDS_ACTION_STATUSES = new Set(["returned", "resubmission_required"]);
+  const UNDER_REVIEW_STATUSES = new Set(["pending_captain_approval", "submitted"]);
+
+  let needsAction = 0;
+  let underReview = 0;
+  let approved = 0;
+
+  const rows = requests.map((req: any) => {
+    const sub = submissionByRequest.get(req.id);
+    const departmentLabel = req.requesting_department_id
+      ? (DEPARTMENT_LABELS[req.requesting_department_id as keyof typeof DEPARTMENT_LABELS] || req.requesting_department_id)
+      : "LGU Department";
+
+    const noSubmissionYet = !sub && req.status === "active";
+    if (noSubmissionYet || (sub && NEEDS_ACTION_STATUSES.has(sub.status))) needsAction++;
+    else if (sub && UNDER_REVIEW_STATUSES.has(sub.status)) underReview++;
+    else if (sub && sub.status === "approved") approved++;
+
+    const typeLabel = documentRequestTypeLabel(req.document_type);
+
+    const subDate = req.deadline ? new Date(req.deadline) : new Date(req.created_at);
+    const sYear = subDate.getFullYear().toString();
+    const recurrence = req.recurrence || "one_time";
+
+    let periodLabel = "";
+    if (recurrence === "monthly") {
+      periodLabel = subDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    } else if (recurrence === "quarterly") {
+      const q = Math.floor(subDate.getMonth() / 3) + 1;
+      periodLabel = `Q${q} ${sYear}`;
+    } else if (recurrence === "annual") {
+      periodLabel = `FY ${sYear}`;
+    } else {
+      periodLabel = `One-Time (${sYear})`;
+    }
+
+    return {
+      year: sYear,
+      row: {
+        searchText: `${req.title} ${departmentLabel} ${typeLabel} ${periodLabel} ${sYear}`,
+        cells: [
+          <Link key="title" href={`/barangay/documents/${req.id}`} className="font-medium hover:underline">
+            {req.title}
+          </Link>,
+          <span key="type" className="text-[11px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">
+            {typeLabel}
+          </span>,
+          <span key="dept" className="text-muted-foreground">{departmentLabel}</span>,
+          <span key="period" className="font-semibold text-foreground">{periodLabel}</span>,
+          <span key="deadline" className="text-muted-foreground">
+            {new Date(req.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>,
+          sub ? (
+            <StatusBadge key="status" status={sub.status} />
+          ) : (
+            <span key="status" className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-800 border border-red-100 text-[10px] font-sans font-bold rounded-full">
+              <AlertTriangle className="h-3 w-3 text-red-600" /> Not Submitted
+            </span>
+          ),
+        ],
+      }
+    };
   });
+
+  const stats = [
+    { label: "Total Requests", value: requests.length, icon: FolderOpen },
+    { label: "Needs Your Action", value: needsAction, icon: AlertTriangle },
+    { label: "Under Review", value: underReview, icon: Clock },
+    { label: "Approved", value: approved, icon: CheckCircle2 },
+  ];
 
   return (
     <div className="space-y-8 animate-stagger-in">
       <div>
-        <h1 className="font-sans font-bold text-2xl tracking-tight mt-1">LGU Required Documents</h1>
-        <p className="text-sm text-foreground/60 mt-1">Checklist of annual planning and developmental frameworks mandated by municipal code.</p>
+        <h1 className="font-sans font-bold text-2xl tracking-tight mt-1">LGU Documents</h1>
+        <p className="text-sm text-foreground/60 mt-1">Every document ever requested of this barangay by an LGU department, and what's been submitted in response.</p>
       </div>
 
-      <div className="space-y-4">
-        {REQUIRED_TYPES.map(({ type, label }) => {
-          const latest = latestByType.get(type);
-          const compliant = !!latest && latest.status === "approved";
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
           return (
-            <div key={type} className="bryl-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-xl bg-muted/20 border border-border flex items-center justify-center shrink-0">
-                  <FolderOpen className="h-5 w-5 text-foreground/70" />
-                </div>
-                <div className="space-y-1">
-                  <span className="font-sans text-[10px] text-foreground/40 font-semibold capitalize">{type}</span>
-                  <h3 className="font-sans font-semibold text-base text-foreground">{label}</h3>
-                  <p className="text-xs text-foreground/50">
-                    {latest ? `Last submitted ${new Date(latest.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "No submission on file"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-border/40 pt-4 sm:pt-0">
-                <div className="flex items-center gap-2">
-                  {compliant ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 text-primary-foreground border border-primary/30 text-[10px] font-sans font-bold rounded-full">
-                      <CheckCircle2 className="h-3 w-3 text-foreground" /> Compliant
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-800 border border-red-100 text-[10px] font-sans font-bold rounded-full">
-                      <AlertTriangle className="h-3 w-3 text-red-600" /> {latest ? "Awaiting Review" : "Missing"}
-                    </span>
-                  )}
-                </div>
-                {latest ? (
-                  <Link
-                    href={`/barangay/documents/${latest.id}`}
-                    className="inline-flex items-center gap-1 font-sans text-[10px] font-bold text-foreground hover:underline"
-                  >
-                    View Submission <ArrowRight className="h-3 w-3" />
-                  </Link>
-                ) : (
-                  <Link
-                    href="/barangay/reports"
-                    className="inline-flex items-center gap-1 font-sans text-[10px] font-bold text-foreground hover:underline"
-                  >
-                    View Requests <ArrowRight className="h-3 w-3" />
-                  </Link>
-                )}
-              </div>
-            </div>
+            <Card key={stat.label} className="border border-border/60 shadow-xs">
+              <CardHeader className="flex flex-row items-center justify-between p-5 pb-2">
+                <CardTitle className="text-[11px] font-bold tracking-wide uppercase text-muted-foreground">
+                  {stat.label}
+                </CardTitle>
+                <Icon className="h-4 w-4 text-primary opacity-80" />
+              </CardHeader>
+              <CardContent className="p-5 pt-0">
+                <p className="text-2xl font-bold text-foreground font-sans tracking-tight">{stat.value}</p>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
+
+      <BarangayDocumentsClient initialRows={rows} />
     </div>
   );
 }

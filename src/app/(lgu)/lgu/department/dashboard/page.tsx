@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, AlertCircle, CheckCircle, Clock, FileText, Eye, CheckCircle2 } from "lucide-react";
 import { RequestDocumentSheet } from "@/components/lgu/request-document-sheet";
+import { getDepartmentDocumentTypes } from "@/lib/documents/request-types";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { getFileViewUrl } from "@/lib/storage/file-url";
 
 const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   approved: "default",
@@ -132,11 +134,15 @@ export default async function DepartmentDashboard() {
             Department: {DEPARTMENT_LABELS[department]}
           </h1>
           <p className="text-xs text-muted-foreground mt-1 font-medium">
-            Manage your department's private document requests, submissions, and reviews.
+            Manage your department&apos;s private document requests, submissions, and reviews.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <RequestDocumentSheet defaultDocumentType="other" allowedTypes={["other"]} />
+          <RequestDocumentSheet
+            defaultDocumentType={getDepartmentDocumentTypes(department)[0] || "other"}
+            allowedTypes={getDepartmentDocumentTypes(department)}
+            barangays={activeBarangays}
+          />
           <Button asChild variant="outline" size="sm">
             <Link href="/lgu/documents/pending">View Review Inbox</Link>
           </Button>
@@ -233,7 +239,7 @@ export default async function DepartmentDashboard() {
                                 <span className="font-semibold text-foreground line-clamp-1">{reqStatus.requestTitle}</span>
                                 {reqStatus.submission && (
                                   <a
-                                    href={reqStatus.submission.file_url}
+                                    href={getFileViewUrl(reqStatus.submission.file_url, reqStatus.submission.file_name)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
@@ -305,7 +311,7 @@ export default async function DepartmentDashboard() {
                         </p>
                         <div className="mt-2.5 flex items-center justify-between">
                           <a
-                            href={sub.file_url}
+                            href={getFileViewUrl(sub.file_url, sub.file_name)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"

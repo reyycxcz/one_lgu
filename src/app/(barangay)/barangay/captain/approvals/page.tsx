@@ -4,7 +4,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { RowActions } from "@/components/lgu/row-actions";
 import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
 import { DEPARTMENT_LABELS, type LguDepartment } from "@/lib/auth/departments";
-import { BadgeCheck, Download } from "lucide-react";
+import { BadgeCheck, Download, ExternalLink } from "lucide-react";
+import { getFileViewUrl } from "@/lib/storage/file-url";
 
 export default async function CaptainApprovalsPage() {
   const profile = await requireBarangaySection("approvals");
@@ -36,12 +37,12 @@ export default async function CaptainApprovalsPage() {
         <span key="submitter" className="text-muted-foreground">{submitter?.full_name || "—"}</span>,
         <a
           key="file"
-          href={s.file_url}
+          href={getFileViewUrl(s.file_url, s.file_name)}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 font-medium text-xs text-primary hover:underline"
         >
-          <Download className="h-3 w-3" /> {s.file_name || "Download"}
+          <ExternalLink className="h-3 w-3" /> {s.file_name || "View File"}
         </a>,
         <span key="date" className="text-muted-foreground">
           {new Date(s.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}

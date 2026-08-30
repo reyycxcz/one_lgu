@@ -37,8 +37,8 @@ export type BarangaySection =
 // Secretary documents disputes but doesn't decide their merits; only
 // Captain/unassigned accounts can act on them.
 const SECTION_ALLOWLIST: Partial<Record<BarangayPosition, BarangaySection[]>> = {
-  secretary: ["certifications", "reports", "compliance", "service_reports"],
-  treasurer: ["reports", "compliance"],
+  secretary: ["certifications", "reports", "documents", "compliance", "service_reports", "complaints"],
+  treasurer: ["reports", "compliance", "documents"],
 };
 
 export function canAccessBarangaySection(

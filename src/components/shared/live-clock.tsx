@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 
 export function LiveClock() {
+  const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 1000 * 30);
     return () => clearInterval(timer);
   }, []);
 
-  if (!now) return null;
+  if (!mounted || !now) return null;
 
   const date = now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   const time = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });

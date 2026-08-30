@@ -4,10 +4,12 @@ import { LguPageHeader } from "@/components/lgu/page-header";
 export const dynamic = "force-dynamic";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, FileText, ChevronDown, CheckCircle2, AlertCircle, Download, Eye } from "lucide-react";
+import { Clock, FileText, ChevronDown, CheckCircle2, AlertCircle, Download, Eye, Repeat } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DEPARTMENT_LABELS } from "@/lib/auth/departments";
+import { documentRequestTypeLabel, recurrenceLabel } from "@/lib/documents/request-types";
 import { requireProfile } from "@/lib/auth/session";
+import { getFileViewUrl } from "@/lib/storage/file-url";
 import Link from "next/link";
 
 export default async function ActiveRequestsPage() {
@@ -24,6 +26,8 @@ export default async function ActiveRequestsPage() {
       deadline,
       created_at,
       requesting_department_id,
+      document_type,
+      recurrence,
       request_recipients (
         barangay_id,
         barangays (
@@ -118,6 +122,14 @@ export default async function ActiveRequestsPage() {
                             {departmentLabel}
                           </span>
                         )}
+                        <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
+                          {documentRequestTypeLabel(req.document_type)}
+                        </span>
+                        {req.recurrence && req.recurrence !== "one_time" && (
+                          <span className="inline-flex items-center gap-1 text-[10px] bg-violet-50 text-violet-700 border border-violet-200/60 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
+                            <Repeat className="h-3 w-3" /> {recurrenceLabel(req.recurrence)}
+                          </span>
+                        )}
                       </div>
                       {req.description && (
                         <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">{req.description}</p>
@@ -141,7 +153,16 @@ export default async function ActiveRequestsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 self-end md:self-center">
+                    <div className="flex items-center gap-3 self-end md:self-center">
+                      {req.recurrence && req.recurrence !== "one_time" && (
+                        <Link
+                          href={`/lgu/requests/new?from=${req.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-foreground/70 hover:text-primary border border-border rounded-md px-2.5 py-1 transition-colors"
+                        >
+                          <Repeat className="h-3.5 w-3.5" /> Create Next Period
+                        </Link>
+                      )}
                       <span className="text-[11px] font-bold text-primary group-open:hidden flex items-center gap-1">
                         Show Status <ChevronDown className="h-4 w-4" />
                       </span>
@@ -178,7 +199,7 @@ export default async function ActiveRequestsPage() {
                             {b.submitted && b.submission && (
                               <div className="flex items-center justify-between gap-2 mt-1 border-t border-slate-100 pt-2 text-[11px]">
                                 <a
-                                  href={b.submission.file_url}
+                                  href={getFileViewUrl(b.submission.file_url, b.submission.file_name)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1 text-primary hover:underline font-bold"

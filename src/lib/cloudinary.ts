@@ -45,10 +45,17 @@ export async function uploadToCloudinary(
   const buffer = Buffer.from(await file.arrayBuffer());
   const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
+  const isImage = file.type.startsWith("image/");
+  // PDFs and documents uploaded with resource_type: "image" or "auto" are subject to
+  // Cloudinary's default Strict PDF Delivery policy (which returns 401 Unauthorized
+  // when accessed directly in browser). Uploading non-images as "raw" ensures direct
+  // delivery and viewing works cleanly just like Excel/CSV.
+  const resourceType = isImage ? "image" : "raw";
+
   try {
     const result = await cloudinary.uploader.upload(base64, {
       folder: `onelgu/${folder}`,
-      resource_type: "auto",
+      resource_type: resourceType,
       // Keep the original name recognizable without letting user input
       // dictate the storage path directly.
       filename_override: file.name.replace(/[^a-zA-Z0-9._-]/g, "_"),

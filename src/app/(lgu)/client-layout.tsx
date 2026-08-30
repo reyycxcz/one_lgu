@@ -39,7 +39,10 @@ import {
   SignOut,
   HardDrives,
 } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
+import { LogOut } from "lucide-react";
 import { Sidebar } from "@/components/shared/sidebar/sidebar";
+import { MobileNavTrigger } from "@/components/shared/sidebar/mobile-nav-trigger";
 import NotificationBell from "@/components/shared/notification-bell";
 import { LiveClock } from "@/components/shared/live-clock";
 import { HeaderGreeting } from "@/components/lgu/header-greeting";
@@ -98,7 +101,7 @@ interface LGUClientLayoutProps {
 // Sidebar groups that only super_admin should see — lgu_reviewer's pages
 // under these are gated server-side too (requireSuperAdmin), this just
 // keeps the nav from listing links they can't actually open.
-const SUPER_ADMIN_ONLY_GROUPS = new Set(["System & User Management"]);
+const SUPER_ADMIN_ONLY_GROUPS = new Set(["User Management", "System Settings & Logs", "System & User Management"]);
 
 // A department-scoped lgu_reviewer (e.g. Treasurer's Office) only ever
 // needs their own inbox, not the full municipality-wide console — same
@@ -106,7 +109,10 @@ const SUPER_ADMIN_ONLY_GROUPS = new Set(["System & User Management"]);
 const DEPARTMENT_NAV_GROUPS = [
   {
     label: "Overview & Monitoring",
-    items: [{ path: "/lgu/department/dashboard", label: "Overview", icon: "LayoutDashboard" }],
+    items: [
+      { path: "/lgu/department/dashboard", label: "Overview", icon: "LayoutDashboard" },
+      { path: "/lgu/documents/frequency", label: "Frequency Monitoring", icon: "History" },
+    ],
   },
   {
     label: "Document Receiver",
@@ -153,7 +159,6 @@ export default function LGUClientLayout({ children, userProfile, navGroups, pend
       <div className="hidden md:block sticky top-0 h-screen">
         <Sidebar
           user={{ name: userProfile.name, email: userProfile.email, role: roleLabel }}
-          appTitle="ONELGU"
           appSubtitle="Ilocos Norte"
           navGroups={resolvedNavGroups}
           onLogout={() => signOut()}
@@ -172,6 +177,22 @@ export default function LGUClientLayout({ children, userProfile, navGroups, pend
             <NotificationBell />
             <HeaderProfileMenu name={userProfile.name} email={userProfile.email} />
           </div>
+        </header>
+
+        <header className="h-16 border-b border-border bg-white px-4 flex items-center justify-between md:hidden sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <MobileNavTrigger
+              navGroups={resolvedNavGroups}
+              user={{ name: userProfile.name, email: userProfile.email, role: roleLabel }}
+              appSubtitle="Ilocos Norte"
+              onLogout={() => signOut()}
+            />
+            <img src="/images/logo/o_icon.png" alt="OneLGU" className="h-8 w-8 object-contain" />
+            <span className="font-sans font-bold text-lg tracking-wider text-foreground">ONELGU</span>
+          </div>
+          <Link href="/login" className="p-1 text-destructive">
+            <LogOut className="h-5 w-5" />
+          </Link>
         </header>
 
         <main key={pathname} className="flex-1 p-6 md:p-8 w-full max-w-none animate-page-fade-in">

@@ -6,7 +6,7 @@ import { requireSession, requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
 import { logAction } from "@/lib/audit/logger";
 import { notifyUser } from "@/lib/notifications/notify";
-import { profileUpdateSchema, passwordUpdateSchema, createOfficialSchema, createDepartmentReceiverSchema } from "@/lib/validations/profile.schema";
+import { profileUpdateSchema, passwordUpdateSchema, createOfficialSchema, createDepartmentReceiverSchema, createResidentSchema } from "@/lib/validations/profile.schema";
 import type { BarangayPosition } from "@/lib/auth/positions";
 import type { LguDepartment } from "@/lib/auth/departments";
 
@@ -291,6 +291,71 @@ export async function createLguReceiver(formData: FormData) {
     entityType: "profile",
     entityId: created.user.id,
     metadata: { department },
+  });
+
+  return { success: true };
+}
+
+/**
+ * Super-admin provisions a new resident account directly from the LGU portal.
+ */
+export async function createResident(formData: FormData) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin"])) {
+    return { error: "Only LGU admins can add resident accounts" };
+  }
+
+  const parsed = createResidentSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    password: formData.get("password"),
+    barangayId: formData.get("barangayId"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  const { fullName, email, phone, password, barangayId } = parsed.data;
+
+  const admin = createAdminClient();
+
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name: fullName, must_change_password: true },
+    app_metadata: { role: "resident" },
+  });
+
+  if (createError || !created.user) {
+    return { error: createError?.message || "Could not create the resident account" };
+  }
+
+  const supabase = await createClient();
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({
+      role: "resident",
+      barangay_id: barangayId,
+      full_name: fullName,
+      phone: phone || null,
+      is_active: true,
+    })
+    .eq("id", created.user.id);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  await logAction({
+    actorId: profile.id,
+    action: "user.resident_created",
+    entityType: "profile",
+    entityId: created.user.id,
+    barangayId,
   });
 
   return { success: true };

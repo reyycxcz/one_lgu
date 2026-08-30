@@ -37,7 +37,6 @@ export default function NotificationBell() {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60_000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchNotifications() {

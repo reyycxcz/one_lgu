@@ -6,6 +6,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarangayFormSheet } from "@/components/lgu/barangay-form-sheet";
 
+function Breakdown({ title, data, total, colors }: { title: string; data: Record<string, number>; total: number; colors: Record<string, string> }) {
+  const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-bold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {entries.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No records yet.</p>
+        ) : (
+          entries.map(([status, count]) => {
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            return (
+              <div key={status}>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="capitalize text-foreground/70">{status.replace(/_/g, " ")}</span>
+                  <span className="font-semibold tabular-nums">{count} <span className="text-foreground/40">· {pct}%</span></span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div className={`h-full rounded-full ${colors[status] || "bg-slate-300"}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function LguBarangayDetailPage({
   params,
 }: {
@@ -73,37 +104,6 @@ export default async function LguBarangayDetailPage({
     submitted: "bg-amber-500", under_review: "bg-amber-500", approved: "bg-primary",
     rejected: "bg-red-500", archived: "bg-slate-400",
   };
-
-  function Breakdown({ title, data, total, colors }: { title: string; data: Record<string, number>; total: number; colors: Record<string, string> }) {
-    const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-bold">{title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {entries.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No records yet.</p>
-          ) : (
-            entries.map(([status, count]) => {
-              const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-              return (
-                <div key={status}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="capitalize text-foreground/70">{status.replace(/_/g, " ")}</span>
-                    <span className="font-semibold tabular-nums">{count} <span className="text-foreground/40">· {pct}%</span></span>
-                  </div>
-                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                    <div className={`h-full rounded-full ${colors[status] || "bg-slate-300"}`} style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">

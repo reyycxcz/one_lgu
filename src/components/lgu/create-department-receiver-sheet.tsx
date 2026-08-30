@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { DEPARTMENT_LABELS, type LguDepartment } from "@/lib/auth/departments";
-import { Plus } from "lucide-react";
+import { Plus, Eye, EyeOff } from "lucide-react";
 
 const DEPARTMENT_OPTIONS = Object.keys(DEPARTMENT_LABELS) as LguDepartment[];
 
@@ -25,6 +25,8 @@ export function CreateDepartmentReceiverSheet() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [department, setDepartment] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,63 +63,133 @@ export function CreateDepartmentReceiverSheet() {
           <Plus className="h-3.5 w-3.5" /> Add Department Receiver
         </span>
       </button>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Add Department Receiver</SheetTitle>
-          <SheetDescription>
-            Creates an LGU reviewer account scoped to one office — it only ever sees the report type that office handles. Set a temporary password and share it yourself; they&apos;ll be required to change it on first login.
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl p-6 flex flex-col justify-between overflow-y-auto">
+        <div>
+          <SheetHeader className="text-left space-y-1">
+            <SheetTitle className="text-lg font-semibold text-foreground">Add Department Receiver</SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground">
+              Creates an LGU reviewer account scoped to one office. They will change their password on first login.
+            </SheetDescription>
+          </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {error && (
-            <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              {error}
+          <form id="create-dept-receiver-form" onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+            {error && (
+              <div role="alert" aria-live="assertive" className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <Input name="fullName" placeholder="e.g. Maria Santos" required className="h-9 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <Input name="email" type="email" placeholder="receiver@dingras.gov.ph" required className="h-9 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Phone <span className="text-muted-foreground font-normal">(optional)</span>
+                </label>
+                <Input name="phone" placeholder="09171234567" className="h-9 text-sm" />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Department <span className="text-red-500">*</span>
+                </label>
+                <input type="hidden" name="department" value={department} />
+                <Select value={department} onValueChange={setDepartment}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTMENT_OPTIONS.map((d) => (
+                      <SelectItem key={d} value={d}>{DEPARTMENT_LABELS[d]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Temporary Password <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    minLength={8}
+                    placeholder="••••••••"
+                    required
+                    className="h-9 text-sm pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Min 8 chars, letter & number.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Confirm Password <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    minLength={8}
+                    placeholder="••••••••"
+                    required
+                    className="h-9 text-sm pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+          </form>
+        </div>
 
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Full Name</label>
-            <Input name="fullName" required />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Email</label>
-            <Input name="email" type="email" required />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Phone (optional)</label>
-            <Input name="phone" placeholder="09171234567" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Temporary Password</label>
-            <Input name="password" type="password" minLength={8} required />
-            <p className="text-[10px] text-foreground/40 mt-1">At least 8 characters, with a letter and a number.</p>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Confirm Password</label>
-            <Input name="confirmPassword" type="password" minLength={8} required />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Department</label>
-            <input type="hidden" name="department" value={department} />
-            <Select value={department} onValueChange={setDepartment}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select department" />
-              </SelectTrigger>
-              <SelectContent>
-                {DEPARTMENT_OPTIONS.map((d) => (
-                  <SelectItem key={d} value={d}>{DEPARTMENT_LABELS[d]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <SheetFooter className="pt-4">
-            <Button type="submit" disabled={loading || !department} className="w-full sm:w-auto">
-              {loading ? "Creating..." : "Add Department Receiver"}
-            </Button>
-          </SheetFooter>
-        </form>
+        <SheetFooter className="pt-4 border-t mt-4 flex flex-row items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setOpen(false)}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="create-dept-receiver-form"
+            disabled={loading || !department}
+            size="sm"
+            className="bg-primary text-white hover:bg-primary/90"
+          >
+            {loading ? "Creating..." : "Add Department Receiver"}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

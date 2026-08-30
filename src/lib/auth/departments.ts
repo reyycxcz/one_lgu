@@ -20,7 +20,8 @@ export type LguDepartment =
   | "drrm_office"
   | "business_permits_office"
   | "hr_office"
-  | "general_services_office";
+  | "general_services_office"
+  | "dilg_office";
 
 export const DEPARTMENT_LABELS: Record<LguDepartment, string> = {
   mayor_office: "Mayor's Office",
@@ -40,6 +41,7 @@ export const DEPARTMENT_LABELS: Record<LguDepartment, string> = {
   business_permits_office: "Business Permits & Licensing Office (BPLO)",
   hr_office: "Human Resource Management Office (HRMO)",
   general_services_office: "General Services Office",
+  dilg_office: "Department of the Interior and Local Government (DILG)",
 };
 
 // Which report type(s) land in each department's inbox — only these 4
@@ -66,6 +68,7 @@ export const DEPARTMENT_REPORT_TYPES: Record<LguDepartment, ReportType[]> = {
   business_permits_office: ["financial"],
   hr_office: ["monthly"],
   general_services_office: ["monthly"],
+  dilg_office: [],
 };
 
 export function getDepartmentReportTypes(department: LguDepartment | null | undefined): ReportType[] | null {

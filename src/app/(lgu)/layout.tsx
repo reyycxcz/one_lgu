@@ -10,6 +10,7 @@ const LGU_NAV_GROUPS = [
     items: [
       { path: "/lgu/dashboard", label: "Overview", icon: "LayoutDashboard" },
       { path: "/lgu/compliance/status", label: "Compliance Matrix", icon: "ClipboardList" },
+      { path: "/lgu/documents/frequency", label: "Frequency Monitoring", icon: "History" },
       { path: "/lgu/compliance/late", label: "Overdue & Missing", icon: "AlertCircle" },
       { path: "/lgu/dashboard/recent-activities", label: "Activity Stream", icon: "Activity" },
     ],
@@ -54,9 +55,17 @@ const LGU_NAV_GROUPS = [
     ],
   },
   {
-    label: "System & User Management",
+    label: "User Management",
     items: [
-      { path: "/lgu/users/departments", label: "Staff & Reviewers", icon: "UserCheck" },
+      { path: "/lgu/users/residents", label: "Residents", icon: "Users" },
+      { path: "/lgu/users/officials", label: "Barangay Officials", icon: "UserCheck" },
+      { path: "/lgu/users/departments", label: "Staff & Reviewers", icon: "Building2" },
+      { path: "/lgu/users/requests", label: "Account Requests", icon: "UserPlus" },
+    ],
+  },
+  {
+    label: "System Settings & Logs",
+    items: [
       { path: "/lgu/settings/system", label: "System Settings", icon: "Settings" },
       { path: "/lgu/audit-logs/activities", label: "Audit Logs", icon: "Database" },
     ],

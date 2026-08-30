@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import ServiceSearch from "./service-search";
+import { getBarangayServiceStatus } from "@/actions/barangays";
 
 export default async function ResidentDashboard() {
   const session = await requireSession();
@@ -15,7 +16,7 @@ export default async function ResidentDashboard() {
   const [{ data: profile }, { data: certifications }, { data: complaints }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, barangays(name)")
+      .select("full_name, barangay_id, barangays(id, name)")
       .eq("id", session.user.id)
       .single(),
     supabase
@@ -33,7 +34,11 @@ export default async function ResidentDashboard() {
   ]);
 
   const firstName = profile?.full_name?.split(" ")[0] || "Resident";
-  const barangayName = (profile?.barangays as any)?.name || session.user.user_metadata?.barangay_code || "your barangay";
+  const barangayInfo = profile?.barangays as unknown as { id: string; name: string } | null;
+  const barangayName = barangayInfo?.name || session.user.user_metadata?.barangay_code || "your barangay";
+  const barangayUuid = profile?.barangay_id || barangayInfo?.id;
+  const isBarangayOpen = barangayUuid ? await getBarangayServiceStatus(barangayUuid) : true;
+
   const pendingCerts = certifications?.filter(c => c.status === "submitted" || c.status === "verified").length || 0;
   const activeComplaints = complaints?.filter(c => c.status !== "resolved" && c.status !== "closed").length || 0;
 
@@ -126,8 +131,10 @@ export default async function ResidentDashboard() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs font-sans text-foreground/50 uppercase tracking-wider">Barangay</p>
-            <p className="text-2xl font-sans font-bold text-foreground mt-1">Open</p>
+            <p className="text-xs font-sans text-foreground/50 uppercase tracking-wider">Barangay Status</p>
+            <p className={`text-2xl font-sans font-bold mt-1 ${isBarangayOpen ? "text-emerald-600" : "text-rose-600"}`}>
+              {isBarangayOpen ? "Open" : "Closed"}
+            </p>
           </CardContent>
         </Card>
       </div>

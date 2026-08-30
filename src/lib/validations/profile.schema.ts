@@ -75,5 +75,19 @@ export const createDepartmentReceiverSchema = z.object({
     "business_permits_office",
     "hr_office",
     "general_services_office",
+    "dilg_office",
   ]),
+});
+
+export const createResidentSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters long").max(150),
+  email: z.string().email("Invalid email address"),
+  phone: z
+    .string()
+    .max(30)
+    .regex(PH_PHONE_REGEX, "Enter a valid PH mobile number (e.g. +639171234567 or 09171234567)")
+    .optional()
+    .or(z.literal("")),
+  password: strongPasswordSchema,
+  barangayId: z.string().uuid("Select a barangay"),
 });

@@ -57,14 +57,14 @@ export function PrivacyPolicyContent() {
       <h2>6. Data Retention</h2>
       <p>
         Account data is retained for as long as your account is active. Certification requests, complaints, and reports are
-        retained per the municipality's records-retention policy, consistent with local government administrative requirements,
+        retained per the municipality&apos;s records-retention policy, consistent with local government administrative requirements,
         even after an account is deleted.
       </p>
 
       <h2>7. Contact</h2>
       <p>
         For questions about this policy or to exercise your data privacy rights, contact your Barangay Hall directly, or the
-        Municipality of Dingras' Data Protection Officer through the Municipal Hall.
+        Municipality of Dingras&apos; Data Protection Officer through the Municipal Hall.
       </p>
     </div>
   );

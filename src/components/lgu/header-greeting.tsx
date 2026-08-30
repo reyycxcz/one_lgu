@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 function greetingFor(hour: number) {
   if (hour < 12) return "Good morning";
@@ -9,14 +9,14 @@ function greetingFor(hour: number) {
 }
 
 export function HeaderGreeting({ name }: { name: string }) {
-  const [greeting, setGreeting] = useState<string | null>(null);
+  const [greeting, setGreeting] = useState<string>("");
 
   useEffect(() => {
     setGreeting(greetingFor(new Date().getHours()));
   }, []);
 
   // First name only, keeps it compact.
-  const firstName = name.split(" ")[0];
+  const firstName = name ? name.split(" ")[0] : "";
 
   if (!greeting) return null;
 

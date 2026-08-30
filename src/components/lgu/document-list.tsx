@@ -4,9 +4,10 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { RowActions } from "@/components/lgu/row-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterableTable, type FilterableRow } from "@/components/lgu/filterable-table";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, ExternalLink } from "lucide-react";
 import { requireProfile } from "@/lib/auth/session";
 import { DEPARTMENT_LABELS, type LguDepartment } from "@/lib/auth/departments";
+import { getFileViewUrl } from "@/lib/storage/file-url";
 
 export async function DocumentList({
   title,
@@ -177,7 +178,7 @@ export async function DocumentList({
         cells: [
           <a
             key="file"
-            href={d.file_url}
+            href={getFileViewUrl(d.file_url, d.file_name)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 font-medium text-xs text-primary hover:underline"
@@ -220,7 +221,7 @@ export async function DocumentList({
         cells: [
           <a
             key="file"
-            href={sub.file_url}
+            href={getFileViewUrl(sub.file_url, sub.file_name)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 font-medium text-xs text-primary hover:underline"

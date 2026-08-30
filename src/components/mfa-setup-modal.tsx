@@ -27,11 +27,16 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
-  // Enroll a fresh factor whenever the modal opens.
   useEffect(() => {
     if (!open) {
-      // reset for next time
       startedRef.current = false;
+      return;
+    }
+
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    async function enroll() {
       setLoading(true);
       setError(null);
       setQrCode(null);
@@ -40,13 +45,7 @@ export function MfaSetupModal({ open, onClose, onSuccess }: MfaSetupModalProps) 
       setCode("");
       setVerifying(false);
       setDone(false);
-      return;
-    }
 
-    if (startedRef.current) return;
-    startedRef.current = true;
-
-    async function enroll() {
       const supabase = createClient();
 
       // Remove any abandoned unverified factor from a previous attempt so the

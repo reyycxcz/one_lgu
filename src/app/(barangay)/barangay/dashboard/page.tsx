@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { REPORT_TYPE_LABELS } from "@/types/report";
+import { BarangayServiceToggle } from "@/components/barangay/service-toggle";
+import { getBarangayServiceStatus } from "@/actions/barangays";
 
 const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   approved: "default",
@@ -26,14 +28,15 @@ export default async function BarangayDashboard() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, barangay_id, position, barangays(name)")
+    .select("full_name, role, barangay_id, position, barangays(id, name)")
     .eq("id", session.user.id)
     .single();
 
-  const barangayData = profile?.barangays as unknown as { name: string } | null;
-  const barangayId = barangayData?.name || "";
-  const barangayUuid = profile?.barangay_id;
+  const barangayData = profile?.barangays as unknown as { id: string; name: string } | null;
+  const barangayName = barangayData?.name || "";
+  const barangayUuid = profile?.barangay_id || barangayData?.id || "";
   const position = (profile?.position as BarangayPosition | null) ?? null;
+  const canToggleService = position === "captain" || position === "secretary" || profile?.role === "super_admin";
 
   const showCertifications = canAccessBarangaySection(position, "certifications");
   const showComplaints = canAccessBarangaySection(position, "complaints");
@@ -41,7 +44,8 @@ export default async function BarangayDashboard() {
   // Only shown when none of the above apply — the Treasurer's case.
   const showReportsPanel = !showCertifications && !showComplaints && !showServiceReports;
 
-  const [certResult, complaintResult, serviceReportResult, reportResult] = await Promise.all([
+  const [isServiceOpen, certResult, complaintResult, serviceReportResult, reportResult] = await Promise.all([
+    barangayUuid ? getBarangayServiceStatus(barangayUuid) : Promise.resolve(true),
     showCertifications
       ? supabase
           .from("certification_requests")
@@ -88,11 +92,11 @@ export default async function BarangayDashboard() {
       : { href: "/barangay/reports", label: "View Reports" };
 
   const subtitle = position
-    ? `${barangayId ? `${barangayId} — ` : ""}${POSITION_LABELS[position]}`
-    : (barangayId ? `${barangayId} — Operations Center` : "Operations Center");
+    ? `${barangayName ? `${barangayName} — ` : ""}${POSITION_LABELS[position]}`
+    : (barangayName ? `${barangayName} — Operations Center` : "Operations Center");
 
   return (
-    <div className="space-y-8 animate-stagger-in">
+    <div className="space-y-6 animate-stagger-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground font-sans tracking-tight">Barangay Dashboard</h1>
@@ -104,6 +108,15 @@ export default async function BarangayDashboard() {
           </Link>
         </Button>
       </div>
+
+      {barangayUuid && (
+        <BarangayServiceToggle
+          barangayId={barangayUuid}
+          barangayName={barangayName}
+          initialIsOpen={isServiceOpen}
+          canToggle={canToggleService}
+        />
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {showCertifications && (

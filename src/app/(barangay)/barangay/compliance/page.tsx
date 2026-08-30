@@ -1,33 +1,42 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireBarangaySection } from "@/lib/auth/require-barangay-section";
 
 export const dynamic = "force-dynamic";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, CheckCircle2, AlertTriangle } from "lucide-react";
+import { FileText, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { DocumentRequestsCard } from "@/components/barangay/document-requests-card";
-
-const REQUIRED_TYPES = ["monthly", "financial", "accomplishment", "compliance"];
 
 export default async function BarangayCompliancePage() {
   const profile = await requireBarangaySection("compliance");
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("reports")
-    .select("type, status, title, file_url, created_at")
+  const { data: rawRequests } = await supabase
+    .from("request_recipients")
+    .select("request_id")
     .eq("barangay_id", profile.barangay_id || "");
 
-  const reports = data || [];
-  const total = reports.length;
-  const approved = reports.filter((r) => r.status === "approved").length;
-  const rate = total > 0 ? Math.round((approved / total) * 100) : 0;
+  const requestIds = (rawRequests || []).map((r) => r.request_id);
 
-  const submittedTypes = new Set(reports.map((r) => r.type));
-  const missingTypes = REQUIRED_TYPES.filter((t) => !submittedTypes.has(t));
+  let submissions: { status: string }[] = [];
+  if (requestIds.length > 0) {
+    const { data } = await supabase
+      .from("document_submissions")
+      .select("status")
+      .in("request_id", requestIds)
+      .eq("barangay_id", profile.barangay_id || "");
+    submissions = data || [];
+  }
+
+  const total = requestIds.length;
+  const submittedCount = submissions.length;
+  const approved = submissions.filter((s) => s.status === "approved").length;
+  const rate = submittedCount > 0 ? Math.round((approved / submittedCount) * 100) : 0;
+  const needsAction = total - submittedCount + submissions.filter((s) => ["returned", "resubmission_required"].includes(s.status)).length;
 
   const stats = [
-    { label: "Total Reports Submitted", value: total, icon: FileText },
+    { label: "Total Documents Requested", value: total, icon: FileText },
     { label: "Approved", value: approved, icon: CheckCircle2 },
     { label: "Approval Rate", value: `${rate}%`, icon: CheckCircle2 },
   ];
@@ -76,20 +85,23 @@ export default async function BarangayCompliancePage() {
             <div className="p-2 bg-slate-100 rounded-lg text-slate-700 h-fit">
               <FileText className="h-5 w-5" />
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-foreground">Periodic Submissions Checklist</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Mandatory reports that must be submitted regularly.</p>
-              {missingTypes.length > 0 ? (
+            <div className="flex-1">
+              <h2 className="text-sm font-bold text-foreground">LGU Document Requests</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Full history of every document ever requested of this barangay, and its submission status.</p>
+              {needsAction > 0 ? (
                 <div className="mt-3 flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3">
                   <AlertTriangle className="h-4 w-4 shrink-0" />
-                  <span>Missing periodic reports for this cycle: <span className="font-bold capitalize">{missingTypes.join(", ")}</span></span>
+                  <span><span className="font-bold">{needsAction}</span> document{needsAction === 1 ? "" : "s"} need{needsAction === 1 ? "s" : ""} your attention.</span>
                 </div>
               ) : (
                 <div className="mt-3 flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg p-3">
                   <CheckCircle2 className="h-4 w-4 shrink-0" />
-                  <span>All periodic reports are up to date!</span>
+                  <span>All document requests are up to date!</span>
                 </div>
               )}
+              <Link href="/barangay/documents" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline mt-3">
+                View Full Document History <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
         </CardContent>

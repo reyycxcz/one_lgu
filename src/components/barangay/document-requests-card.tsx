@@ -2,9 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CheckCircle2, Clock, Download, MessageSquare } from "lucide-react";
+import { CheckCircle2, Clock, Download, MessageSquare, ExternalLink } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DEPARTMENT_LABELS } from "@/lib/auth/departments";
+import { getFileViewUrl } from "@/lib/storage/file-url";
 
 /**
  * Shared between /barangay/reports and /barangay/compliance — both are
@@ -126,8 +127,8 @@ export async function DocumentRequestsCard({ barangayId }: { barangayId: string 
                         <>
                           <StatusBadge status={sub.status} className="scale-90" />
                           <Button size="sm" variant="outline" asChild className="text-[11px] h-8 cursor-pointer">
-                            <a href={sub.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                              <Download className="h-3.5 w-3.5" /> View Submitted
+                            <a href={getFileViewUrl(sub.file_url, sub.file_name)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                              <ExternalLink className="h-3.5 w-3.5" /> View Submitted
                             </a>
                           </Button>
                         </>

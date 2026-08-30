@@ -50,14 +50,14 @@ export function DataPrivacyCard({ allowDelete = true }: { allowDelete?: boolean 
             </a>
           </Button>
           <p className="text-[11px] text-muted-foreground mt-1.5">
-            Downloads a JSON file with your profile and everything you've submitted (certification requests, complaints, reports, notifications).
+            Downloads a JSON file with your profile and everything you&apos;ve submitted (certification requests, complaints, reports, notifications).
           </p>
         </div>
 
         <div className="pt-4 border-t border-border">
           {!allowDelete ? (
             <p className="text-[11px] text-muted-foreground">
-              Account deletion isn't available for the super admin role — transfer super admin to another account first via User Management if you want to delete this one.
+              Account deletion isn&apos;t available for the super admin role — transfer super admin to another account first via User Management if you want to delete this one.
             </p>
           ) : !confirming ? (
             <Button type="button" variant="outline" className="text-destructive hover:text-destructive" onClick={() => setConfirming(true)}>
@@ -67,7 +67,7 @@ export function DataPrivacyCard({ allowDelete = true }: { allowDelete?: boolean 
             <div className="space-y-3 p-4 rounded-lg bg-red-50 border border-red-200">
               <p className="text-xs text-red-800 font-medium">
                 This deactivates your account and removes your personal information (name, email, phone, address) from it.
-                Records you submitted (certifications, complaints, reports) are kept — not tied to your identity anymore, but retained for the municipality's legal records requirements — so this can't be fully undone. Type <strong>DELETE</strong> to confirm.
+                Records you submitted (certifications, complaints, reports) are kept — not tied to your identity anymore, but retained for the municipality&apos;s legal records requirements — so this can&apos;t be fully undone. Type <strong>DELETE</strong> to confirm.
               </p>
 
               {error && (

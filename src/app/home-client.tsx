@@ -34,6 +34,17 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+  // On touch devices, skip the scroll-triggered reveal entirely and just
+  // show sections on mount — some mobile WebKit/IntersectionObserver
+  // combinations (notably iOS Safari) never fire `whileInView`, which was
+  // leaving every section between the header and footer stuck invisible.
+  // A lazy initializer runs during the client's first render (hydration
+  // happens in-browser, so `window` already exists), so this is correct
+  // from first paint with no flash of hidden content.
+  const [scrollRevealDisabled] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
+  );
+
   const CIVIC_ICONS = { BookOpen, ShieldAlert, Sparkles, Award, Megaphone };
   const civicCards = civicPosts.map((post) => ({
     ...post,
@@ -197,7 +208,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="features"
           className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -291,7 +303,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="civic"
           className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-20"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -362,7 +375,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="portals"
           className="max-w-6xl mx-auto px-6 py-16 border-t border-border/60"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -442,7 +456,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="security"
           className="bg-[#F8FDF9] border-t border-b border-[#E3F2E7] py-20"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -530,7 +545,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="how-it-works"
           className="bg-white border-t border-b border-[#E3F2E7] py-20"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -594,7 +610,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="mobile-app"
           className="max-w-6xl mx-auto px-6 py-16"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -699,7 +716,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
           id="faq"
           className="max-w-6xl mx-auto px-6 py-20"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={staggerContainer}
         >
@@ -740,7 +758,8 @@ export default function HomeClient({ civicPosts }: { civicPosts: CivicPost[] }) 
         <motion.section
           className="bg-[#FAFDFB] border-t border-b border-[#E3F2E7] py-16"
           initial="hidden"
-          whileInView="visible"
+          whileInView={scrollRevealDisabled ? undefined : "visible"}
+          animate={scrollRevealDisabled ? "visible" : undefined}
           viewport={viewportOnce}
           variants={fadeUp}
         >

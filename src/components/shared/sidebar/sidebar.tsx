@@ -22,10 +22,12 @@ export interface NavGroup {
 interface SidebarProps {
   navGroups: NavGroup[]
   user?: { name?: string; role?: string; email?: string }
-  logoSrc?: string
-  appTitle?: string
   appSubtitle?: string
   onLogout?: () => void
+  // Fired when a (non-logout) nav link is clicked — lets a mobile drawer
+  // wrapping this Sidebar close itself on navigation instead of staying
+  // open over the newly-loaded page.
+  onNavigate?: () => void
 }
 
 const SIDEBAR_W = 260
@@ -33,9 +35,9 @@ const SIDEBAR_W = 260
 export function Sidebar({
   navGroups,
   user,
-  appTitle = 'ONELGU',
   appSubtitle = 'Dingras',
   onLogout,
+  onNavigate,
 }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -72,15 +74,15 @@ export function Sidebar({
       style={{ width: SIDEBAR_W }}
     >
       {/* ─── Logo Header ─── */}
-      <div className="flex items-center flex-shrink-0 border-b border-sidebar-border px-4 py-5 gap-3">
+      <div className="flex items-center justify-center flex-shrink-0 border-b border-sidebar-border px-4 py-5 gap-3">
         <img
-          src="/images/logo/one_lgu.png"
-          alt="OneLGU Logo"
-          className="object-contain flex-shrink-0 h-11"
+          src="/images/logo/o_icon.png"
+          alt="OneLGU"
+          className="object-contain flex-shrink-0 h-11 w-11"
         />
-        <div className="min-w-0 leading-tight">
+        <div className="min-w-0 leading-tight text-center">
           <p className="text-sm font-bold text-foreground tracking-wider whitespace-nowrap uppercase">
-            {appTitle}
+            ONELGU
           </p>
           <p className="text-[9px] text-green-700/70 font-semibold truncate uppercase tracking-widest mt-0.5">
             {appSubtitle}
@@ -130,7 +132,7 @@ export function Sidebar({
                               e.preventDefault()
                               handleLogout()
                             }
-                          : undefined
+                          : onNavigate
                       }
                       className={cn(
                         'group relative flex items-center gap-2.5 no-underline rounded-lg text-[13.5px] overflow-hidden whitespace-nowrap mx-2 my-0.5 px-2.5 py-[7px] justify-start',

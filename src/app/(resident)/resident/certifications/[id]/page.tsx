@@ -1,10 +1,19 @@
 import Link from "next/link";
 import QRCode from "qrcode";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText, Download, ExternalLink, Paperclip } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
+import { StatusTimeline } from "@/components/shared/status-timeline";
+import { getFileViewUrl, getFileDownloadUrl } from "@/lib/storage/file-url";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://one-lgu.vercel.app";
+
+interface RequirementAttachment {
+  name?: string;
+  file_url?: string;
+  url?: string;
+  uploaded_at?: string;
+}
 
 export default async function CertificationDetailPage({ params }: { params: { id: string } }) {
   const session = await requireSession();
@@ -33,6 +42,7 @@ export default async function CertificationDetailPage({ params }: { params: { id
 
   const verifyUrl = `${SITE_URL}/verify/${cert.id}`;
   const qrDataUrl = cert.status === "released" ? await QRCode.toDataURL(verifyUrl, { margin: 1, width: 160 }) : null;
+  const requirements = (cert.requirements as unknown as RequirementAttachment[]) || [];
 
   return (
     <div className="space-y-8 animate-stagger-in">
@@ -49,67 +59,79 @@ export default async function CertificationDetailPage({ params }: { params: { id
           <div className="bg-white border border-border p-6 rounded-xl space-y-4">
             <div>
               <p className="text-xs font-medium text-foreground/55 mb-1">Document Type</p>
-              <h3 className="text-lg font-semibold text-foreground">{cert.type.replace(/_/g, " ")}</h3>
+              <h3 className="text-lg font-semibold text-foreground capitalize">{cert.type.replace(/_/g, " ")}</h3>
             </div>
             <div>
               <p className="text-xs font-medium text-foreground/55 mb-1">Purpose</p>
               <p className="text-sm text-foreground/75">{cert.purpose}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-foreground/55 mb-1">Status</p>
-              <span className="inline-block text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <p className="text-xs font-medium text-foreground/55 mb-1">Current Status</p>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 {cert.status.replace(/_/g, " ")}
               </span>
             </div>
             {cert.rejected_reason && (
-              <div>
-                <p className="text-xs font-medium text-foreground/55 mb-1">Rejection Reason</p>
-                <p className="text-sm text-red-600">{cert.rejected_reason}</p>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-xs font-bold text-red-800 mb-0.5">Rejection Reason</p>
+                <p className="text-xs text-red-700">{cert.rejected_reason}</p>
               </div>
             )}
           </div>
+
+          {/* Submitted Requirements / Attachments */}
+          {requirements.length > 0 && (
+            <div className="bg-white border border-border p-6 rounded-xl space-y-3">
+              <div className="flex items-center gap-2">
+                <Paperclip className="h-4 w-4 text-primary" />
+                <h4 className="font-sans text-sm font-bold text-foreground">Submitted Requirement Files</h4>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3 pt-2">
+                {requirements.map((req, i) => {
+                  const fileUrl = req.file_url || req.url || "";
+                  const fileName = req.name || `Requirement_${i + 1}.pdf`;
+                  const viewUrl = getFileViewUrl(fileUrl, fileName);
+
+                  return (
+                    <div
+                      key={i}
+                      className="p-3 rounded-lg border border-border/70 bg-slate-50/60 flex items-center justify-between gap-3 text-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate font-medium text-foreground">{fileName}</span>
+                      </div>
+                      {fileUrl && (
+                        <a
+                          href={viewUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-primary text-white hover:bg-primary/90 text-[11px] font-bold shrink-0 transition-colors"
+                        >
+                          <ExternalLink className="h-3 w-3" /> View
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white border border-border p-6 rounded-xl space-y-4">
-            <h4 className="font-sans text-sm font-bold text-foreground">Timeline</h4>
-            <div className="space-y-3 text-xs">
-              <div className="flex items-start gap-2">
-                <span className="h-2 w-2 rounded-full bg-primary mt-1 shrink-0" />
-                <div>
-                  <p className="font-semibold text-foreground">Submitted</p>
-                  <p className="text-foreground/50">{new Date(cert.created_at).toLocaleDateString()}</p>
-                </div>
-              </div>
-              {cert.verified_at && (
-                <div className="flex items-start gap-2">
-                  <span className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-foreground">Verified</p>
-                    <p className="text-foreground/50">{new Date(cert.verified_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-              {cert.approved_at && (
-                <div className="flex items-start gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-500 mt-1 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-foreground">Approved</p>
-                    <p className="text-foreground/50">{new Date(cert.approved_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-              {cert.released_at && (
-                <div className="flex items-start gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-600 mt-1 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-foreground">Released</p>
-                    <p className="text-foreground/50">{new Date(cert.released_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <StatusTimeline
+            currentStatus={cert.status}
+            kind="certification"
+            metadata={{
+              createdAt: cert.created_at,
+              verifiedAt: cert.verified_at,
+              approvedAt: cert.approved_at,
+              releasedAt: cert.released_at,
+              rejectedReason: cert.rejected_reason,
+            }}
+          />
 
           {qrDataUrl && (
             <div className="bg-white border border-border p-6 rounded-xl space-y-3 text-center">

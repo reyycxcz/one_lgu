@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updatePassword } from "@/actions/profile";
+import { Eye, EyeOff } from "lucide-react";
 
 export function ChangePasswordForm({
   redirectTo,
@@ -16,6 +17,8 @@ export function ChangePasswordForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -59,11 +62,45 @@ export function ChangePasswordForm({
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="newPassword">New Password</Label>
-          <Input id="newPassword" name="newPassword" type="password" minLength={8} required />
+          <div className="relative">
+            <Input
+              id="newPassword"
+              name="newPassword"
+              type={showNewPassword ? "text" : "password"}
+              minLength={8}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              aria-label={showNewPassword ? "Hide password" : "Show password"}
+            >
+              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" minLength={8} required />
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              minLength={8}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Updating..." : "Update Password"}
