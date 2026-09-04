@@ -24,7 +24,17 @@ export async function ReportList({
     .limit(500);
 
   if (statuses && statuses.length > 0) {
-    query = query.in("status", statuses);
+    const validReportStatuses = new Set(["submitted", "under_review", "approved", "rejected", "archived"]);
+    const mappedStatuses = Array.from(
+      new Set(
+        statuses
+          .map((s) => (s === "returned" ? "rejected" : s))
+          .filter((s) => validReportStatuses.has(s))
+      )
+    );
+    if (mappedStatuses.length > 0) {
+      query = query.in("status", mappedStatuses);
+    }
   }
 
   const { data: reports } = await query;
@@ -43,7 +53,7 @@ export async function ReportList({
         <span key="date" className="text-muted-foreground">
           {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
         </span>,
-        <StatusBadge key="status" status={r.status} />,
+        <StatusBadge key="status" status={r.status === "rejected" ? "returned" : r.status} />,
         <RowActions key="actions" id={r.id} kind="report" status={r.status} />,
       ],
     };

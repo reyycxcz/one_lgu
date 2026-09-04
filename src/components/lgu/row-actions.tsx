@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateCertificationStatus } from "@/actions/certifications";
 import { updateComplaintStatus } from "@/actions/complaints";
-import { reviewReport } from "@/actions/reports";
-import { archiveAnnouncement } from "@/actions/announcements";
-import { reviewSubmissionAction, captainDecisionAction } from "@/actions/workflow";
+import { reviewReport, archiveReport, restoreReport } from "@/actions/reports";
+import { archiveAnnouncement, publishAnnouncement, restoreAnnouncement } from "@/actions/announcements";
+import { reviewSubmissionAction, captainDecisionAction, archiveSubmissionAction, restoreSubmissionAction } from "@/actions/workflow";
 import { nextStatusesFor, STATUS_LABELS, RESPONSIBLE_UNITS, type ComplaintRecordType, type ComplaintStatus } from "@/lib/complaints/taxonomy";
-import { Check, X, FileCheck, PackageCheck, Package, Printer, PlayCircle, Archive, Eye } from "lucide-react";
+import { Check, X, FileCheck, PackageCheck, Package, Printer, PlayCircle, Archive, Eye, RotateCcw, Megaphone } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const FIELD_INPUT_CLASS =
@@ -108,6 +108,8 @@ export function RowActions({
   const [textDialog, setTextDialog] = useState<TextDialogConfig | null>(null);
   const [textDialogValue, setTextDialogValue] = useState("");
   const closeTextDialog = useCallback(() => setTextDialog(null), []);
+  const [confirmArchiveOpen, setConfirmArchiveOpen] = useState(false);
+  const closeArchiveDialog = useCallback(() => setConfirmArchiveOpen(false), []);
 
   function openTextDialog(config: TextDialogConfig) {
     setError(null);
@@ -218,6 +220,17 @@ export function RowActions({
         <Link key="reprint" href={`/barangay/certifications/${id}/generate`} className={`${BUTTON_BASE} bg-secondary text-primary hover:bg-secondary/70`}>
           <Printer className="h-3 w-3" /> Reprint
         </Link>
+      );
+    } else if (status === "rejected") {
+      buttons.push(
+        <button
+          key="reopen"
+          disabled={isPending}
+          onClick={() => run(() => updateCertificationStatus(id, "submitted"))}
+          className={`${BUTTON_BASE} bg-secondary text-primary hover:bg-secondary/70`}
+        >
+          <RotateCcw className="h-3 w-3" /> Reopen
+        </button>
       );
     }
   }
@@ -512,6 +525,49 @@ export function RowActions({
           <X className="h-3 w-3" /> Return
         </button>
       );
+    } else if (status === "approved") {
+      buttons.push(
+        <button
+          key="archive"
+          disabled={isPending}
+          onClick={() => setConfirmArchiveOpen(true)}
+          className={`${BUTTON_BASE} bg-slate-100 text-slate-700 hover:bg-slate-200`}
+        >
+          <Archive className="h-3 w-3" /> Archive
+        </button>
+      );
+    } else if (status === "rejected" || status === "returned") {
+      buttons.push(
+        <button
+          key="approve"
+          disabled={isPending}
+          onClick={() => run(() => reviewReport(id, "approved"))}
+          className={`${BUTTON_BASE} bg-primary text-white hover:bg-primary/90`}
+        >
+          <Check className="h-3 w-3" /> Approve
+        </button>
+      );
+      buttons.push(
+        <button
+          key="archive"
+          disabled={isPending}
+          onClick={() => setConfirmArchiveOpen(true)}
+          className={`${BUTTON_BASE} bg-slate-100 text-slate-700 hover:bg-slate-200`}
+        >
+          <Archive className="h-3 w-3" /> Archive
+        </button>
+      );
+    } else if (status === "archived") {
+      buttons.push(
+        <button
+          key="restore"
+          disabled={isPending}
+          onClick={() => run(() => restoreReport(id))}
+          className={`${BUTTON_BASE} bg-secondary text-primary hover:bg-secondary/70`}
+        >
+          <RotateCcw className="h-3 w-3" /> Restore
+        </button>
+      );
     }
   }
 
@@ -578,14 +634,79 @@ export function RowActions({
           <X className="h-3 w-3" /> Return
         </button>
       );
+    } else if (status === "approved") {
+      buttons.push(
+        <button
+          key="archive"
+          disabled={isPending}
+          onClick={() => setConfirmArchiveOpen(true)}
+          className={`${BUTTON_BASE} bg-slate-100 text-slate-700 hover:bg-slate-200`}
+        >
+          <Archive className="h-3 w-3" /> Archive
+        </button>
+      );
+    } else if (status === "returned" || status === "resubmission_required") {
+      buttons.push(
+        <button
+          key="approve"
+          disabled={isPending}
+          onClick={() => run(() => reviewSubmissionAction(id, "approved"))}
+          className={`${BUTTON_BASE} bg-primary text-white hover:bg-primary/90`}
+        >
+          <Check className="h-3 w-3" /> Approve
+        </button>
+      );
+      buttons.push(
+        <button
+          key="archive"
+          disabled={isPending}
+          onClick={() => setConfirmArchiveOpen(true)}
+          className={`${BUTTON_BASE} bg-slate-100 text-slate-700 hover:bg-slate-200`}
+        >
+          <Archive className="h-3 w-3" /> Archive
+        </button>
+      );
+    } else if (status === "archived") {
+      buttons.push(
+        <button
+          key="restore"
+          disabled={isPending}
+          onClick={() => run(() => restoreSubmissionAction(id))}
+          className={`${BUTTON_BASE} bg-secondary text-primary hover:bg-secondary/70`}
+        >
+          <RotateCcw className="h-3 w-3" /> Restore
+        </button>
+      );
     }
   }
 
   if (kind === "announcement") {
-    if (status === "published") {
+    if (status === "draft") {
+      buttons.push(
+        <button
+          key="publish"
+          disabled={isPending}
+          onClick={() => run(() => publishAnnouncement(id))}
+          className={`${BUTTON_BASE} bg-primary text-white hover:bg-primary/90`}
+        >
+          <Megaphone className="h-3 w-3" /> Publish
+        </button>
+      );
+    } else if (status === "published") {
       buttons.push(
         <button key="archive" disabled={isPending} onClick={() => run(() => archiveAnnouncement(id))} className={`${BUTTON_BASE} bg-slate-100 text-slate-700 hover:bg-slate-200`}>
           <Archive className="h-3 w-3" /> Archive
+        </button>
+      );
+    } else if (status === "archived") {
+      buttons.push(
+        <button
+          key="restore"
+          disabled={isPending}
+          onClick={() => run(() => restoreAnnouncement(id))}
+          className={`${BUTTON_BASE} bg-secondary text-primary hover:bg-secondary/70`}
+        >
+          <RotateCcw className="h-3 w-3" /> Restore
         </button>
       );
     }
@@ -603,6 +724,22 @@ export function RowActions({
       {resolutionDialog}
       {noticeDialog}
       {scheduleDialog}
+      <ConfirmDialog
+        open={confirmArchiveOpen}
+        title="Archive Document"
+        description="Are you sure you want to move this approved document to the archived records?"
+        confirmLabel="Archive"
+        loading={isPending}
+        onConfirm={() => {
+          setConfirmArchiveOpen(false);
+          if (kind === "report") {
+            run(() => archiveReport(id));
+          } else if (kind === "workflow_submission") {
+            run(() => archiveSubmissionAction(id));
+          }
+        }}
+        onCancel={closeArchiveDialog}
+      />
       <ConfirmDialog
         open={!!textDialog}
         title={textDialog?.title ?? ""}

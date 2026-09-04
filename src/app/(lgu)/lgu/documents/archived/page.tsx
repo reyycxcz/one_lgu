@@ -11,7 +11,7 @@ export default async function ArchivedDocumentsPage() {
       title="Archived Documents"
       description="Older document submissions moved to the archive."
       statuses={["archived"]}
-      submissionStatuses={[]}
+      submissionStatuses={["archived"]}
       types={types}
       targetAudience="barangay_official"
     />

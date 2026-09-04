@@ -7,6 +7,7 @@ import { notifyUser } from "@/lib/notifications/notify";
 import { requireProfile } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/rbac";
 import { uploadReportFile } from "@/lib/storage/upload";
+import { revalidatePath } from "next/cache";
 
 export async function submitReport(formData: FormData) {
   const profile = await requireProfile();
@@ -88,10 +89,12 @@ export async function reviewReport(
     .eq("id", id)
     .single();
 
+  const dbStatus = status === "returned" ? "rejected" : status;
+
   const { data, error } = await supabase
     .from("reports")
     .update({
-      status,
+      status: dbStatus,
       reviewed_by: profile.id,
       reviewed_at: new Date().toISOString(),
       review_notes: notes,
@@ -110,7 +113,7 @@ export async function reviewReport(
     barangayId: data.barangay_id,
     metadata: { notes },
     oldValue: before ? { status: before.status } : undefined,
-    newValue: { status },
+    newValue: { status: dbStatus },
   });
 
   // Notify the barangay official who submitted the report.
@@ -127,6 +130,112 @@ export async function reviewReport(
       entityId: id,
     });
   }
+
+  revalidatePath("/lgu/documents/pending");
+  revalidatePath("/lgu/documents/approved");
+  revalidatePath("/lgu/documents/returned");
+  revalidatePath("/lgu/documents/archived");
+  revalidatePath("/lgu/documents/sk-pending");
+  revalidatePath("/lgu/documents/sk-approved");
+  revalidatePath("/lgu/documents/sk-returned");
+  revalidatePath("/lgu/documents/sk-archived");
+  revalidatePath("/lgu/reports");
+  revalidatePath("/lgu/reports/pending");
+  revalidatePath("/lgu/reports/approved");
+  revalidatePath("/lgu/reports/returned");
+  revalidatePath("/lgu/reports/archived");
+
+  return { data };
+}
+
+export async function archiveReport(id: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
+    return { error: "Access Denied: Only LGU admins and reviewers can archive reports." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: before } = await supabase
+    .from("reports")
+    .select("status, barangay_id, title")
+    .eq("id", id)
+    .single();
+
+  const { data, error } = await supabase
+    .from("reports")
+    .update({
+      status: "archived",
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+
+  await logAction({
+    actorId: profile.id,
+    action: "report.archived",
+    entityType: "report",
+    entityId: id,
+    barangayId: data.barangay_id,
+    oldValue: before ? { status: before.status } : undefined,
+    newValue: { status: "archived" },
+  });
+
+  revalidatePath("/lgu/documents/approved");
+  revalidatePath("/lgu/documents/sk-approved");
+  revalidatePath("/lgu/documents/archived");
+  revalidatePath("/lgu/documents/sk-archived");
+  revalidatePath("/lgu/reports/approved");
+  revalidatePath("/lgu/reports/archived");
+
+  return { data };
+}
+
+export async function restoreReport(id: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
+    return { error: "Access Denied: Only LGU admins and reviewers can restore reports." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: before } = await supabase
+    .from("reports")
+    .select("status, barangay_id, title")
+    .eq("id", id)
+    .single();
+
+  const { data, error } = await supabase
+    .from("reports")
+    .update({
+      status: "approved",
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+
+  await logAction({
+    actorId: profile.id,
+    action: "report.restored",
+    entityType: "report",
+    entityId: id,
+    barangayId: data.barangay_id,
+    oldValue: before ? { status: before.status } : undefined,
+    newValue: { status: "approved" },
+  });
+
+  revalidatePath("/lgu/documents/approved");
+  revalidatePath("/lgu/documents/sk-approved");
+  revalidatePath("/lgu/documents/archived");
+  revalidatePath("/lgu/documents/sk-archived");
+  revalidatePath("/lgu/reports/approved");
+  revalidatePath("/lgu/reports/archived");
 
   return { data };
 }

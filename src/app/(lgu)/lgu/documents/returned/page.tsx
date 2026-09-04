@@ -10,7 +10,7 @@ export default async function ReturnedDocumentsPage() {
     <DocumentList
       title="Returned Documents"
       description="Documents sent back to the barangay for correction."
-      statuses={["rejected"]}
+      statuses={["rejected", "returned"]}
       submissionStatuses={["returned", "resubmission_required"]}
       types={types}
       targetAudience="barangay_official"

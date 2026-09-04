@@ -11,7 +11,7 @@ export default async function SkArchivedDocumentsPage() {
       title="Archived Documents (SK)"
       description="Older Sangguniang Kabataan document submissions moved to the archive."
       statuses={["archived"]}
-      submissionStatuses={[]}
+      submissionStatuses={["archived"]}
       types={types}
       targetAudience="sk_official"
     />

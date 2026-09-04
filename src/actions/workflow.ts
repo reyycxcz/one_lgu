@@ -251,6 +251,10 @@ export async function submitDocumentResponseAction(formData: FormData) {
 
   revalidatePath("/barangay/compliance");
   revalidatePath("/barangay/captain/approvals");
+  revalidatePath("/barangay/reports");
+  revalidatePath("/barangay/documents");
+  revalidatePath("/lgu/documents/returned");
+  revalidatePath("/lgu/documents/sk-returned");
   return { data: submission };
 }
 
@@ -400,7 +404,12 @@ export async function captainDecisionAction(
 
   revalidatePath("/barangay/captain/approvals");
   revalidatePath("/barangay/compliance");
+  revalidatePath("/barangay/reports");
+  revalidatePath("/barangay/documents");
   revalidatePath("/lgu/documents/pending");
+  revalidatePath("/lgu/documents/returned");
+  revalidatePath("/lgu/documents/sk-pending");
+  revalidatePath("/lgu/documents/sk-returned");
   return { data: true };
 }
 
@@ -487,5 +496,120 @@ export async function reviewSubmissionAction(
   });
 
   revalidatePath("/lgu/documents/pending");
+  return { data: true };
+}
+
+export async function archiveSubmissionAction(submissionId: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
+    return { error: "Access Denied: Only LGU admins and reviewers can archive submissions." };
+  }
+
+  const supabase = await createClient();
+
+  // 1. Get submission and request details to verify department ownership
+  const { data: submission, error: subError } = await supabase
+    .from("document_submissions")
+    .select("*, document_requests(*)")
+    .eq("id", submissionId)
+    .single();
+
+  if (subError || !submission) {
+    return { error: "Submission not found." };
+  }
+
+  const request = submission.document_requests as any;
+
+  if (profile.role !== "super_admin" && request?.requesting_department_id !== profile.department) {
+    return { error: "Access Denied: You do not have permission to archive this submission." };
+  }
+
+  // 2. Update Submission Status
+  const { error: updateError } = await supabase
+    .from("document_submissions")
+    .update({
+      status: "archived",
+    })
+    .eq("id", submissionId);
+
+  if (updateError) {
+    if (updateError.message.includes("chk_submission_status")) {
+      return {
+        error: "Database constraint error: Please run migration 0021_allow_archived_submissions.sql in Supabase to enable archiving document submissions.",
+      };
+    }
+    return { error: updateError.message };
+  }
+
+  // 3. Log Action
+  await logAction({
+    actorId: profile.id,
+    action: "document_submission.archived",
+    entityType: "document_submission",
+    entityId: submissionId,
+    barangayId: submission.barangay_id,
+  });
+
+  revalidatePath("/lgu/documents/approved");
+  revalidatePath("/lgu/documents/sk-approved");
+  revalidatePath("/lgu/documents/archived");
+  revalidatePath("/lgu/documents/sk-archived");
+  revalidatePath("/barangay/documents");
+  return { data: true };
+}
+
+export async function restoreSubmissionAction(submissionId: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin", "lgu_reviewer"])) {
+    return { error: "Access Denied: Only LGU admins and reviewers can restore submissions." };
+  }
+
+  const supabase = await createClient();
+
+  // 1. Get submission and request details to verify department ownership
+  const { data: submission, error: subError } = await supabase
+    .from("document_submissions")
+    .select("*, document_requests(*)")
+    .eq("id", submissionId)
+    .single();
+
+  if (subError || !submission) {
+    return { error: "Submission not found." };
+  }
+
+  const request = submission.document_requests as any;
+
+  if (profile.role !== "super_admin" && request?.requesting_department_id !== profile.department) {
+    return { error: "Access Denied: You do not have permission to restore this submission." };
+  }
+
+  // 2. Update Submission Status
+  const { error: updateError } = await supabase
+    .from("document_submissions")
+    .update({
+      status: "approved",
+    })
+    .eq("id", submissionId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  // 3. Log Action
+  await logAction({
+    actorId: profile.id,
+    action: "document_submission.restored",
+    entityType: "document_submission",
+    entityId: submissionId,
+    barangayId: submission.barangay_id,
+  });
+
+  revalidatePath("/lgu/documents/approved");
+  revalidatePath("/lgu/documents/sk-approved");
+  revalidatePath("/lgu/documents/archived");
+  revalidatePath("/lgu/documents/sk-archived");
+  revalidatePath("/barangay/documents");
   return { data: true };
 }

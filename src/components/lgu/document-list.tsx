@@ -113,7 +113,17 @@ export async function DocumentList({
           .limit(500);
 
         if (statuses && statuses.length > 0) {
-          query = query.in("status", statuses);
+          const validReportStatuses = new Set(["submitted", "under_review", "approved", "rejected", "archived"]);
+          const mappedStatuses = Array.from(
+            new Set(
+              statuses
+                .map((s) => (s === "returned" ? "rejected" : s))
+                .filter((s) => validReportStatuses.has(s))
+            )
+          );
+          if (mappedStatuses.length > 0) {
+            query = query.in("status", mappedStatuses);
+          }
         }
         
         // If department-scoped, apply the OR filter of standard types + requested titles
@@ -203,7 +213,7 @@ export async function DocumentList({
           <span key="date" className="text-muted-foreground">
             {new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>,
-          <StatusBadge key="status" status={d.status} />,
+          <StatusBadge key="status" status={d.status === "rejected" ? "returned" : d.status} />,
           <RowActions key="actions" id={d.id} kind="report" status={d.status} />,
         ],
       }

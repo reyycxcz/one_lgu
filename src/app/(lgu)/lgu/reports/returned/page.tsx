@@ -5,7 +5,7 @@ export default function ReturnedReportsPage() {
     <ReportList
       title="Returned Reports"
       description="Reports sent back to the barangay for correction."
-      statuses={["rejected"]}
+      statuses={["rejected", "returned"]}
     />
   );
 }

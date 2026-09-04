@@ -139,3 +139,71 @@ export async function archiveAnnouncement(id: string) {
 
   return { success: true };
 }
+
+export async function publishAnnouncement(id: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin"])) {
+    return { error: "Only LGU admins can publish announcements" };
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("announcements")
+    .update({
+      status: "published",
+      published_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+
+  const recipientCount = await broadcastToResidents(data.id, data.title, data.excerpt);
+
+  await logAction({
+    actorId: profile.id,
+    action: "announcement.published",
+    entityType: "announcement",
+    entityId: data.id,
+    metadata: { recipientCount },
+  });
+
+  revalidatePath("/lgu/announcements/sent");
+  revalidatePath("/lgu/announcements/history");
+  revalidatePath("/");
+
+  return { data };
+}
+
+export async function restoreAnnouncement(id: string) {
+  const profile = await requireProfile();
+
+  if (!hasRole(profile.role, ["super_admin"])) {
+    return { error: "Only LGU admins can restore announcements" };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("announcements")
+    .update({ status: "published" })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  await logAction({
+    actorId: profile.id,
+    action: "announcement.restored",
+    entityType: "announcement",
+    entityId: id,
+  });
+
+  revalidatePath("/lgu/announcements/sent");
+  revalidatePath("/lgu/announcements/history");
+  revalidatePath("/");
+
+  return { success: true };
+}

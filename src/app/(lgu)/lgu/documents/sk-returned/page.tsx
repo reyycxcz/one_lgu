@@ -10,7 +10,7 @@ export default async function SkReturnedDocumentsPage() {
     <DocumentList
       title="Returned Documents (SK)"
       description="Sangguniang Kabataan documents sent back for correction."
-      statuses={["rejected"]}
+      statuses={["rejected", "returned"]}
       submissionStatuses={["returned", "resubmission_required"]}
       types={types}
       targetAudience="sk_official"
